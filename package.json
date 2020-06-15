@@ -48,6 +48,7 @@
     "copyfiles": "^2.3.0",
     "immutable": "^4.0.0-rc.12",
     "rxjs": "~6.5.4",
+    "rxjs-compat": "^6.5.5",
     "tslib": "^1.10.0",
     "zone.js": "~0.10.2"
   },
