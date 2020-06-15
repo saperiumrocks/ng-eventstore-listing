@@ -1,22 +1,13 @@
 language: node_js
-
 node_js:
 - "11.6.0"
-
 dist: trusty
-
 sudo: required
 
 os:
 - linux
 addons:
-  apt:
-    update: true
-    sources:
-    - google-chrome
-    packages:
-    - dpkg
-    - google-chrome-stable
+  chrome: stable
 before_install:
 - export CHROME_BIN=chromium-browser
 - export DISPLAY=:99.0
