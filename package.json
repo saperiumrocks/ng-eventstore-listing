@@ -16,7 +16,10 @@
     "copy:readme": "copyfiles ./README.md ./dist/ng-eventstore-listing",
     "format:check": "prettier --list-different 'projects/**/*.ts'",
     "format:write": "prettier --write 'projects/**/*.ts'",
-    "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
+    "commit-msg": "commitlint -E HUSKY_GIT_PARAMS",
+    "adjust-version": "npm-run-all adjust-version:*",
+    "adjust-version:lib": "rjp projects/ng-simple-alert/package.json version $VERSION",
+    "adjust-version:main": "rjp package.json version $VERSION"
   },
   "commitlint": {
     "extends": [
@@ -58,6 +61,7 @@
     "@angular-devkit/build-ng-packagr": "~0.901.7",
     "@angular/cli": "~9.1.6",
     "@angular/compiler-cli": "~9.1.7",
+    "@semantic-release/exec": "^5.0.0",
     "@types/jasmine": "~3.5.0",
     "@types/jasminewd2": "~2.0.3",
     "@types/node": "^12.11.1",
