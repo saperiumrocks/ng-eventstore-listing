@@ -20,7 +20,8 @@ jobs:
     - ng lint
   - stage: build & publish showcase
     script:
-    - npm run build:demo
+    - npm install
+    - npm run build:showcase
     deploy:
       provider: pages
       skip_cleanup: true
