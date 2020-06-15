@@ -7,6 +7,9 @@ Run in your angular project folder:
 npm install ng-eventstore-listing
 ```
 
+## Demo
+[Demo](https://saperiumrocks.github.io/ng-eventstore-listing/)
+
 ## Usage
 
 #### Add this to your module:
@@ -55,8 +58,8 @@ imports: [
 ## Types
 
 #### SubscriptionTopicConfiguration
-| -------- | ---- | -------- | ----------- |
 | Property | Type | Required | Description |
+| -------- | ---- | -------- | ----------- |
 | streamKey | string | Yes | - |
 | context | string | Yes | - |
 | idPropertyName | string | Yes | - |

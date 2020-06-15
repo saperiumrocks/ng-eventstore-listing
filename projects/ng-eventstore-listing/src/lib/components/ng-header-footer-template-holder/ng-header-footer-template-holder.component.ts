@@ -1,14 +1,14 @@
-import { Component, OnInit, ComponentFactoryResolver, Input, Output, EventEmitter, ViewChild, OnChanges, ComponentRef, SimpleChanges, forwardRef } from '@angular/core';
+import { Component, OnInit, ComponentFactoryResolver, Input, Output, EventEmitter, ViewChild, OnChanges, ComponentRef, SimpleChanges, AfterViewInit } from '@angular/core';
 import { HeaderFooterTemplateComponent } from '../template-components/index';
 import { TemplateDirective } from '../../directives/template.directive';
 
 @Component({
-  selector: 'lib-header-footer-template-holder',
-  templateUrl: './header-footer-template-holder.component.html',
-  styleUrls: ['./header-footer-template-holder.component.css']
+  selector: 'lib-ng-header-footer-template-holder',
+  templateUrl: './ng-header-footer-template-holder.component.html',
+  styleUrls: ['./ng-header-footer-template-holder.component.css']
 })
-export class HeaderFooterTemplateHolderComponent implements OnInit, OnChanges {
-  @Input() headerComponentClass: any;
+export class NgHeaderFooterTemplateHolderComponent implements OnInit, OnChanges, AfterViewInit {
+  @Input() componentClass: any;
   @Input() headerData: any = {};
 
   @Input() pageIndex: number;
@@ -27,6 +27,10 @@ export class HeaderFooterTemplateHolderComponent implements OnInit, OnChanges {
   constructor(private componentFactoryResolver: ComponentFactoryResolver) { }
 
   ngOnInit() {
+    // this.loadComponent();
+  }
+
+  ngAfterViewInit(): void {
     this.loadComponent();
   }
 
@@ -37,12 +41,12 @@ export class HeaderFooterTemplateHolderComponent implements OnInit, OnChanges {
       changesKeys.forEach((key) => {
         (self.componentRef.instance as HeaderFooterTemplateComponent)[key] = changes[key].currentValue;
       });
-      (self.componentRef.instance as HeaderFooterTemplateComponent).initPageValues();
+      (self.componentRef.instance as HeaderFooterTemplateComponent).updatePageValues();
     }
   }
 
   loadComponent() {
-    const componentFactory = this.componentFactoryResolver.resolveComponentFactory(this.headerComponentClass);
+    const componentFactory = this.componentFactoryResolver.resolveComponentFactory(this.componentClass);
 
     const viewContainerRef = this.itemHost.viewContainerRef;
     viewContainerRef.clear();
@@ -59,7 +63,8 @@ export class HeaderFooterTemplateHolderComponent implements OnInit, OnChanges {
     (this.componentRef.instance as HeaderFooterTemplateComponent).pageChangedEmitter = this.pageChangedEmitter;
     (this.componentRef.instance as HeaderFooterTemplateComponent).filterEmitter = this.filterEmitter;
 
-    (this.componentRef.instance as HeaderFooterTemplateComponent).initPageValues();
+    (this.componentRef.instance as HeaderFooterTemplateComponent).ngOnInit();
+    (this.componentRef.instance as HeaderFooterTemplateComponent).updatePageValues();
   }
 
 }

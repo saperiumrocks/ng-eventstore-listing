@@ -18,6 +18,9 @@ jobs:
   - stage: lint
     script:
     - ng lint
+  - stage: test
+    script:
+    - npm run test:lib
   - stage: build & publish showcase
     script:
     - npm install

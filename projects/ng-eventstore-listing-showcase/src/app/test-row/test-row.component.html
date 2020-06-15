@@ -10,10 +10,16 @@
     </div>
     <div class="row">
       <div class="col-4 border-right">
-        Column 1
+        <label>Sample Select: </label>
+        <select>
+          <option>Sample 1</option>
+          <option>Sample 2</option>
+          <option>Sample 3</option>
+        </select>
       </div>
       <div class="col-4 border-right">
         Sold Amount: {{ data.get('soldAmount') | currency }}
+        <input placeholder="Sample Input">
       </div>
       <div class="col-4">
         Sold Date: {{ data.get('soldAt') | date }}

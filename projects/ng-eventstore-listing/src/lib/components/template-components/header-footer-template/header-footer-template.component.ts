@@ -1,6 +1,6 @@
 import { EventEmitter, OnInit, ChangeDetectorRef } from '@angular/core';
 
-export abstract class HeaderFooterTemplateComponent {
+export abstract class HeaderFooterTemplateComponent implements OnInit {
   // Event Emitters
   actionEmitter: EventEmitter<any> = new EventEmitter();
   pageChangedEmitter: EventEmitter<any> = new EventEmitter();
@@ -23,13 +23,17 @@ export abstract class HeaderFooterTemplateComponent {
   constructor(private changeDetectorRef: ChangeDetectorRef) {
   }
 
-  initPageValues(): void {
+  ngOnInit(): void { }
+
+  updatePageValues(): void {
     this.pageStart = ((this.pageIndex - 1) * this.itemsPerPage) + 1;
-    this.pageEnd = ((this.pageIndex - 1) * this.itemsPerPage) + this.actualItemCount;
-    this.changeDetectorRef.markForCheck();
+    this.pageEnd = Math.min((((this.pageIndex - 1) * this.itemsPerPage) + this.actualItemCount), this.totalItemCount);
+    this.changeDetectorRef.detectChanges();
   }
 
   onPageChanged = (event) => {
+    this.pageIndex = event;
+    this.updatePageValues();
     this.pageChangedEmitter.emit(event);
   }
 

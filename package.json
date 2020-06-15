@@ -1,10 +1,11 @@
 {
   "name": "ng-eventstore-listing",
   "version": "0.0.8-alpha",
-  "description": "An listing library utilizing an eventstore implementation",
+  "description": "A listing library utilizing an eventstore implementation",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
+    "test:lib": "cd projects/ng-eventstore-listing && ng test && cd .. && cd ..",
     "build": "npm run build:lib && npm run build:showcase",
     "build:lib": "npm run copy:readme && ng build ng-eventstore-listing --prod",
     "publish:lib": "cd dist/ng-eventstore-listing && npm publish && cd .. && cd ..",
@@ -51,6 +52,7 @@
     "copyfiles": "^2.3.0",
     "immutable": "^4.0.0-rc.12",
     "lodash-es": "^4.17.15",
+    "ngx-bootstrap": "^5.6.1",
     "rxjs": "~6.5.4",
     "rxjs-compat": "^6.5.5",
     "tslib": "^1.10.0",

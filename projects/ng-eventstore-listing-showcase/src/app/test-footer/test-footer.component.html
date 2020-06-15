@@ -1,0 +1,13 @@
+<div class="row mt-3">
+  <div *ngIf="totalItemCount" class="pager-container col-4 offset-8 text-right">
+    <label class="text-sm d-lg-inline-block pr-2">{{pageStart}}-{{pageEnd}} of {{totalItemCount}}</label>
+    <!-- <pagination class="d-inline-flex text-sm" previousText="&lsaquo;" nextText="&rsaquo;" firstText="&laquo;" lastText="&raquo;"
+        [totalItems]="totalItemCount" [maxSize]="maxSize" [boundaryLinks]="true" [rotate]="false"
+        [itemsPerPage]="itemsPerPage" [(ngModel)]="pageIndex"
+        (pageChanged)="onPageChanged($event)">
+    </pagination> -->
+    <div>
+      <span *ngFor="let page of pagesArray">|<a href="#" (click)="onPage(page)"> {{ page }} </a>{{ +page === pagesArray.length ? '|' : '' }}</span>
+    </div>
+  </div>
+</div>

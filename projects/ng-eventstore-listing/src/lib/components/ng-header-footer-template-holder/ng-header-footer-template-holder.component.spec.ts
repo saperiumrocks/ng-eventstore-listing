@@ -1,29 +1,37 @@
-import { HeaderFooterTemplateHolderComponent } from './header-footer-template-holder.component';
+import { NgHeaderFooterTemplateHolderComponent } from './ng-header-footer-template-holder.component';
 import { SimpleChanges } from '@angular/core';
 
 
 describe('HeaderTemplateHolderComponent', () => {
-  let component: HeaderFooterTemplateHolderComponent;
+  let component: NgHeaderFooterTemplateHolderComponent;
   let mockComponentFactoryResolver;
   let mockViewContainerRef;
 
   beforeEach(() => {
     mockComponentFactoryResolver = jasmine.createSpyObj('ComponentFactoryResolver', ['resolveComponentFactory']);
     mockViewContainerRef = jasmine.createSpyObj('ViewContainerRef', ['createComponent', 'clear']);
-    component = new HeaderFooterTemplateHolderComponent(mockComponentFactoryResolver);
+    component = new NgHeaderFooterTemplateHolderComponent(mockComponentFactoryResolver);
   });
 
-  describe('ngOnInit', () => {
+  // describe('ngOnInit', () => {
+  //   it('should call loadComponent', () => {
+  //     spyOn(component, 'loadComponent');
+  //     component.ngOnInit();
+  //     expect(component.loadComponent).toHaveBeenCalled();
+  //   });
+  // });
+
+  describe('ngAfterViewInit', () => {
     it('should call loadComponent', () => {
       spyOn(component, 'loadComponent');
-      component.ngOnInit();
+      component.ngAfterViewInit();
       expect(component.loadComponent).toHaveBeenCalled();
     });
   });
 
   describe('ngOnChanges', () => {
     it('should apply updated values to the component instance', () => {
-      component.componentRef = { instance: { initPageValues: () => {} } } as any;
+      component.componentRef = { instance: { initPageValues: () => {}, updatePageValues: () => {} } } as any;
       // component.itemHost = { viewContainerRef: mockViewContainerRef };
       const mockDataValue = { testData1: 1, testData2: 2 };
       const mockChanges: SimpleChanges = {

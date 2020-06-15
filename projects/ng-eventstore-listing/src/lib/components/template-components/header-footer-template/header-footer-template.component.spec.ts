@@ -11,7 +11,7 @@ describe('HeaderFooterTemplateComponent', () => {
   let component: HeaderFooterTemplateComponent;
   let mockChangeDetectorRef;
   beforeEach(() => {
-    mockChangeDetectorRef = jasmine.createSpyObj('ChangeDetectorRef', ['markForCheck']);
+    mockChangeDetectorRef = jasmine.createSpyObj('ChangeDetectorRef', ['detectChanges']);
     component = new MockComponent(mockChangeDetectorRef);
   });
 
@@ -20,8 +20,9 @@ describe('HeaderFooterTemplateComponent', () => {
       component.pageIndex = 2;
       component.itemsPerPage = 25;
       component.actualItemCount = 24;
+      component.totalItemCount = 100;
 
-      component.initPageValues();
+      component.updatePageValues();
 
       expect(component.pageStart).toEqual(26);
       expect(component.pageEnd).toEqual(49);

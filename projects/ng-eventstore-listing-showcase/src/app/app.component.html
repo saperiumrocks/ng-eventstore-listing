@@ -2,8 +2,9 @@
   <h3>NG Eventstore Listing Demo</h3>
   <lib-ng-eventstore-listing
     [idPropertyName]="idPropertyName"
-    [inputDataList]="data"
+    [inputDataList]="currentData"
     [itemComponentClass]="rowComponentClass">
   </lib-ng-eventstore-listing>
+  <lib-ng-header-footer-template-holder [componentClass]="footerComponentClass" [actualItemCount]="actualItemCount" [itemsPerPage]="itemsPerPage" [pageIndex]="pageIndex" [totalItemCount]="totalFilteredItems" (pageChangedEmitter)="onPageUpdate($event)"></lib-ng-header-footer-template-holder>
 </div>
 

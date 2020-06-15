@@ -1,6 +1,6 @@
 {
   "name": "ng-eventstore-listing",
-  "version": "0.0.8-alpha",
+  "version": "0.0.9-alpha",
   "peerDependencies": {
     "@angular/common": "5.2.0",
     "@angular/core": "5.2.0",

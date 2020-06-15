@@ -3,10 +3,10 @@ import { ItemTemplateComponent } from 'projects/ng-eventstore-listing/src/lib/co
 
 @Component({
   selector: 'app-test',
-  templateUrl: './test.component.html',
-  styleUrls: ['./test.component.css']
+  templateUrl: './test-row.component.html',
+  styleUrls: ['./test-row.component.css']
 })
-export class TestComponent extends ItemTemplateComponent implements OnInit {
+export class TestRowComponent extends ItemTemplateComponent implements OnInit {
   constructor(changeDetectorRef: ChangeDetectorRef) {
     super(changeDetectorRef);
   }
