@@ -1,0 +1,9 @@
+div.row-item {
+  border: solid black 1px;
+  min-height: 100px;
+  margin-bottom: 20px;
+}
+
+div.border-right {
+  border-right: solid gray 1px;
+}

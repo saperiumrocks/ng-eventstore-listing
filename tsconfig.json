@@ -14,7 +14,13 @@
     "lib": [
       "es2018",
       "dom"
-    ]
+    ],
+    "paths": {
+      "ng-eventstore-listing": [
+        "dist/ng-eventstore-listing/ng-eventstore-listing",
+        "dist/ng-eventstore-listing"
+      ]
+    }
   },
   "angularCompilerOptions": {
     "fullTemplateTypeCheck": true,

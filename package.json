@@ -1,15 +1,40 @@
 {
-  "name": "my-library",
-  "version": "0.0.0",
+  "name": "ng-eventstore-listing",
+  "version": "0.0.8-alpha",
+  "description": "An listing library utilizing an eventstore implementation",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "build": "ng build",
+    "build": "npm run build:lib && npm run build:showcase",
+    "build:lib": "npm run copy:readme && ng build ng-eventstore-listing --prod",
+    "publish:lib": "cd dist/ng-eventstore-listing && npm publish && cd .. && cd ..",
+    "build:showcase": "ng build ng-eventstore-listing --base-href='https://saperium.github.io/ng-eventstore-listing/'",
+    "publish:demo": "npx angular-cli-ghpages --dir=./dist/ng-eventstore-listing",
     "test": "ng test",
     "lint": "ng lint",
-    "e2e": "ng e2e"
+    "e2e": "ng e2e",
+    "copy:readme": "copyfiles ./README.md ./dist/ng-eventstore-listing",
+    "format:check": "prettier --list-different 'projects/**/*.ts'",
+    "format:write": "prettier --write 'projects/**/*.ts'",
+    "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
   },
-  "private": true,
+  "commitlint": {
+    "extends": [
+      "@commitlint/config-conventional"
+    ]
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "projects/**/*.ts": [
+      "prettier --write",
+      "git add"
+    ]
+  },
+  "private": false,
   "dependencies": {
     "@angular/animations": "~9.1.7",
     "@angular/common": "~9.1.7",
@@ -19,17 +44,23 @@
     "@angular/platform-browser": "~9.1.7",
     "@angular/platform-browser-dynamic": "~9.1.7",
     "@angular/router": "~9.1.7",
+    "bootstrap": "^4.5.0",
+    "copyfiles": "^2.3.0",
+    "immutable": "^4.0.0-rc.12",
     "rxjs": "~6.5.4",
     "tslib": "^1.10.0",
     "zone.js": "~0.10.2"
   },
   "devDependencies": {
+    "@angular-devkit/build-angular": "~0.901.7",
+    "@angular-devkit/build-ng-packagr": "~0.901.7",
     "@angular/cli": "~9.1.6",
     "@angular/compiler-cli": "~9.1.7",
-    "@types/node": "^12.11.1",
     "@types/jasmine": "~3.5.0",
     "@types/jasminewd2": "~2.0.3",
+    "@types/node": "^12.11.1",
     "codelyzer": "^5.1.2",
+    "husky": "^4.2.5",
     "jasmine-core": "~3.5.0",
     "jasmine-spec-reporter": "~4.2.1",
     "karma": "~5.0.0",
@@ -37,6 +68,9 @@
     "karma-coverage-istanbul-reporter": "~2.1.0",
     "karma-jasmine": "~3.0.1",
     "karma-jasmine-html-reporter": "^1.4.2",
+    "lint-staged": "^10.2.10",
+    "ng-packagr": "^9.0.0",
+    "prettier": "^2.0.5",
     "protractor": "~5.4.3",
     "ts-node": "~8.3.0",
     "tslint": "~6.1.0",

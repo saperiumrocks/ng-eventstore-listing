@@ -2,5 +2,164 @@
   "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
   "version": 1,
   "newProjectRoot": "projects",
-  "projects": {}
+  "projects": {
+    "ng-eventstore-listing": {
+      "projectType": "library",
+      "root": "projects/ng-eventstore-listing",
+      "sourceRoot": "projects/ng-eventstore-listing/src",
+      "prefix": "lib",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-ng-packagr:build",
+          "options": {
+            "tsConfig": "projects/ng-eventstore-listing/tsconfig.lib.json",
+            "project": "projects/ng-eventstore-listing/ng-package.json"
+          },
+          "configurations": {
+            "production": {
+              "tsConfig": "projects/ng-eventstore-listing/tsconfig.lib.prod.json"
+            }
+          }
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "main": "projects/ng-eventstore-listing/src/test.ts",
+            "tsConfig": "projects/ng-eventstore-listing/tsconfig.spec.json",
+            "karmaConfig": "projects/ng-eventstore-listing/karma.conf.js"
+          }
+        },
+        "lint": {
+          "builder": "@angular-devkit/build-angular:tslint",
+          "options": {
+            "tsConfig": [
+              "projects/ng-eventstore-listing/tsconfig.lib.json",
+              "projects/ng-eventstore-listing/tsconfig.spec.json"
+            ],
+            "exclude": [
+              "**/node_modules/**"
+            ]
+          }
+        }
+      }
+    },
+    "ng-eventstore-listing-showcase": {
+      "projectType": "application",
+      "schematics": {},
+      "root": "projects/ng-eventstore-listing-showcase",
+      "sourceRoot": "projects/ng-eventstore-listing-showcase/src",
+      "prefix": "app",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-angular:browser",
+          "options": {
+            "outputPath": "dist/ng-eventstore-listing-showcase",
+            "index": "projects/ng-eventstore-listing-showcase/src/index.html",
+            "main": "projects/ng-eventstore-listing-showcase/src/main.ts",
+            "polyfills": "projects/ng-eventstore-listing-showcase/src/polyfills.ts",
+            "tsConfig": "projects/ng-eventstore-listing-showcase/tsconfig.app.json",
+            "aot": true,
+            "assets": [
+              "projects/ng-eventstore-listing-showcase/src/favicon.ico",
+              "projects/ng-eventstore-listing-showcase/src/assets"
+            ],
+            "styles": [
+              "node_modules/bootstrap/dist/css/bootstrap.min.css",
+              "projects/ng-eventstore-listing-showcase/src/styles.css"
+            ],
+            "scripts": []
+          },
+          "configurations": {
+            "production": {
+              "fileReplacements": [
+                {
+                  "replace": "projects/ng-eventstore-listing-showcase/src/environments/environment.ts",
+                  "with": "projects/ng-eventstore-listing-showcase/src/environments/environment.prod.ts"
+                }
+              ],
+              "optimization": true,
+              "outputHashing": "all",
+              "sourceMap": false,
+              "extractCss": true,
+              "namedChunks": false,
+              "extractLicenses": true,
+              "vendorChunk": false,
+              "buildOptimizer": true,
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "2mb",
+                  "maximumError": "5mb"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "6kb",
+                  "maximumError": "10kb"
+                }
+              ]
+            }
+          }
+        },
+        "serve": {
+          "builder": "@angular-devkit/build-angular:dev-server",
+          "options": {
+            "browserTarget": "ng-eventstore-listing-showcase:build"
+          },
+          "configurations": {
+            "production": {
+              "browserTarget": "ng-eventstore-listing-showcase:build:production"
+            }
+          }
+        },
+        "extract-i18n": {
+          "builder": "@angular-devkit/build-angular:extract-i18n",
+          "options": {
+            "browserTarget": "ng-eventstore-listing-showcase:build"
+          }
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "main": "projects/ng-eventstore-listing-showcase/src/test.ts",
+            "polyfills": "projects/ng-eventstore-listing-showcase/src/polyfills.ts",
+            "tsConfig": "projects/ng-eventstore-listing-showcase/tsconfig.spec.json",
+            "karmaConfig": "projects/ng-eventstore-listing-showcase/karma.conf.js",
+            "assets": [
+              "projects/ng-eventstore-listing-showcase/src/favicon.ico",
+              "projects/ng-eventstore-listing-showcase/src/assets"
+            ],
+            "styles": [
+              "projects/ng-eventstore-listing-showcase/src/styles.css"
+            ],
+            "scripts": []
+          }
+        },
+        "lint": {
+          "builder": "@angular-devkit/build-angular:tslint",
+          "options": {
+            "tsConfig": [
+              "projects/ng-eventstore-listing-showcase/tsconfig.app.json",
+              "projects/ng-eventstore-listing-showcase/tsconfig.spec.json",
+              "projects/ng-eventstore-listing-showcase/e2e/tsconfig.json"
+            ],
+            "exclude": [
+              "**/node_modules/**"
+            ]
+          }
+        },
+        "e2e": {
+          "builder": "@angular-devkit/build-angular:protractor",
+          "options": {
+            "protractorConfig": "projects/ng-eventstore-listing-showcase/e2e/protractor.conf.js",
+            "devServerTarget": "ng-eventstore-listing-showcase:serve"
+          },
+          "configurations": {
+            "production": {
+              "devServerTarget": "ng-eventstore-listing-showcase:serve:production"
+            }
+          }
+        }
+      }
+    }},
+  "defaultProject": "ng-eventstore-listing"
 }
