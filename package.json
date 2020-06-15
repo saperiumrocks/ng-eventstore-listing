@@ -7,6 +7,7 @@
     "start": "ng serve",
     "build": "npm run build:lib && npm run build:showcase",
     "build:lib": "npm run copy:readme && ng build ng-eventstore-listing --prod",
+    "build:demo": "ng build ng-eventstore-listing-showcase --prod",
     "publish:lib": "cd dist/ng-eventstore-listing && npm publish && cd .. && cd ..",
     "build:showcase": "ng build ng-eventstore-listing --base-href='https://saperiumrocks.github.io/ng-eventstore-listing/'",
     "publish:demo": "npx angular-cli-ghpages --dir=./dist/ng-eventstore-listing-showcase",
