@@ -21,6 +21,7 @@ jobs:
   - stage: test
     script:
     - npm run test:lib
+    if: branch = publish
   - stage: build & publish showcase
     script:
     - npm install
@@ -30,7 +31,7 @@ jobs:
       skip_cleanup: true
       github_token: $GH_TOKEN
       local_dir: dist/ng-eventstore-listing-showcase
-    if: branch = master
+    if: branch = publish
   - stage: build & publish lib
     script:
     - npm run build:lib
