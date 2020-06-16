@@ -5,7 +5,7 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "test:lib": "cd projects/ng-eventstore-listing && ng test && cd .. && cd ..",
+    "test:lib": "ng test ng-eventstore-listing --watch=false --sourceMap=false --browsers=ChromeHeadless",
     "build": "npm run build:lib && npm run build:showcase",
     "build:lib": "npm run copy:readme && ng build ng-eventstore-listing --prod",
     "publish:lib": "cd dist/ng-eventstore-listing && npm publish && cd .. && cd ..",
