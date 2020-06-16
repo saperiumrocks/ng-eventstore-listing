@@ -3,8 +3,9 @@
   <lib-ng-eventstore-listing
     [idPropertyName]="idPropertyName"
     [inputDataList]="currentData"
-    [itemComponentClass]="rowComponentClass">
+    [itemComponentClass]="rowComponentClass"
+    [subscriptionTopicConfigurations]="subscriptionTopicConfigurations">
   </lib-ng-eventstore-listing>
-  <lib-ng-header-footer-template-holder [componentClass]="footerComponentClass" [actualItemCount]="actualItemCount" [itemsPerPage]="itemsPerPage" [pageIndex]="pageIndex" [totalItemCount]="totalFilteredItems" (pageChangedEmitter)="onPageUpdate($event)"></lib-ng-header-footer-template-holder>
+  <lib-ng-header-footer-template-holder [componentClass]="footerComponentClass"[actualItemCount]="actualItemCount" [itemsPerPage]="itemsPerPage" [pageIndex]="pageIndex" [totalItemCount]="totalFilteredItems" (pageChangedEmitter)="onPageUpdate($event)"></lib-ng-header-footer-template-holder>
 </div>
 

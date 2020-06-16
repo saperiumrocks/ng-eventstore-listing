@@ -13,6 +13,7 @@ import _isEmpty from 'lodash-es/isEmpty';
 import _isEqual from 'lodash-es/isEqual';
 import _cloneDeep from 'lodash-es/cloneDeep';
 import _uniq from 'lodash-es/uniq';
+import { NgEventstoreListingService } from './ng-eventstore-listing.service';
 
 @Component({
   selector: 'lib-ng-eventstore-listing',
@@ -52,8 +53,12 @@ export class NgEventstoreListingComponent implements OnInit, OnChanges, OnDestro
   topicsSubscriptions: Subscription[] = [];
   topicsSubscription: Subscription;
 
+  streamsSubscriptions: Subscription[] = [];
+  streamsSubscription: Subscription;
+
   constructor(
     private changeDetectorRef: ChangeDetectorRef,
+    private eventStoreService: NgEventstoreListingService
     // private pushService: PushService
   ) { }
 
@@ -163,6 +168,7 @@ export class NgEventstoreListingComponent implements OnInit, OnChanges, OnDestro
           })
         )
         .subscribe(([res, resOffsetKeys, idPropertyName]: [OffsetsResponse, string[], string]) => {
+          console.log(res);
           this._onOffsetResponse(res.data.items, resOffsetKeys, idPropertyName);
         });
 
@@ -171,12 +177,26 @@ export class NgEventstoreListingComponent implements OnInit, OnChanges, OnDestro
     });
   }
 
+  // private _onOffsetResponse(offsets: number[] = [], offsetKeys: string[] = [], idPropertyName: string): void {
+  //   const topics = offsetKeys.map((offsetKey: string, index?: number) => {
+  //     if (offsets[index]) {
+  //       return { topic: offsetKey, offset: offsets[index] + 1 };
+  //     } else {
+  //       return { topic: offsetKey };
+  //     }
+  //   });
+
+  //   this._subscribeToEvents(topics, idPropertyName);
+  // }
+
   private _onOffsetResponse(offsets: number[] = [], offsetKeys: string[] = [], idPropertyName: string): void {
     const topics = offsetKeys.map((offsetKey: string, index?: number) => {
+      const offsetKeySplit = offsetKey.split('.');
+      const streamId = offsetKeySplit[offsetKeySplit.length - 1];
       if (offsets[index]) {
-        return { topic: offsetKey, offset: offsets[index] + 1 };
+        return { streamId: streamId, offset: offsets[index] + 1 };
       } else {
-        return { topic: offsetKey };
+        return { streamId: streamId };
       }
     });
 
@@ -191,7 +211,15 @@ export class NgEventstoreListingComponent implements OnInit, OnChanges, OnDestro
     //   this._playbackEvents(events, idPropertyName);
     // });
 
-    self.topicsSubscriptions.push(self.topicsSubscription);
+    // Review use of this global variable
+    self.streamsSubscription = self.eventStoreService.subscribeToStreams(topics).subscribe((delta) => {
+      const events = delta.events || [];
+      this._playbackEvents(events, idPropertyName);
+    });
+
+    self.streamsSubscriptions.push(self.streamsSubscription);
+
+    // self.topicsSubscriptions.push(self.topicsSubscription);
   }
 
   private _playbackEvents(events: DeltaEvent[], idPropertyName: string) {
@@ -253,13 +281,20 @@ export class NgEventstoreListingComponent implements OnInit, OnChanges, OnDestro
       getOffsetsSubscription.unsubscribe();
     });
 
-    this.topicsSubscriptions.forEach((topicsSubscription: Subscription) => {
-      topicsSubscription.unsubscribe();
-    });
+    // this.topicsSubscriptions.forEach((topicsSubscription: Subscription) => {
+    //   topicsSubscription.unsubscribe();
+    // });
 
     this.getOffsetsSubscriptions = [];
     this.getOffsetsSubjects = [];
-    this.topicsSubscriptions = [];
+    // this.topicsSubscriptions = [];
+
+    // NEW IMPLEMENTATION
+    this.streamsSubscriptions.forEach((streamsSubscription: Subscription) => {
+      streamsSubscription.unsubscribe();
+    });
+
+    this.streamsSubscriptions = [];
   }
 
   private _getItemIndex(dataList: Immutable.List<any>, eventPayload: any): number {

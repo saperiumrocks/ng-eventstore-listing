@@ -26,8 +26,12 @@ export interface OffsetsResponse {
 }
 
 export interface SubscriptionTopicConfiguration {
+  // Old Implementation
   streamKey?: string;
-  context: string;
+  context?: string;
+  // New ES Implementation
+  streamId?: string;
+
   idPropertyName: string;
   getOffsetsFunction(contextIds: string[]): Observable<OffsetsResponse>;
 }
