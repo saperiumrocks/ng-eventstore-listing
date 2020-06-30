@@ -1,4 +1,9 @@
 export interface SubscriptionOptions {
-  streamId: string;
+  // stream name
+  streamId?: string;
+  // query
+  context?: string;
+  aggregate?: string;
+
   offset: number;
 }

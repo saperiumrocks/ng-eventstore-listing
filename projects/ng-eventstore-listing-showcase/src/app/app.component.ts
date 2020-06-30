@@ -1,10 +1,10 @@
 import { Component, ChangeDetectionStrategy, OnInit } from '@angular/core';
 import { TestRowComponent } from './test-row/test-row.component';
 import { TestFooterComponent } from './test-footer/test-footer.component';
-import { SubscriptionTopicConfiguration } from 'projects/ng-eventstore-listing/src/lib/models/template';
-import { OffsetsResponse } from 'dist/ng-eventstore-listing/lib/models/template';
-import { Observable } from 'rxjs';
+import { SubscriptionTopicConfiguration } from 'projects/ng-eventstore-listing/src/lib/models';
+import { OffsetsResponse } from 'projects/ng-eventstore-listing/src/lib/models';
 import { of } from 'rxjs';
+import * as playbacks from '../playbacks';
 
 @Component({
   selector: 'app-root',
@@ -25,6 +25,9 @@ export class AppComponent implements OnInit {
   itemsPerPage = 3;
   pageIndex = 1;
   totalFilteredItems = 4;
+  playbackFiles = playbacks;
+
+  socketUrl = 'http://localhost:3000/events';
 
   ngOnInit() {
     this.mockData = [
@@ -38,11 +41,12 @@ export class AppComponent implements OnInit {
       {
         context: 'vehicle',
         idPropertyName: 'vehicleId',
-        getOffsetsFunction: (contextIds: string[]) => of(({ apiVersion: '1.0', data: { items: contextIds.map(() => 1 ) } } as OffsetsResponse))
+        getOffsetsFunction: (contextIds: string[]) => of(({ apiVersion: '1.0', data: { items: contextIds.map(() => 0 ) } } as OffsetsResponse))
       }
     ];
 
     this.currentData = this.mockData.slice(0, this.itemsPerPage);
+
   }
 
   onPageUpdate(page) {

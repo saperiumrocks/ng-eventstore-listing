@@ -1,8 +1,7 @@
 import { Component, OnInit, Input, Output, EventEmitter, OnChanges, SimpleChanges, ChangeDetectionStrategy, ChangeDetectorRef, OnDestroy } from '@angular/core';
 // import { PushService } from 'app/shared/services/push/push.service';
-import { SubscriptionTopicConfiguration, OffsetsResponse, ListHeaderGroups } from './models/template';
+import { SubscriptionTopicConfiguration, OffsetsResponse, ListHeaderGroups, DeltaEvent } from './models';
 import { Subject, Subscription } from 'rxjs';
-import { DeltaEvent } from './models/delta';
 
 import * as Immutable from 'immutable';
 
@@ -38,6 +37,9 @@ export class NgEventstoreListingComponent implements OnInit, OnChanges, OnDestro
   @Input() lookups = {};
   @Input() listHeaderGroups: ListHeaderGroups = { groups: [] };
   @Input() subscriptionTopicConfigurations: SubscriptionTopicConfiguration[] = [];
+  @Input() socketUrl: string;
+
+  @Input() playbackFiles: any[];
 
   sortField: string;
   sortOrder: string;
@@ -59,8 +61,9 @@ export class NgEventstoreListingComponent implements OnInit, OnChanges, OnDestro
   constructor(
     private changeDetectorRef: ChangeDetectorRef,
     private eventStoreService: NgEventstoreListingService
-    // private pushService: PushService
-  ) { }
+  ) {
+    this.eventStoreService.startListeningToEvents(this.socketUrl);
+  }
 
   ngOnInit() {
     this.customPlaybackEvents = !_isEmpty(this.customPlaybackFunctions) ? Object.keys(this.customPlaybackFunctions) : [];
@@ -193,17 +196,18 @@ export class NgEventstoreListingComponent implements OnInit, OnChanges, OnDestro
     const topics = offsetKeys.map((offsetKey: string, index?: number) => {
       const offsetKeySplit = offsetKey.split('.');
       const streamId = offsetKeySplit[offsetKeySplit.length - 1];
-      if (offsets[index]) {
-        return { streamId: streamId, offset: offsets[index] + 1 };
-      } else {
-        return { streamId: streamId };
-      }
+      // if (offsets[index]) {
+      return { streamId: streamId, offset: offsets[index] + 1 };
+      // } else {
+      //   return { streamId: streamId };
+      // }
     });
 
     this._subscribeToEvents(topics, idPropertyName);
   }
 
   private _subscribeToEvents(topics: any[], idPropertyName: string) {
+    console.log(this.playbackFiles);
     const self = this;
     // Replace with new ES subscription call
     // self.topicsSubscription = self.pushService.subscribeToTopics(topics).subscribe((delta) => {

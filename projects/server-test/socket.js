@@ -34,12 +34,12 @@ module.exports = function(server, es) {
     const subscriptionTokens = [];
     // const promises = [];
     _.each(topics, (item) => {
-        const subscriptionToken = es.subscribe(item.streamId, item.offset, function(err, event) {
+        const subscriptionToken = es.subscribe(item.streamId, item.offset, function(err, event, done) {
           if (err) {
             console.error(err);
-            // reject(err);
           } else {
-            subscriberFunc(event)
+            subscriberFunc(event);
+            done();
           }
         });
         topicCallback(subscriptionToken);

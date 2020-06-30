@@ -6,8 +6,6 @@ import { NgHeaderFooterTemplateHolderComponent } from './components/ng-header-fo
 import { CommonModule } from '@angular/common';
 import { TemplateDirective } from './directives/template.directive';
 
-
-
 @NgModule({
   declarations: [
     NgEventstoreListingComponent,

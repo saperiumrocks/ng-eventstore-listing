@@ -1,10 +1,10 @@
 import { Injectable } from '@angular/core';
 import * as io from 'socket.io-client';
-import { SubscriptionOptions } from './models/subscription-options';
+import { SubscriptionOptions } from './models';
 
 import _find from 'lodash-es/find';
 import _findIndex from 'lodash-es/findIndex';
-import { Observable, of } from 'rxjs';
+import { Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -14,17 +14,29 @@ export class NgEventstoreListingService {
   observers: any[] = [];
   streamsSubscribed: any = {};
 
-  constructor() {
-    this.socket = io('http://localhost:3000/events');
+  constructor() { }
 
-    this.socket.on('connection', (socket) => {
+  startListeningToEvents(url: string) {
+    const self = this;
+    self.socket = io(url);
+
+    self.socket.on('connection', (socket) => {
       console.log('a user connected');
       socket.on('disconnect', () => {
         console.log('user disconnected');
       });
     });
 
+    self.socket.on('reconnect', () => {
+      // readd all observers' subscriptions on reconnect
+      self.observers.forEach((item) => {
+        // readd subscription
+        self._addSubscription(item.observer, item.topics);
+      });
+    });
+
     this.socket.on('events', (data) => {
+      // Handle playbacks here
       console.log('message: ' + data);
     });
   }
@@ -33,7 +45,7 @@ export class NgEventstoreListingService {
     const self = this;
     this.socket.emit('add-subscriptions', JSON.stringify(subscriptionOptions), (error, subscriptionTokens) => {
        // Associate an observer count per subscribed topic
-       console.log(subscriptionTokens);
+      //  console.log(subscriptionTokens);
        if (subscriptionTokens) {
         subscriptionTokens.forEach((token) => {
           if (self.streamsSubscribed[token]) {
@@ -78,7 +90,7 @@ export class NgEventstoreListingService {
             });
 
             // If there are topics to unsubscribe, then emit remove-subscriptions
-            console.log('STREAMS TO UNSUBSCRIBE:', streamsToUnsubscribe);
+            // console.log('STREAMS TO UNSUBSCRIBE:', streamsToUnsubscribe);
             if (streamsToUnsubscribe.length > 0) {
               // remove our subscription from the server
               self.socket.emit('remove-subscriptions', JSON.stringify(streamsToUnsubscribe), () => {
@@ -116,4 +128,13 @@ export class NgEventstoreListingService {
         }
     });
   }
+
+  // subscribeToTopics(topics: any[], subscribeCallback?: () => void, unsubscribeCallback?: () => void): Observable<any> {
+  //   const self = this;
+  //   return new Observable(observer => {
+  //     if (subscriptionOptions.length > 0) {
+  //       self._addSubscription(observer, subscriptionOptions, subscribeCallback, unsubscribeCallback);
+  //     }
+  //   });
+  // }
 }
