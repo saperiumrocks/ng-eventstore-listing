@@ -5,7 +5,9 @@
   <div class="col-10">
     <div class="row">
       <div class="col-12">
-        {{ data.get('vehicleDescription') }}
+        <!-- {{ data.get('vehicleDescription') }} -->
+        <!-- {{ data | json }}; -->
+        {{ data.get('data').get('yearName') + ' ' + data.get('data').get('makeName') + ' ' +  data.get('data').get('modelName') }}
       </div>
     </div>
     <div class="row">
@@ -18,11 +20,11 @@
         </select>
       </div>
       <div class="col-4 border-right">
-        Sold Amount: {{ data.get('soldAmount') | currency }}
+        Sold Amount: {{ data.get('data').get('soldAmount') | currency }}
         <input placeholder="Sample Input">
       </div>
       <div class="col-4">
-        Sold Date: {{ data.get('soldAt') | date }}
+        Sold Date: {{ data.get('data').get('soldAt') | date }}
       </div>
     </div>
   </div>

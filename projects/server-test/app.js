@@ -8,19 +8,20 @@ const routes = require('./routes/routes.js')(es);
 
 var app = express();
 
-// app.use(function (req, res, next) {
+app.use(function (req, res, next) {
 //   // Website you wish to allow to connect
 //   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-//   res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
+  res.setHeader('Access-Control-Allow-Origin', '*');
 //   res.setHeader('Access-Control-Allow-Credentials', true);
-//   next();
-// });
+  next();
+});
 
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'projections')));
 
 
 app.use('/', routes);

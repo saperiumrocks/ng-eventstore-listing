@@ -4,9 +4,10 @@
     [idPropertyName]="idPropertyName"
     [inputDataList]="currentData"
     [itemComponentClass]="rowComponentClass"
-    [subscriptionTopicConfigurations]="subscriptionTopicConfigurations"
+    [itemSubscriptionConfiguration]="itemSubscriptionConfiguration"
+    [listSubscriptionConfiguration]="listSubscriptionConfiguration"
     [socketUrl]="socketUrl"
-    [playbackFiles]="playbackFiles">
+    [scriptStore]="scriptStore">
   </lib-ng-eventstore-listing>
   <lib-ng-header-footer-template-holder [componentClass]="footerComponentClass"[actualItemCount]="actualItemCount" [itemsPerPage]="itemsPerPage" [pageIndex]="pageIndex" [totalItemCount]="totalFilteredItems" (pageChangedEmitter)="onPageUpdate($event)"></lib-ng-header-footer-template-holder>
 </div>

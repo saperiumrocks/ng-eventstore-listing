@@ -1,12 +1,12 @@
 import * as Immutable from 'immutable';
-import { SubscriptionTopicConfiguration, PageUpdateEvent } from './index';
+import { SubscriptionConfiguration, PageUpdateEvent } from './index';
 
 export interface ListTemplateParent {
   rowComponentClass: any;
   customPlaybackFunctions: any;
-  playbackEventsToWatch: string [];
+  playbackEventsToWatch: string[];
   dataList: Immutable.List<any>;
-  subscriptionTopicConfigurations: SubscriptionTopicConfiguration[];
+  subscriptionTopicConfigurations: SubscriptionConfiguration[];
   actualItemCount: number;
   pageIndex: number;
   itemsPerPage: number;

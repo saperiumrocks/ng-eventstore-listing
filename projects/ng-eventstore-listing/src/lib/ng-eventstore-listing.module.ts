@@ -5,20 +5,22 @@ import { NgHeaderFooterTemplateHolderComponent } from './components/ng-header-fo
 
 import { CommonModule } from '@angular/common';
 import { TemplateDirective } from './directives/template.directive';
+import { IO_TOKEN } from './services/socket.io.service';
+
+import * as io from 'socket.io-client';
 
 @NgModule({
   declarations: [
     NgEventstoreListingComponent,
     ItemTemplateHolderComponent,
     NgHeaderFooterTemplateHolderComponent,
-    TemplateDirective
+    TemplateDirective,
   ],
-  imports: [
-    CommonModule
-  ],
+  imports: [CommonModule],
   exports: [
     NgEventstoreListingComponent,
-    NgHeaderFooterTemplateHolderComponent
-  ]
+    NgHeaderFooterTemplateHolderComponent,
+  ],
+  providers: [{ provide: IO_TOKEN, useValue: io }],
 })
-export class NgEventstoreListingModule { }
+export class NgEventstoreListingModule {}
