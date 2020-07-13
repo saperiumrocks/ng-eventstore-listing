@@ -9,15 +9,7 @@ declare var document: any;
 export class ScriptService {
   private scripts: any = {};
 
-  constructor() {
-    // ScriptStore.forEach((script: any) => {
-    //   this.scripts[script.name] = {
-    //     loaded: false,
-    //     src: script.src,
-    //     meta: script.meta
-    //   };
-    // });
-  }
+  constructor() {}
 
   init(scriptStore: Script[]) {
     scriptStore.forEach((script: Script) => {
@@ -37,9 +29,7 @@ export class ScriptService {
 
   loadScript(name: string): Promise<any> {
     return new Promise((resolve, reject) => {
-      //resolve if already loaded
-      console.log('this.scripts');
-      console.log(this.scripts);
+      // resolve if already loaded
       if (this.scripts[name].loaded) {
         resolve({
           script: name,

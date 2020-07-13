@@ -1,8 +1,6 @@
-import { Query } from '../services/playback.service';
-import { StateFunctions } from './state-functions';
+import { Query } from '.';
 
 export interface SubscriptionConfiguration {
   query: Query;
   playbackScriptName: string;
-  stateFunctions: StateFunctions;
 }

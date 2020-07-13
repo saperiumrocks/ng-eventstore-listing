@@ -1,31 +1,247 @@
 <div class="row row-item">
-  <div class="col-2">
-    <img class="img-fluid" src="{{ data.get('photoUrl') }}">
+  <!-- First Column -->
+  <div class="col-3 border-right">
+    <!-- Vehicle Description -->
+    <div class="row no-gutters mb-3 mt-1">
+      <div class="col-7 text-md">
+        <span class="font-weight-bold">{{ data.get('data').get('yearName') + ' ' + data.get('data').get('makeName') + ' ' +  data.get('data').get('modelName') }}</span> <br>
+        <span class="font-weight-bold">{{ data.get('data').get('vin') }}</span>
+      </div>
+      <div class="col-4 text-md">
+        <label class="font-weight-bold">{{ data.get('data').get('mileage') | number:'0.0-0' }}mi</label>
+      </div>
+      <div class="col-1 text-md">
+      </div>
+    </div>
+    <!-- Seller Information -->
+    <div class="row no-gutters">
+      <div class="col-12">
+        <div class="row mb-2">
+          <div class="col-6">
+            <span>Seller: </span>
+          </div>
+          <div class="col-6 text-md">
+          </div>
+        </div>
+        <div class="row mb-2">
+          <div class="col-6">
+            <span>Dealership: </span>
+          </div>
+          <div class="col-6 text-md">
+            <div class="text-right">{{ data.get('data').get('dealershipName') }}</div>
+          </div>
+        </div>
+        <div class="row mb-2">
+          <div class="col-6">
+            <span>Mailing Address: </span>
+          </div>
+          <div class="col-6">
+            <div class="text-right">{{ data.get('data').get('dealershipAddress') }}</div>
+          </div>
+        </div>
+        <div class="row mb-2">
+          <div class="col-6">
+            <span>Seller Rep: </span>
+          </div>
+          <div class="col-6">
+            <!-- <label class="font-weight-bold">{{ data.get('data').get('mileage') | number:'0.0-0' }}mi</label> -->
+          </div>
+        </div>
+        <div class="row mb-4">
+          <div class="col-6">
+            <span>DMV Clerk: </span>
+          </div>
+          <div class="col-6 text-md">
+            <!-- <label class="font-weight-bold">{{ data.get('data').get('mileage') | number:'0.0-0' }}mi</label> -->
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="row mb-2">
+      <div class="col-12 bottom-align">
+        <button class="btn btn-default btn-block">Folow-up Notes</button>
+      </div>
+    </div>
   </div>
-  <div class="col-10">
+
+  <div class="col-3 pt-1 border-right">
+    <div class="row mb-2">
+      <div class="col-6">
+        <span>Title Status: </span>
+      </div>
+      <div class="col-6 text-md">
+        <div class="text-right">{{ data.get('data').get('titleStatus') }}</div>
+      </div>
+    </div>
+    <div class="row mb-2">
+      <div class="col-6">
+        <span>Received Date: </span>
+      </div>
+      <div class="col-6 text-md">
+        <!-- <label class="font-weight-bold">{{ data.get('data').get('mileage') | number:'0.0-0' }}mi</label> -->
+      </div>
+    </div>
+    <div class="row mb-2">
+      <div class="col-6">
+        <span>Tracking Number: </span>
+      </div>
+      <div class="col-6 text-md">
+        <!-- <label class="font-weight-bold">{{ data.get('data').get('mileage') | number:'0.0-0' }}mi</label> -->
+      </div>
+    </div>
+    <div class="row mb-2">
+      <div class="col-6">
+        <span>Title Clerk: </span>
+      </div>
+      <div class="col-6 text-md">
+      </div>
+    </div>
+    <div class="row mb-5 pb-3">
+      <div class="col-12">
+        <input class="checkbox" type="checkbox">
+        <label>&nbsp;&nbsp; Title Received </label>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-12 bottom-align">
+        <div class="row mb-2 pb-1 no-gutters">
+          <div class="col-2 pr-1">
+            <button class="btn btn-default btn-block btn-sm">^</button>
+          </div>
+          <div class="col-5 px-1">
+            <button class="btn btn-default btn-block btn-sm">View Title</button>
+          </div>
+          <div class="col-5">
+            <span>03-02-2020</span>
+            TR
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-12">
+            <button class="btn btn-default btn-block">Recap Notes</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- 3rd Column -->
+  <div class="col-3 pt-1 border-right">
+    <div class="row mb-2">
+      <div class="col-6">
+        <span> Buyer: </span>
+      </div>
+      <div class="col-6"></div>
+    </div>
+    <div class="row mb-2">
+      <div class="col-6">
+        <span> Dealership: </span>
+      </div>
+      <div class="col-6">
+        <div class="text-right">{{ data.get('data').get('soldDealershipName') }}</div>
+      </div>
+    </div>
+    <div class="row mb-2">
+      <div class="col-6">
+        <span> Mailing Address: </span>
+      </div>
+      <div class="col-6">
+        <div class="text-right">{{ data.get('data').get('soldDealershipAddress') }}</div>
+      </div>
+    </div>
+    <div class="row mb-2">
+      <div class="col-6">
+        <span> Buyer Rep: </span>
+      </div>
+      <div class="col-6"></div>
+    </div>
+    <div class="row mb-2">
+      <div class="col-6">
+        <span> Title to Buyer: </span>
+      </div>
+      <div class="col-6"></div>
+    </div>
+    <div class="row mb-2">
+      <div class="col-6">
+        <span> Tracking Number: </span>
+      </div>
+      <div class="col-6"></div>
+    </div>
+    <div class="row mb-5 pb-2">
+      <div class="col-6">
+        <span> Collection Issue: </span>
+      </div>
+      <div class="col-6"></div>
+    </div>
+    <!-- Seller Responses Button -->
+    <div class="row mb-2">
+      <div class="col-12 bottom-align">
+        <button class="btn btn-default btn-block">Seller Responses</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-3 pt-1">
+    <div class="row mb-2">
+      <div class="col-6">
+        <span class="font-weight-bold text-md">SOLD</span>
+      </div>
+      <div class="col-6">
+        <div class="font-weight-bold text-md text-right">{{ data.get('data').get('soldAmount') | currency:'USD':'symbol':'0.0-0' }}</div>
+      </div>
+    </div>
+    <div class="row mb-2">
+      <div class="col-6">
+        <span class="font-weight-bold">Current Amount: </span>
+      </div>
+      <div class="col-6">
+        <div class="font-weight-bold text-right">{{ data.get('data').get('soldAmount') | currency:'USD':'symbol':'0.0-0' }}</div>
+      </div>
+    </div>
+
+    <div class="row mb-2">
+      <div class="col-6">
+        <span class="font-weight-bold">Sold Date: </span>
+      </div>
+      <div class="col-6">
+        <div class="font-weight-bold text-right">{{ data.get('data').get('soldAt') | date:'MMMM d, y' }}</div>
+      </div>
+    </div>
+
+    <div class="row mb-3">
+      <div class="col-6">
+        <span class="font-weight-bold">Payment Method: </span>
+      </div>
+      <div class="col-6">
+        <div class="text-right">{{ data.get('data').get('paymentMethod') }}</div>
+      </div>
+    </div>
+
     <div class="row">
       <div class="col-12">
-        <!-- {{ data.get('vehicleDescription') }} -->
-        <!-- {{ data | json }}; -->
-        {{ data.get('data').get('yearName') + ' ' + data.get('data').get('makeName') + ' ' +  data.get('data').get('modelName') }}
+        <input class="checkbox" type="checkbox">
+        <label>&nbsp;&nbsp; Pending Arbitration </label>
       </div>
     </div>
+
     <div class="row">
-      <div class="col-4 border-right">
-        <label>Sample Select: </label>
-        <select>
-          <option>Sample 1</option>
-          <option>Sample 2</option>
-          <option>Sample 3</option>
-        </select>
-      </div>
-      <div class="col-4 border-right">
-        Sold Amount: {{ data.get('data').get('soldAmount') | currency }}
-        <input placeholder="Sample Input">
-      </div>
-      <div class="col-4">
-        Sold Date: {{ data.get('data').get('soldAt') | date }}
+      <div class="col-12 bottom-align">
+        <div class="row mb-2 no-gutters">
+          <div class="col-6 pr-1">
+            <button class="btn btn-default btn-block">Buyer Invoice</button>
+          </div>
+        </div>
+    
+        <div class="row no-gutters">
+          <div class="col-6 pr-1">
+            <button class="btn btn-default btn-block">Adjust Price</button>
+          </div>
+          <div class="col-6 pl-1">
+            <button class="btn btn-default btn-block">History</button>
+          </div>
+        </div>
       </div>
     </div>
+
+   
   </div>
 </div>

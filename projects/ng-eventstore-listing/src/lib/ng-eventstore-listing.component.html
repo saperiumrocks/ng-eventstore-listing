@@ -1,4 +1,4 @@
-<div *ngIf="listHeaderGroups && listHeaderGroups.groups && listHeaderGroups.groups.length > 0"  [class]="'row ' + (listHeaderGroups && listHeaderGroups.generalRowClassName ? listHeaderGroups.generalRowClassName : '')">
+<!-- <div *ngIf="listHeaderGroups && listHeaderGroups.groups && listHeaderGroups.groups.length > 0"  [class]="'row ' + (listHeaderGroups && listHeaderGroups.generalRowClassName ? listHeaderGroups.generalRowClassName : '')">
   <div class="col-12">
     <div class="header bg-white p-2">
       <div [class]="'row ' + listHeaderGroups.generalRowClassName">
@@ -12,13 +12,12 @@
       </div>
     </div>
   </div>
-</div>
-<div [class]="'row ' + (listHeaderGroups && listHeaderGroups.generalRowClassName) ? listHeaderGroups.generalRowClassName : ''" *ngFor="let item of dataList; trackBy: trackByFn.bind(this, idPropertyName)">
+</div> -->
+<div [class]="'row ' + (listHeaderGroups && listHeaderGroups.generalRowClassName) ? listHeaderGroups.generalRowClassName : ''" *ngFor="let item of dataList; trackBy: trackByFn">
   <div class="col-12">
     <lib-item-template-holder
       [data]="item"
       [itemComponentClass]="itemComponentClass"
-      [idPropertyName]="idPropertyName"
       [lookups]="lookups"
       (updateEmitter)="onUpdate($event)"
       (updateLookupsEmitter)="onUpdateLookups($event)"

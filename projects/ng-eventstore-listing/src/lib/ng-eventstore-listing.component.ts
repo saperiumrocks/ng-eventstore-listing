@@ -10,18 +10,25 @@ import {
   ChangeDetectorRef,
   OnDestroy,
 } from '@angular/core';
-import { Subscription } from 'rxjs';
-import { switchMap, map as rxMap } from 'rxjs/operators';
+
+import { switchMap, debounceTime } from 'rxjs/operators';
 
 import {
   SubscriptionConfiguration,
-  OffsetsResponse,
   ListHeaderGroups,
-  DeltaEvent,
   Script,
+  PlaybackListResponse,
+  PlaybackList,
+  RowItem,
+  Filter,
+  Query,
+  Sort,
+  PlaybackListRequest,
 } from './models';
+
 import { ScriptService } from './services/script.service';
-import { PlaybackService, Query } from './services/playback.service';
+import { PlaybackService } from './services/playback.service';
+import { PlaybackListService } from './services/playback-list.service';
 
 import * as Immutable from 'immutable';
 import _defaultsDeep from 'lodash-es/defaultsDeep';
@@ -30,7 +37,8 @@ import _isEqual from 'lodash-es/isEqual';
 import _cloneDeep from 'lodash-es/cloneDeep';
 import _clone from 'lodash-es/clone';
 import _uniq from 'lodash-es/uniq';
-import { RowItem } from './models/row-item';
+import _merge from 'lodash-es/defaults';
+import { Subscription, Subject } from 'rxjs';
 
 @Component({
   selector: 'lib-ng-eventstore-listing',
@@ -44,79 +52,141 @@ export class NgEventstoreListingComponent
   @Output() updateLookupsEmitter: EventEmitter<any> = new EventEmitter();
   @Output() showModalEmitter: EventEmitter<any> = new EventEmitter();
   @Output() deleteEmitter: EventEmitter<any> = new EventEmitter();
-  @Output() sortEmitter: EventEmitter<any> = new EventEmitter();
-  @Output() updateDataList: EventEmitter<any> = new EventEmitter();
+  @Output() playbackListLoadedEmitter: EventEmitter<any> = new EventEmitter();
 
   @Input() itemComponentClass: any;
-  @Input() inputDataList: Immutable.List<any>;
-  @Input() DataInterface: any;
-  @Input() idPropertyName = 'id';
-  @Input() playbackEventsToWatch: string[] = [];
-  @Input() customPlaybackFunctions = {};
   @Input() lookups = {};
-  @Input() listHeaderGroups: ListHeaderGroups = { groups: [] };
   @Input() socketUrl: string;
   @Input() scriptStore: Script[];
-
   @Input() itemSubscriptionConfiguration: SubscriptionConfiguration;
   @Input() listSubscriptionConfiguration: SubscriptionConfiguration;
-
-  sortField: string;
-  sortOrder: string;
-  sortFields = {};
+  @Input() playbackListName: string;
+  @Input() filters: Filter[] = null;
+  @Input() sort: Sort = null;
+  @Input() pageIndex = 1;
+  @Input() itemsPerPage: number;
 
   dataList: Immutable.List<RowItem>;
-  customPlaybackEvents = [];
+  dataCount: number;
+  dataTotalCount: number;
+  initialized = false;
+  getPlaybackListSubscription: Subscription;
+  getPlaybackListSubject: Subject<PlaybackListRequest> = new Subject();
+  subscriptionTokens: string[] = [];
+  playbackList: PlaybackList = {
+    get: (rowId: string, callback: (err, item) => void) => {
+      const rowIndex = this.dataList.findIndex((value: any) => {
+        return value.get('rowId') === rowId;
+      });
 
-  getOffsetsSubjects: any = {};
-  getOffsetsSubscriptions: Subscription[] = [];
-  getOffsetsSubscription: Subscription;
+      if (rowIndex > -1) {
+        callback(null, this.dataList.get(rowIndex));
+      } else {
+        callback(new Error(`Row with rowId: ${rowIndex} does not exist`), null);
+      }
+    },
+    add: (
+      rowId: string,
+      revision: number,
+      data: any,
+      meta: any,
+      callback: (err?: any) => void
+    ) => {
+      const newEntry = {
+        rowId: rowId,
+        revision: revision,
+        data: data,
+        meta: meta,
+      };
 
-  topicsSubscriptions: Subscription[] = [];
-  topicsSubscription: Subscription;
+      this.changeDetectorRef.markForCheck();
+      this.dataList = this.dataList.push(Immutable.fromJS(newEntry));
+      callback();
+    },
+    update: (
+      rowId: string,
+      revision: number,
+      oldData: any,
+      newData: any,
+      meta: any,
+      callback: (err?) => void
+    ) => {
+      const rowIndex = this.dataList.findIndex((value: any) => {
+        return value.get('rowId') === rowId;
+      });
 
-  streamsSubscriptions: Subscription[] = [];
-  streamsSubscription: Subscription;
+      const newEntry = Immutable.fromJS({
+        rowId: rowId,
+        revision: revision,
+        data: {
+          ...oldData,
+          ...newData,
+        },
+        meta: meta,
+      });
 
-  scriptsLoaded = false;
+      if (rowIndex > -1) {
+        this.dataList = this.dataList.set(rowIndex, newEntry);
+        callback();
+      } else {
+        callback(new Error(`Row with rowId: ${rowIndex} does not exist`));
+      }
+    },
+    delete: (rowId: string, callback: (error?: any) => void) => {
+      const rowIndex = this.dataList.findIndex((value: any) => {
+        return value.get('rowId') === rowId;
+      });
+
+      if (rowIndex > -1) {
+        this.dataList = this.dataList.remove(rowIndex);
+        callback(null);
+      } else {
+        callback(new Error(`Row with rowId: ${rowIndex} does not exist`));
+      }
+    },
+  };
+
+  stateFunctions = {
+    getState: (id: string) => {
+      const index = this.dataList.findIndex((row: any) => {
+        return row.get('rowId') === id;
+      });
+      return (this.dataList.get(index) as any).toJS();
+    },
+    setState: (id: string, data: any) => {
+      const index = this.dataList.findIndex((row: any) => {
+        return row.get('rowId') === id;
+      });
+      this.dataList = this.dataList.set(index, Immutable.fromJS(data));
+      this.changeDetectorRef.markForCheck();
+    },
+  };
 
   constructor(
     private changeDetectorRef: ChangeDetectorRef,
     private scriptService: ScriptService,
-    private playbackService: PlaybackService
+    private playbackService: PlaybackService,
+    private playbackListService: PlaybackListService
   ) {}
 
-  ngOnInit() {
-    this.customPlaybackEvents = !_isEmpty(this.customPlaybackFunctions)
-      ? Object.keys(this.customPlaybackFunctions)
-      : [];
-    this.changeDetectorRef.markForCheck();
-  }
+  ngOnInit() {}
 
   ngOnChanges(changes: SimpleChanges): void {
     const self = this;
-    console.log('TEST CHANGES');
-    console.log(changes);
-
-    if (!this.scriptsLoaded) {
+    if (!this.initialized) {
+      this._initializeRequests();
       this._loadScripts();
+      this.initialized = true;
     }
 
     const changesKeys = Object.keys(changes);
     changesKeys.forEach((key) => {
       self[key] = changes[key].currentValue;
       switch (key) {
-        case 'inputDataList': {
-          this._setImmutableList(
-            changes[key].currentValue,
-            changes[key].previousValue
-          );
-          // this.changeDetectorRef.detectChanges();
-          break;
-        }
-        case 'listHeaderGroups': {
-          this._initSortFields(changes.listHeaderGroups.currentValue);
-          // this.changeDetectorRef.detectChanges();
+        case 'pageIndex':
+        case 'filters':
+        case 'sort': {
+          this.requestPlaybackList();
           break;
         }
       }
@@ -127,14 +197,115 @@ export class NgEventstoreListingComponent
     this._resetSubscriptions();
   }
 
-  trackByFn(idPropertyName: string, index: number, item: any) {
-    return item.get(idPropertyName);
+  trackByFn(index: number, item: any) {
+    return item.get('rowId');
   }
 
-  _loadScripts() {
+  private _initializeRequests(): void {
+    this.getPlaybackListSubscription = this.getPlaybackListSubject
+      .pipe(
+        debounceTime(100),
+        switchMap((params) => {
+          return this.playbackListService.getPlaybackList(
+            params.playbackListName,
+            params.startIndex,
+            params.limit,
+            params.filters,
+            params.sort
+          );
+        })
+      )
+      .subscribe((res: PlaybackListResponse) => {
+        this.dataList = Immutable.fromJS(res.rows);
+        this.dataCount = res.rows.length;
+        this.dataTotalCount = res.count;
+
+        this._resetSubscriptions();
+        this._initSubscriptions();
+
+        this.changeDetectorRef.markForCheck();
+
+        this.playbackListLoadedEmitter.emit({
+          totalItems: this.dataTotalCount,
+          dataCount: this.dataCount,
+        });
+      });
+  }
+
+  getPlaybackList(
+    playbackListName: string,
+    startIndex: number,
+    limit: number,
+    filters?: Filter[],
+    sort?: Sort
+  ) {
+    const playbackListRequestParams: PlaybackListRequest = {
+      playbackListName: playbackListName,
+      startIndex: startIndex,
+      limit: limit,
+      filters: filters,
+      sort: sort,
+    };
+    this.getPlaybackListSubject.next(playbackListRequestParams);
+  }
+
+  requestPlaybackList() {
+    const startIndex = this.itemsPerPage * (this.pageIndex - 1);
+    this.getPlaybackList(
+      this.playbackListName,
+      startIndex,
+      this.itemsPerPage,
+      this.filters,
+      this.sort
+    );
+  }
+
+  private _loadScripts() {
     if (this.scriptStore) {
       this.scriptService.init(this.scriptStore);
     }
+  }
+
+  private async _initSubscriptions() {
+    const self = this;
+    // Per row subscriptions
+    self.dataList.forEach(async (row: any) => {
+      const query: Query = _clone(self.itemSubscriptionConfiguration.query);
+      query.aggregateId = query.aggregateId.replace(
+        /{{rowId}}/g,
+        row.get('rowId')
+      );
+      this.subscriptionTokens.push(
+        await self.playbackService.registerForPlayback(
+          self.itemSubscriptionConfiguration.playbackScriptName,
+          self,
+          query,
+          self.stateFunctions,
+          row.get('revision') + 1,
+          self.playbackList
+        )
+      );
+    });
+
+    // List subscription
+    this.subscriptionTokens.push(
+      await self.playbackService.registerForPlayback(
+        self.listSubscriptionConfiguration.playbackScriptName,
+        self,
+        self.listSubscriptionConfiguration.query,
+        self.stateFunctions,
+        // TODO: Revision response from getPlaybackList
+        0,
+        self.playbackList
+      )
+    );
+  }
+
+  private _resetSubscriptions() {
+    this.subscriptionTokens.forEach((subscriptionToken) => {
+      this.playbackService.unRegisterForPlayback(subscriptionToken);
+    });
+    this.subscriptionTokens = [];
   }
 
   onUpdate(payload: any) {
@@ -152,211 +323,4 @@ export class NgEventstoreListingComponent
   onDelete(payload: any) {
     this.deleteEmitter.emit(payload);
   }
-
-  onSort(sortField: string) {
-    if (this.sortFields[sortField]) {
-      if (this.sortField !== sortField) {
-        if (this.sortField) {
-          this.sortFields[this.sortField] = {};
-        }
-        this.sortOrder = 'asc';
-      } else {
-        this.sortOrder = this.sortOrder === 'asc' ? 'desc' : 'asc';
-      }
-      this.sortField = sortField;
-      this.sortFields[this.sortField].icon =
-        this.sortOrder === 'asc' ? 'fa fa-angle-up' : 'fa fa-angle-down';
-      const sortData = {
-        sortField: this.sortField,
-        sortOrder: this.sortOrder,
-      };
-      this.sortEmitter.emit(sortData);
-    }
-  }
-
-  private _setImmutableList(newList: RowItem[] = [], previousList: any[] = []) {
-    this.dataList = Immutable.fromJS(newList);
-    const oldIds = previousList.map((item) => item[this.idPropertyName]);
-    const newIds = newList.map((item) => item[this.idPropertyName]);
-
-    if (!_isEqual(oldIds, newIds)) {
-      this._resetSubscriptions();
-      this._initSubscriptions();
-    }
-  }
-
-  private _initSortFields(listHeaderGroups: ListHeaderGroups): void {
-    if (listHeaderGroups) {
-      listHeaderGroups.groups.forEach((listHeaderGroup) => {
-        listHeaderGroup.listHeaders.forEach((listHeader) => {
-          if (listHeader.sortProperty) {
-            this.sortFields[listHeader.sortProperty] = {};
-          }
-        });
-      });
-    }
-  }
-
-  private async _initSubscriptions() {
-    const self = this;
-    // Per row subscriptions
-    this.dataList.forEach(async (row: any) => {
-      const query: Query = _clone(this.itemSubscriptionConfiguration.query);
-      query.aggregateId = query.aggregateId.replace(
-        /{{rowId}}/g,
-        row.get('rowId')
-      );
-      await this.playbackService.registerForPlayback(
-        this.itemSubscriptionConfiguration.playbackScriptName,
-        self,
-        query,
-        this.itemSubscriptionConfiguration.stateFunctions,
-        0
-      );
-    });
-
-    // List subscription
-    await this.playbackService.registerForPlayback(
-      this.listSubscriptionConfiguration.playbackScriptName,
-      self,
-      this.listSubscriptionConfiguration.query,
-      this.listSubscriptionConfiguration.stateFunctions,
-      0
-    );
-  }
-
-  // private _onOffsetResponse(offsets: number[] = [], offsetKeys: string[] = [], subscriptionConfiguration: SubscriptionConfiguration): void {
-  //   const queries = offsetKeys.map((offsetKey: string, index?: number) => {
-  //     const offsetKeySplit = offsetKey.split('.');
-
-  //     console.log(offsetKey);
-  //     // context.vehicle.key.vehicle-projection-vehicle-vehicle-gi-4nV3Sth-result
-
-  //     const query: Query = {
-  //       context: subscriptionConfiguration.query.context,
-  //       aggregate: subscriptionConfiguration.query.aggregate,
-  //       aggregateId: subscriptionConfiguration.query.aggregateId
-  //     };
-
-  //     return { query: query, offset: offsets[index] + 1 };
-  //   });
-
-  //   this._subscribeToEvents(queries, subscriptionConfiguration);
-  // }
-
-  // private async _subscribeToEvents(queries: any[], subscriptionConfiguration: SubscriptionConfiguration) {
-  //   const self = this;
-  //   queries.forEach(async (query) => {
-  //     const subscription = await this.playbackService.registerForPlayback(subscriptionConfiguration.playbackScriptName, self, query.query, query.offset);
-  //   });
-  // }
-
-  // private _playbackEvents(events: DeltaEvent[], idPropertyName: string) {
-  //   const self = this;
-  //   events.forEach((deltaEvent: DeltaEvent) => {
-  //     if (self.playbackEventsToWatch.includes(deltaEvent.event) && idPropertyName) {
-  //       const eventPayload = deltaEvent.payload;
-  //       // const itemIndex = self._getItemIndex(self.dataList, eventPayload);
-  //       const itemIndices = self._getItemIndices(self.dataList, eventPayload, idPropertyName);
-  //       itemIndices.forEach((itemIndex) => {
-  //         if (itemIndex > -1) {
-  //           self.dataList = self.dataList.update(itemIndex, (item: any) => {
-  //             const oldItem = item.toObject();
-  //             const newItem = self._mergeData(oldItem, eventPayload);
-  //             return Immutable.fromJS(newItem);
-  //           });
-  //           this.changeDetectorRef.markForCheck();
-  //         }
-  //       });
-  //     } else if (self.customPlaybackEvents.includes(deltaEvent.event) && idPropertyName) {
-  //       const eventPayload = deltaEvent.payload;
-  //       // const itemIndex = self._getItemIndex(self.dataList, eventPayload);
-  //       const itemIndices = self._getItemIndices(self.dataList, eventPayload, idPropertyName);
-
-  //       itemIndices.forEach((itemIndex) => {
-  //         if (itemIndex > -1) {
-  //           self.dataList = self.dataList.update(itemIndex, (item: any) => {
-  //             const customFunction = self.customPlaybackFunctions[deltaEvent.event];
-  //             if (customFunction) {
-  //               const customFunctionResponse = customFunction(item.toObject(), eventPayload);
-  //               if (customFunctionResponse) {
-  //                 return Immutable.fromJS(_cloneDeep(customFunctionResponse));
-  //               } else {
-  //                 return item;
-  //               }
-  //             }
-  //             return item;
-  //           });
-  //           this.changeDetectorRef.markForCheck();
-  //         }
-  //       });
-  //     } else if (self.customPlaybackEvents.includes(deltaEvent.event) && !idPropertyName) {
-  //       const eventPayload = deltaEvent.payload;
-  //       const customFunction = self.customPlaybackFunctions[deltaEvent.event];
-  //       const customFunctionResponse = customFunction(null, eventPayload);
-
-  //       if (customFunctionResponse) {
-  //         return Immutable.fromJS(_cloneDeep(customFunctionResponse));
-  //       }
-  //       return null;
-  //     }
-  //   });
-  //   self.inputDataList = self.dataList;
-  //   self.updateDataList.emit(self.inputDataList);
-  // }
-
-  private _resetSubscriptions() {
-    this.getOffsetsSubscriptions.forEach(
-      (getOffsetsSubscription: Subscription) => {
-        getOffsetsSubscription.unsubscribe();
-      }
-    );
-
-    // this.topicsSubscriptions.forEach((topicsSubscription: Subscription) => {
-    //   topicsSubscription.unsubscribe();
-    // });
-
-    this.getOffsetsSubscriptions = [];
-    this.getOffsetsSubjects = [];
-    // this.topicsSubscriptions = [];
-
-    // NEW IMPLEMENTATION
-    this.streamsSubscriptions.forEach((streamsSubscription: Subscription) => {
-      streamsSubscription.unsubscribe();
-    });
-
-    this.streamsSubscriptions = [];
-  }
-
-  // private _getItemIndex(dataList: Immutable.List<any>, eventPayload: any): number {
-  //   return dataList.findIndex((item: any) => {
-  //     return item.get(this.idPropertyName) === eventPayload[this.idPropertyName];
-  //   });
-  // }
-
-  // private _getItemIndices(dataList: Immutable.List<any> = Immutable.fromJS([]), eventPayload: any, idPropertyName: string): number[] {
-  //   return dataList.filter((item: any) => {
-  //     return item.get(idPropertyName) === eventPayload[idPropertyName];
-  //   }).map((item: any) => {
-  //     return dataList.indexOf(item);
-  //   }).toJS();
-  // }
-
-  // private _getSubscriptionKeys(context: string, idPropertyName: string, streamKey?: string): string[] {
-  //   if (!streamKey && this.dataList) {
-  //     return _uniq(this.dataList.toArray().map((item) => {
-  //       if (item && item.get(idPropertyName)) {
-  //         return `context.${context}.key.${item.get(idPropertyName)}`;
-  //       }
-  //     }));
-  //   } else if (streamKey) {
-  //     return [`context.${context}.key.${streamKey}`];
-  //   }
-  //   return [];
-  // }
-
-  // private _mergeData(originalItem: any, dataToAppend: any): any {
-  //   // TODO: Note defaults when handling arrays
-  //   return _cloneDeep(_defaultsDeep(dataToAppend, originalItem));
-  // }
 }

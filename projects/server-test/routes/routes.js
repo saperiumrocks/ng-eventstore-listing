@@ -2,7 +2,6 @@ var express = require('express');
 var router = express.Router();
 const shortid = require('shortid');
 
-
 const getEventStreamAsync = async function(es, query, revMin, revMax) {
   return new Promise((resolve, reject) => {
       try {
@@ -68,9 +67,9 @@ const getPlaybackListViewAsync = function(es, listName) {
 }
 
 
-const queryPlaybackListAsync = function(playbackList, start, limit) {
+const queryPlaybackListAsync = function(playbackList, start, limit, filters, sort) {
   return new Promise((resolve, reject) => {
-      playbackList.query(start, limit, null, null, function(error, results) {
+      playbackList.query(start, limit, filters, sort, function(error, results) {
           if (error) {
               reject(error);
           } else {
@@ -118,7 +117,6 @@ const routes = function (es) {
    });
 
    if (vehiclesListProjection) {
-     console.log(vehiclesListProjection)
      const vehicleList = vehiclesListProjection.payload.vehicles;
 
      for (let index = 0; index < vehicleList.length; index++) {
@@ -223,7 +221,7 @@ const routes = function (es) {
 
     const query = {
       context: 'auction',
-      aggregate: 'saleschannelinstancevehicle',
+      aggregate: 'sales-channel-instance-vehicle',
       aggregateId: salesChannelInstanceVehicleId
     };
 
@@ -234,6 +232,63 @@ const routes = function (es) {
     res.json(event);
   });
 
+  router.put('/sales-channel-instance-vehicles/:salesChannelInstanceVehicleId/title-status', async function(req, res, next) {
+    const param = req.params;
+    const body = req.body;
+
+    const titleStatus = body.titleStatus;
+    const salesChannelInstanceVehicleId = param.salesChannelInstanceVehicleId;
+
+    const event = {
+      name: 'titles_vehicle_title_status_updated',
+      payload: {
+         salesChannelInstanceVehicleId: salesChannelInstanceVehicleId,
+         titleStatus: titleStatus
+      }
+    };
+
+    const query = {
+      context: 'auction',
+      aggregate: 'sales-channel-instance-vehicle',
+      aggregateId: salesChannelInstanceVehicleId
+    };
+
+    const stream = await getEventStreamAsync(es, query, 0, 1);
+    stream.addEvent(event);
+    await commitStream(stream);
+  
+    res.json(event);
+  });
+
+  router.put('/sales-channel-instance-vehicles/:salesChannelInstanceVehicleId/sold-amount', async function(req, res, next) {
+    const param = req.params;
+    const body = req.body;
+
+    const soldAmount = body.soldAmount;
+    const salesChannelInstanceVehicleId = param.salesChannelInstanceVehicleId;
+
+    const event = {
+      name: 'titles_vehicle_sold_amount_updated',
+      payload: {
+         salesChannelInstanceVehicleId: salesChannelInstanceVehicleId,
+         soldAmount: soldAmount
+      }
+    };
+
+    const query = {
+      context: 'auction',
+      aggregate: 'sales-channel-instance-vehicle',
+      aggregateId: salesChannelInstanceVehicleId
+    };
+
+    const stream = await getEventStreamAsync(es, query, 0, 1);
+    stream.addEvent(event);
+    await commitStream(stream);
+  
+    res.json(event);
+  });
+
+
   router.post('/sales-channel-instance-vehicles/:salesChannelInstanceVehicleId/sell', async function(req, res, next) {
     const salesChannelInstanceVehicleId = req.params.salesChannelInstanceVehicleId;
     const event = {
@@ -241,15 +296,15 @@ const routes = function (es) {
       payload: {
          soldAt: new Date().getTime(),
          soldAmount: req.body.soldAmount,
-         vehicleId: req.body.vehicleId,
          salesChannelInstanceVehicleId: salesChannelInstanceVehicleId,
-         salesChannelInstanceId: req.body.salesChannelInstanceId
+         paymentMethodName: req.body.paymentMethodName,
+         soldDealershipId: req.body.soldDealershipId
       }
     };
 
     const query = {
       context: 'auction',
-      aggregate: 'saleschannelinstancevehicle',
+      aggregate: 'sales-channel-instance-vehicle',
       aggregateId: salesChannelInstanceVehicleId
     };
 
@@ -266,6 +321,174 @@ const routes = function (es) {
     const results = await queryPlaybackListAsync(playbackList, 0, 1000);
 
     res.json(results);
+  });
+
+  router.post('/users', async function(req, res, next) {
+    const body = req.body;
+    
+    const userId = shortid.generate();
+    const event = {
+      name: 'user_created',
+      payload: {
+         userId: userId,
+         name: body.name
+      }
+    };
+
+    const query = {
+      context: 'profile',
+      aggregate: 'user',
+      aggregateId: userId
+    };
+
+    const stream = await getEventStreamAsync(es, query, 0, 1);
+    stream.addEvent(event);
+    await commitStream(stream);
+  
+    res.json(event);
+  });
+
+  router.post('/dealerships', async function(req, res, next) {
+    const body = req.body;
+    
+    const dealershipId = shortid.generate();
+    const event = {
+      name: 'dealership_created',
+      payload: {
+         dealershipId: dealershipId,
+         dealershipName: body.dealershipName,
+         address: body.address,
+         sellerRepUserId: body.sellerRepUserId,
+         buyerRepUserId: body.buyerRepUserId,
+         dmvClerkUserId: body.dmvClerkUserId,
+         isPaidOnFaxApproved: body.isPaidOnFaxApproved
+      }
+    };
+
+    const query = {
+      context: 'profile',
+      aggregate: 'dealership',
+      aggregateId: dealershipId
+    };
+
+    const stream = await getEventStreamAsync(es, query, 0, 1);
+    stream.addEvent(event);
+    await commitStream(stream);
+  
+    res.json(event);
+  });
+
+  // router.put('dealerships/:dealershipId', async function(req, res, next) {
+  //   const body = req.body;
+    
+  // });
+
+  router.get('/playback-list/:playbackListName', async function(req, res) {
+    const query = req.query;
+    const param = req.params;
+
+    const playbackListName = param.playbackListName;
+    const startIndex = query.startIndex;
+    const limit = query.limit;
+
+    const filters = query.filters ? JSON.parse(query.filters) : null;
+    const sort = query.sort ? JSON.parse(query.sort) : null;
+
+    const playbackList = await getPlaybackListViewAsync(es, playbackListName);
+    const results = await queryPlaybackListAsync(playbackList, +startIndex, +limit, filters, sort);
+
+    res.json(results);
+  });
+
+  router.get('/initialize', async function(req, res, next) {
+    // Create Users
+    const mockUsers = [
+      { userId: 'user-1', name: 'Carlo Luis De Guzman' },
+      { userId: 'user-2', name: 'EJ Villadarez' },
+      { userId: 'user-3', name: 'Mark Aldecimo' },
+      { userId: 'user-4', name: 'Gabby Sanchez' },
+      { userId: 'user-5', name: 'Chester Supelana' },
+      { userId: 'user-6', name: 'Miguel Sy' }
+    ];
+    mockUsers.forEach(async (user) => {
+      const event = {
+        name: 'user_created',
+        payload: {
+           userId: user.userId,
+           name: user.name
+        }
+      };
+  
+      const query = {
+        context: 'profile',
+        aggregate: 'user',
+        aggregateId: user.userId
+      };
+  
+      const stream = await getEventStreamAsync(es, query, 0, 1);
+      stream.addEvent(event);
+      await commitStream(stream);
+
+
+      // Create Dealerships
+      const mockDealerships = [
+        {
+          dealershipId: 'dealership-1',
+          dealershipName: 'Glendale Toyota',
+          address: '235 N Fairlane Glendale California 94545',
+          sellerRepUserId: 'user-3',
+          buyerRepUserId: 'user-4',
+          dmvClerkUserId: 'user-5',
+          isPaidOnFaxApproved: true
+        },
+        {
+          dealershipId: 'dealership-2',
+          dealershipName: 'Honda of Vacaville',
+          address: '155 S Freemont Vacaville California 91992',
+          sellerRepUserId: 'user-3',
+          buyerRepUserId: 'user-4',
+          dmvClerkUserId: 'user-5',
+          isPaidOnFaxApproved: false
+        },
+        {
+          dealershipId: 'dealership-3',
+          dealershipName: 'Airport Marina Ford',
+          address: '3670 Queen Court Marina California 90112',
+          sellerRepUserId: 'user-3',
+          buyerRepUserId: 'user-4',
+          dmvClerkUserId: 'user-5',
+          isPaidOnFaxApproved: false
+        }
+      ];
+
+      mockDealerships.forEach(async (dealership) => {
+        const event = {
+          name: 'dealership_created',
+          payload: {
+              dealershipId: dealership.dealershipId,
+              dealershipName: dealership.dealershipName,
+              address: dealership.address,
+              sellerRepUserId: dealership.sellerRepUserId,
+              buyerRepUserId: dealership.buyerRepUserId,
+              dmvClerkUserId: dealership.dmvClerkUserId,
+              isPaidOnFaxApproved: dealership.isPaidOnFaxApproved
+          }
+        };
+    
+        const query = {
+          context: 'profile',
+          aggregate: 'dealership',
+          aggregateId: dealership.dealershipName
+        };
+    
+        const stream = await getEventStreamAsync(es, query, 0, 1);
+        stream.addEvent(event);
+        await commitStream(stream);
+      });
+
+    });    
+  
+    res.json(mockUsers);
   });
 
 

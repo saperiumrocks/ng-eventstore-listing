@@ -1,4 +1,12 @@
-import { Output, EventEmitter, Input, OnInit, OnChanges, SimpleChanges, ChangeDetectorRef } from '@angular/core';
+import {
+  Output,
+  EventEmitter,
+  Input,
+  OnInit,
+  OnChanges,
+  SimpleChanges,
+  ChangeDetectorRef,
+} from '@angular/core';
 
 export abstract class ItemTemplateComponent implements OnInit, OnChanges {
   // Event Emitters
@@ -13,15 +21,16 @@ export abstract class ItemTemplateComponent implements OnInit, OnChanges {
 
   _changeFn: (changes) => void;
 
-  constructor(protected changeDetectorRef?: ChangeDetectorRef) {
-  }
+  constructor(protected changeDetectorRef?: ChangeDetectorRef) {}
 
-  ngOnInit(): void { }
+  ngOnInit(): void {}
 
   ngOnChanges(changes: SimpleChanges): void {
     if (this._changeFn) {
       this._changeFn(changes);
     }
+
+    this.data;
 
     if (this.changeDetectorRef) {
       this.changeDetectorRef.detectChanges();
@@ -30,38 +39,38 @@ export abstract class ItemTemplateComponent implements OnInit, OnChanges {
 
   registerChangeFunction = (changeFn: (changes) => void) => {
     this._changeFn = changeFn;
-  }
+  };
 
   onUpdate = (propertyName: string, actionData: any) => {
     const actionEventEmitterData = {
       propertyName: propertyName,
       id: this.data.get(this.idPropertyName),
-      data: actionData
+      data: actionData,
     };
     this.onUpdateEmitter.emit(actionEventEmitterData);
-  }
+  };
 
   onUpdateLookups = (lookup) => {
     const actionEventEmitterData = {
-      lookup: lookup
+      lookup: lookup,
     };
     this.onUpdateLookupsEmitter.emit(actionEventEmitterData);
-  }
+  };
 
   onShowModal = (modalName, data) => {
     const actionEventEmitterData = {
       modalName: modalName,
       id: this.data.get(this.idPropertyName),
-      data: data
+      data: data,
     };
     this.onShowModalEmitter.emit(actionEventEmitterData);
-  }
+  };
 
   onDelete = (actionData?: any) => {
     const actionEventEmitterData = {
       id: this.data.get(this.idPropertyName),
-      data: actionData
+      data: actionData,
     };
     this.onDeleteEmitter.emit(actionEventEmitterData);
-  }
+  };
 }

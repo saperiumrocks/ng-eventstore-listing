@@ -49,10 +49,7 @@ module.exports = function(server, es) {
     if (err) {
       console.error(err);
     } else {
-      console.log('PLAYBACK HERE SOCKET!');
-      console.log(event);
       // Get Token Subscription
-
       const key = getKeyFromQuery({
         context: event.context,
         aggregate: event.aggregateId,
@@ -75,8 +72,6 @@ module.exports = function(server, es) {
       };
 
       const subscriptionToken = es.subscribe(query, data.offset, subscriberFunc);
-      console.log('SUBSCRIPTION TOKEN', subscriptionToken);
-
       socket.join(subscriptionToken);
 
       subscriptions[getKeyFromQuery(query)] = subscriptionToken;

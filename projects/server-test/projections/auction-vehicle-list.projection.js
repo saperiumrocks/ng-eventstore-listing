@@ -6,6 +6,7 @@
                 const eventPayload = event.payload.payload;
                 const data = {
                     vehicleId: eventPayload.vehicleId,
+                    dealershipId: eventPayload.dealershipId,
                     yearName: eventPayload.yearName,
                     makeName: eventPayload.makeName,
                     modelName: eventPayload.modelName,
@@ -30,13 +31,23 @@
             {
                 name: 'vehicleId',
                 type: 'string'
+            },
+            {
+                name: 'dealershipId',
+                type: 'string'
             }
         ],
         secondaryKeys: {
-            idx_vehicleId: [{
-                name: 'vehicleId',
-                sort: 'ASC'
-            }]
+            idx_vehicleId: [
+                {
+                    name: 'vehicleId',
+                    sort: 'ASC'
+                },
+                {
+                    name: 'dealershipId',
+                    sort: 'ASC'
+                }
+            ]
         }
     };
 })(typeof(exports) === 'undefined' ? this['auction-sales-channel-instance-vehicle-list'] = {} : exports);

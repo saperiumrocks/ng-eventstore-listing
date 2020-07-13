@@ -1,17 +1,15 @@
-import {
-  Component,
-  ChangeDetectionStrategy,
-  OnInit,
-  ChangeDetectorRef,
-} from '@angular/core';
+import { Component, ChangeDetectionStrategy, OnInit } from '@angular/core';
 import { TestRowComponent } from './test-row/test-row.component';
-import { TestFooterComponent } from './test-footer/test-footer.component';
-import { SubscriptionConfiguration } from 'projects/ng-eventstore-listing/src/lib/models';
-import { OffsetsResponse } from 'projects/ng-eventstore-listing/src/lib/models';
-import { of } from 'rxjs';
-import * as playbacks from '../playbacks';
+import {
+  SubscriptionConfiguration,
+  Filter,
+  Sort,
+} from 'projects/ng-eventstore-listing/src/lib/models';
 import { ScriptStore } from './script.store';
-import { ApiService } from './services/api.service';
+import { FormControl } from '@angular/forms';
+import { FilterOperator } from 'projects/ng-eventstore-listing/src/lib/enums/filter-types';
+import { SortDirection } from 'projects/ng-eventstore-listing/src/lib/enums/sort-direction';
+import { environment } from '../environments/environment';
 
 @Component({
   selector: 'app-root',
@@ -20,105 +18,83 @@ import { ApiService } from './services/api.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppComponent implements OnInit {
-  mockData: SampleRowType[];
-  currentData: SampleRowType[];
   rowComponentClass = TestRowComponent;
-  footerComponentClass = TestFooterComponent;
-  idPropertyName = 'vehicleId';
 
-  itemSubscriptionConfiguration: SubscriptionConfiguration;
-  listSubscriptionConfiguration: SubscriptionConfiguration;
+  dealershipFilterFormControl = new FormControl();
+  sortFormControl = new FormControl();
 
-  actualItemCount = 3;
-  itemsPerPage = 3;
+  // FOR DEMO
+  itemsPerPage = 3; // 25;
   pageIndex = 1;
-  totalFilteredItems = 4;
-  playbackFiles = playbacks;
+  filters: Filter[];
+  sort: Sort;
+  totalItems: number = 0;
 
-  socketUrl = 'http://localhost:3000/events';
+  socketUrl = environment.socketUrl;
 
   scriptStore = ScriptStore;
+  playbackListName = 'auction_titles_list_view';
 
-  constructor(
-    private apiService: ApiService,
-    private changeDetector: ChangeDetectorRef
-  ) {}
+  itemSubscriptionConfiguration: SubscriptionConfiguration = {
+    query: {
+      context: 'auction',
+      aggregate: 'auction-titles-dashboard-vehicle',
+      aggregateId: `{{rowId}}`,
+    },
+    playbackScriptName: 'auction-titles-dashboard-vehicle',
+  };
+
+  listSubscriptionConfiguration: SubscriptionConfiguration = {
+    query: {
+      context: 'states',
+      aggregate: 'titles-dashboard-list-projection',
+      aggregateId: 'titles-dashboard-list-projection-result',
+    },
+    playbackScriptName: 'auction-titles-dashboard-vehicle-list',
+  };
+
+  sortOptions: any[] = [
+    {
+      field: 'soldAt',
+      sortDirection: SortDirection.ASC,
+      label: 'Sold Date (Newest First)',
+    },
+    {
+      field: 'soldAt',
+      sortDirection: SortDirection.DESC,
+      label: 'Sold Date (Oldest First)',
+    },
+  ];
+
+  constructor() {}
 
   ngOnInit() {
-    this.apiService.getVehicleList().subscribe((res) => {
-      // this.currentData = res.rows.map((row) => {
-      //   return row.data;
-      // });
-      this.currentData = res.rows;
+    this.dealershipFilterFormControl.valueChanges.subscribe((value) => {
+      if (value) {
+        const newFilter: Filter = {
+          operator: FilterOperator.is,
+          field: 'dealershipId',
+          value: value,
+        };
 
-      this.changeDetector.markForCheck();
-
-      this.initSubscriptions();
+        this.filters = [newFilter];
+      }
     });
-    // this.mockData = [
-    //   { vehicleId: 'vehicle-id-1', vehicleDescription: '2011 Toyota Vios', photoUrl: 'assets/images/1.jpeg', soldAmount: 12500, soldAt: 1591844802852 },
-    //   { vehicleId: 'vehicle-id-2', vehicleDescription: '2009 Mitsubishi Lancer', photoUrl: 'assets/images/2.jpeg', soldAmount: 3200, soldAt: 1591844802852 },
-    //   { vehicleId: 'vehicle-id-3', vehicleDescription: '2016 Honda Civic', photoUrl: 'assets/images/3.jpeg', soldAmount: 1250, soldAt: 1591844802852 },
-    //   { vehicleId: 'vehicle-id-4', vehicleDescription: '2001 Mini Cooper', photoUrl: 'assets/images/4.jpeg', soldAmount: 6700, soldAt: 1591844802852 }
-    // ];
-    // this.currentData = this.mockData.slice(0, this.itemsPerPage);
-  }
 
-  initSubscriptions() {
-    this.itemSubscriptionConfiguration = {
-      query: {
-        context: 'auction',
-        aggregate: 'saleschannelinstancevehicle',
-        aggregateId: `{{rowId}}`,
-      },
-      playbackScriptName: 'auction-sales-channel-instance-vehicle-list',
-      stateFunctions: {
-        getState(id: string) {
-          return this.getRowItem(id);
-        },
-      },
-    };
-
-    this.listSubscriptionConfiguration = {
-      query: {
-        context: 'auction',
-        aggregate: 'titles-dashboard-list-projection',
-        aggregateId: 'titles-dashboard-list-projection-result',
-      },
-      playbackScriptName: 'auction-titles-dashboard-vehicle-list',
-      stateFunctions: {
-        getState() {
-          return { vehicles: this.currentData };
-        },
-      },
-    };
-  }
-
-  onPageUpdate(page) {
-    const endIndex = Math.min(
-      (page - 1) * this.itemsPerPage + this.itemsPerPage,
-      +this.mockData.length
-    );
-    this.currentData = this.mockData.slice(
-      (page - 1) * this.itemsPerPage,
-      endIndex
-    );
-  }
-
-  getRowItem(id: string) {
-    return this.currentData.findIndex((row) => {
-      return row[this.idPropertyName] === id;
+    this.sortFormControl.valueChanges.subscribe((value) => {
+      const sort: Sort = {
+        field: value.field,
+        sortDirection: value.sortDirection,
+      };
+      this.sort = sort;
     });
   }
-}
 
-export interface SampleRowType {
-  vehicleId: string;
-  year: string;
-  make: string;
-  model: string;
-  trim: string;
-  photoUrl?: string;
-  soldAmount?: number;
-  soldAt?: number;
+  onPageChanged(pageEvent: any) {
+    this.pageIndex = pageEvent.page;
+  }
+
+  playbackListLoaded(data) {
+    this.totalItems = data.totalItems;
+  }
 }

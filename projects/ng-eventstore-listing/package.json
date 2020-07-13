@@ -1,6 +1,12 @@
 {
   "name": "ng-eventstore-listing",
   "version": "0.0.10-alpha",
+  "contributors": [
+    {
+      "name": "Carlo Luis De Guzman",
+      "email": "carlo@saperium.com"
+    }
+  ],
   "peerDependencies": {
     "@angular/common": "5.2.0",
     "@angular/core": "5.2.0",

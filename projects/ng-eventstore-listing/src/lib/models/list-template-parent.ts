@@ -1,5 +1,5 @@
 import * as Immutable from 'immutable';
-import { SubscriptionConfiguration, PageUpdateEvent } from './index';
+import { SubscriptionConfiguration, PageUpdateEvent } from '.';
 
 export interface ListTemplateParent {
   rowComponentClass: any;

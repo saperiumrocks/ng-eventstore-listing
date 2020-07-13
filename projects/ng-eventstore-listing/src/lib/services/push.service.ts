@@ -74,7 +74,6 @@ export class PushService {
 
   subscribeStreams() {
     if (this.ioPush.connected) {
-      console.log('IO PUSH CONNECTED');
       var clientTokens = Object.keys(this.subscriptions);
       clientTokens.forEach((clientToken) => {
         var sub = this.subscriptions[clientToken];
@@ -85,7 +84,6 @@ export class PushService {
             offset: sub.offset,
           });
           this.ioPush.emit('subscribe', query, (token: string) => {
-            console.log('SUBSCRIPTION TOKEN:', token);
             if (token) {
               console.log('Server Subscribed:', token, query);
               sub.token = token;
