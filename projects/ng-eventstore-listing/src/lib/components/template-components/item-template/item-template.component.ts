@@ -35,7 +35,7 @@ export abstract class ItemTemplateComponent implements OnInit, OnChanges {
 
   registerChangeFunction = (changeFn: (changes) => void) => {
     this._changeFn = changeFn;
-  };
+  }
 
   onUpdate = (propertyName: string, actionData: any) => {
     const actionEventEmitterData = {
@@ -44,14 +44,14 @@ export abstract class ItemTemplateComponent implements OnInit, OnChanges {
       data: actionData,
     };
     this.onUpdateEmitter.emit(actionEventEmitterData);
-  };
+  }
 
   onUpdateLookups = (lookup) => {
     const actionEventEmitterData = {
       lookup: lookup,
     };
     this.onUpdateLookupsEmitter.emit(actionEventEmitterData);
-  };
+  }
 
   onShowModal = (modalName, data) => {
     const actionEventEmitterData = {
@@ -60,7 +60,7 @@ export abstract class ItemTemplateComponent implements OnInit, OnChanges {
       data: data,
     };
     this.onShowModalEmitter.emit(actionEventEmitterData);
-  };
+  }
 
   onDelete = (actionData?: any) => {
     const actionEventEmitterData = {
@@ -68,5 +68,5 @@ export abstract class ItemTemplateComponent implements OnInit, OnChanges {
       data: actionData,
     };
     this.onDeleteEmitter.emit(actionEventEmitterData);
-  };
+  }
 }
