@@ -42,3 +42,4 @@ jobs:
       on:
         branch: publish
       skip_cleanup: true
+      local_dir: dist/ng-eventstore-listing
