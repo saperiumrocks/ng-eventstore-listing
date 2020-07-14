@@ -35,6 +35,8 @@ jobs:
   - stage: build & publish lib
     script:
     - npm run build:lib
+    before_deploy:
+      - cd dist
     deploy:
       provider: npm
       email: "saperium.rocks@gmail.com"
@@ -42,4 +44,7 @@ jobs:
       on:
         branch: publish
       skip_cleanup: true
-      local_dir: dist/ng-eventstore-listing
+      local_dir: ng-eventstore-listing
+    after_deploy:
+      - cd ..
+
