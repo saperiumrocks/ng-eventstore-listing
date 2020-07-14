@@ -11,13 +11,14 @@ export class PlaybackListService {
   constructor(private http: HttpClient) {}
 
   getPlaybackList(
+    playbackListBaseUrl: string,
     playbackListName: string,
     startIndex: number,
     limit: number,
     filters?: Filter[],
     sort?: Sort
   ): Observable<PlaybackListResponse> {
-    let url = `${environment.vehicleHost}/playback-list/${playbackListName}?startIndex=${startIndex}&limit=${limit}`;
+    let url = `${playbackListBaseUrl}/playback-list/${playbackListName}?startIndex=${startIndex}&limit=${limit}`;
 
     if (filters) {
       url += `&filters=${JSON.stringify(filters)}`;

@@ -57,6 +57,7 @@ export class NgEventstoreListingComponent
   @Input() itemComponentClass: any;
   @Input() lookups = {};
   @Input() socketUrl: string;
+  @Input() playbackListBaseUrl: string;
   @Input() scriptStore: Script[];
   @Input() itemSubscriptionConfiguration: SubscriptionConfiguration;
   @Input() listSubscriptionConfiguration: SubscriptionConfiguration;
@@ -207,6 +208,7 @@ export class NgEventstoreListingComponent
         debounceTime(100),
         switchMap((params) => {
           return this.playbackListService.getPlaybackList(
+            this.playbackListBaseUrl,
             params.playbackListName,
             params.startIndex,
             params.limit,

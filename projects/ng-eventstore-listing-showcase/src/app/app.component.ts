@@ -24,7 +24,7 @@ export class AppComponent implements OnInit {
   sortFormControl = new FormControl();
 
   // FOR DEMO
-  itemsPerPage = 3; // 25;
+  itemsPerPage = 3; // = 25;
   pageIndex = 1;
   filters: Filter[];
   sort: Sort;

@@ -137,7 +137,7 @@ describe('NgEventstoreListingComponent', () => {
           return of({
             count: 2,
             rows: [MOCK_DATA_LIST[2], MOCK_DATA_LIST[3]],
-          } as PlaybackListResponse);
+          });
         }
       );
 
