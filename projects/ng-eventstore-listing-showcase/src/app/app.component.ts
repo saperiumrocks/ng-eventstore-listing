@@ -28,7 +28,7 @@ export class AppComponent implements OnInit {
   pageIndex = 1;
   filters: Filter[];
   sort: Sort;
-  totalItems: number = 0;
+  totalItems = 0;
 
   socketUrl = environment.socketUrl;
 

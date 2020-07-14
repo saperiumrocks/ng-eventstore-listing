@@ -11,7 +11,7 @@ export class PlaybackListService {
   constructor(private http: HttpClient) {}
 
   getPlaybackList(
-    playbackListName: String,
+    playbackListName: string,
     startIndex: number,
     limit: number,
     filters?: Filter[],

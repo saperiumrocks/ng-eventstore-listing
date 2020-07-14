@@ -22,7 +22,7 @@ export class ScriptService {
   }
 
   load(...scripts: string[]): Promise<any> {
-    var promises: any[] = [];
+    const promises: any[] = [];
     scripts.forEach((script) => promises.push(this.loadScript(script)));
     return Promise.all(promises);
   }
@@ -38,12 +38,12 @@ export class ScriptService {
           meta: this.scripts[name].meta,
         });
       } else {
-        //load script
-        let script = document.createElement('script');
+        // load script
+        const script = document.createElement('script');
         script.type = 'text/javascript';
         script.src = this.scripts[name].src;
         if (script.readyState) {
-          //IE
+          // IE
           script.onreadystatechange = () => {
             if (
               script.readyState === 'loaded' ||
@@ -60,7 +60,7 @@ export class ScriptService {
             }
           };
         } else {
-          //Others
+          // Others
           script.onload = () => {
             this.scripts[name].loaded = true;
             resolve({

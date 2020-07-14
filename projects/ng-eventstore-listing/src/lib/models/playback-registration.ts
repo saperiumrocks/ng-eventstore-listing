@@ -2,7 +2,7 @@ import { PlaybackList } from '.';
 
 export interface PlaybackRegistration {
   playbackScript: any;
-  owner: Object;
+  owner: object;
   registrationId: string;
   playbackList: PlaybackList;
 }

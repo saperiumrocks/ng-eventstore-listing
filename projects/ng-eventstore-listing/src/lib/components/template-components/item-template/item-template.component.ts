@@ -30,8 +30,6 @@ export abstract class ItemTemplateComponent implements OnInit, OnChanges {
       this._changeFn(changes);
     }
 
-    this.data;
-
     if (this.changeDetectorRef) {
       this.changeDetectorRef.detectChanges();
     }

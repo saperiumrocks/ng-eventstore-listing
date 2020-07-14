@@ -16,23 +16,25 @@ export class PushService {
     const self = this;
     this.ioPush.on('message', (eventObj, token) => {
       console.log('got message from push server: ', eventObj, token);
-      var clientTokens = Object.keys(self.subscriptions);
+      const clientTokens = Object.keys(self.subscriptions);
       // redirect to mapped subscription/token callback
       clientTokens.forEach((clientToken) => {
-        var sub = self.subscriptions[clientToken];
+        const sub = self.subscriptions[clientToken];
         if (sub.token === token) {
           // update next offset (from stream revision) for this subscription, so for reconnecting
-          if (!isNaN(eventObj.streamRevision))
+          if (!isNaN(eventObj.streamRevision)) {
             sub.offset = eventObj.streamRevision + 1;
-          if (typeof sub.cb === 'function')
+          }
+          if (typeof sub.cb === 'function') {
             sub.cb(undefined, eventObj, sub.owner, clientToken);
+          }
 
           // iterate on monitors meta tags
-          var tags = Object.keys(sub.monitorTags);
+          const tags = Object.keys(sub.monitorTags);
           tags.forEach((tag) => {
             // check for state/eventSource._meta or event._meta
             if (eventObj._meta && eventObj._meta.tag === tag) {
-              var reason = 'N/A';
+              let reason = 'N/A';
               if (typeof eventObj.eventType === 'string') {
                 reason = eventObj.eventType;
               } else if (typeof eventObj.stateType === 'string') {
@@ -40,11 +42,12 @@ export class PushService {
                 if (
                   eventObj.eventSource &&
                   typeof eventObj.eventSource.eventType === 'string'
-                )
+                ) {
                   reason += ` <- ${eventObj.eventSource.eventType}`;
+                }
               }
               // iterate on the monitors
-              var monitors = sub.monitorTags[tag];
+              const monitors = sub.monitorTags[tag];
               monitors.forEach((monitor) => {
                 monitor.callback(reason, eventObj._meta);
               });
@@ -74,13 +77,13 @@ export class PushService {
 
   subscribeStreams() {
     if (this.ioPush.connected) {
-      var clientTokens = Object.keys(this.subscriptions);
+      const clientTokens = Object.keys(this.subscriptions);
       clientTokens.forEach((clientToken) => {
-        var sub = this.subscriptions[clientToken];
+        const sub = this.subscriptions[clientToken];
         // do server subsribe for those without tokens yet
         if (!sub.token) {
           // build up proper subscribe request query
-          var query = Object.assign(sub.query, {
+          const query = Object.assign(sub.query, {
             offset: sub.offset,
           });
           this.ioPush.emit('subscribe', query, (token: string) => {
@@ -100,7 +103,7 @@ export class PushService {
     return new Promise((resolve, reject) => {
       try {
         // just do a force server unsubscribe and removal of subscription entry
-        var sub = this.subscriptions[clientToken];
+        const sub = this.subscriptions[clientToken];
         if (sub) {
           if (sub.token && this.ioPush.connected) {
             //  NOTE: need to handle unsubscribe/emit errors
@@ -126,29 +129,29 @@ export class PushService {
     });
   }
 
-  monitorMeta(clientToken, tag, timeout, cb) {
-    const self = this;
-    var sub = self.subscriptions[clientToken];
-    if (sub && typeof tag === 'string' && typeof cb === 'function') {
-      var monitorToken =
-        Math.random().toString(36).substr(2, 9) + '-' + Date.now().toString();
-      // setup monitor token/filter/callback mapping
-      if (!sub.monitorTags[tag]) sub.monitorTags[tag] = [];
-      sub.monitorTags[tag].push({
-        token: monitorToken,
-        callback: cb,
-      });
-      setTimeout(function () {
-        var sub = self.subscriptions[clientToken];
-        if (sub && Array.isArray(sub.monitorTags[tag])) {
-          var idx = sub.monitorTags[tag].findIndex(
-            (x) => x.token === monitorToken
-          );
-          if (idx != -1) sub.monitorTags[tag].splice(idx, 1);
-          if (sub.monitorTags[tag].length <= 0) delete sub.monitorTags[tag];
-          // console.log('TAGS:', clientToken, sub.monitorTags);
-        }
-      }, timeout);
-    }
-  }
+  // monitorMeta(clientToken, tag, timeout, cb) {
+  //   const self = this;
+  //   const sub = self.subscriptions[clientToken];
+  //   if (sub && typeof tag === 'string' && typeof cb === 'function') {
+  //     const monitorToken =
+  //       Math.random().toString(36).substr(2, 9) + '-' + Date.now().toString();
+  //     // setup monitor token/filter/callback mapping
+  //     if (!sub.monitorTags[tag]) { sub.monitorTags[tag] = []; }
+  //     sub.monitorTags[tag].push({
+  //       token: monitorToken,
+  //       callback: cb,
+  //     });
+  //     setTimeout(() => {
+  //       const sub = self.subscriptions[clientToken];
+  //       if (sub && Array.isArray(sub.monitorTags[tag])) {
+  //         const idx = sub.monitorTags[tag].findIndex(
+  //           (x) => x.token === monitorToken
+  //         );
+  //         if (idx != -1) { sub.monitorTags[tag].splice(idx, 1); }
+  //         if (sub.monitorTags[tag].length <= 0) { delete sub.monitorTags[tag]; }
+  //         // console.log('TAGS:', clientToken, sub.monitorTags);
+  //       }
+  //     }, timeout);
+  //   }
+  // }
 }

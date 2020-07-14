@@ -134,10 +134,10 @@ describe('NgEventstoreListingComponent', () => {
     beforeEach(() => {
       mockPlaybackListService.getPlaybackList.and.callFake(
         (playbackListName, startIndex, limit, filters, sort) => {
-          return of(<PlaybackListResponse>{
+          return of({
             count: 2,
             rows: [MOCK_DATA_LIST[2], MOCK_DATA_LIST[3]],
-          });
+          } as PlaybackListResponse);
         }
       );
 

@@ -28,10 +28,10 @@ export class PlaybackService {
 
   async registerForPlayback(
     scriptName: string,
-    owner: Object,
+    owner: object,
     query: Query,
     stateFunctions: StateFunctions,
-    offset?: Number,
+    offset?: number,
     playbackList?: PlaybackList
   ) {
     const script = await this.scriptService.load(scriptName);
@@ -41,9 +41,9 @@ export class PlaybackService {
       query,
       offset,
       this,
-      (err, eventObj, owner, token) => {
+      (err, eventObj, owner2, token) => {
         // owner is playbackservice
-        const self = owner as PlaybackService;
+        const self = owner2 as PlaybackService;
         const registration = self.playbackRegistry[token];
         // call the function
         // const playbackList = self.createPlaybacklist(registration)
@@ -83,12 +83,11 @@ export class PlaybackService {
               },
             };
 
-            const callback = () => {
+            const doneCallback = () => {
               stateFunctions.setState(row.rowId, row);
-              console.log('DONE');
             };
 
-            playbackFunction(state, eventObj, funcs, callback);
+            playbackFunction(state, eventObj, funcs, doneCallback);
           }
         }
       }
