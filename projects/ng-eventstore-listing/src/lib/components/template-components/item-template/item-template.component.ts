@@ -1,7 +1,5 @@
 import {
-  Output,
   EventEmitter,
-  Input,
   OnInit,
   OnChanges,
   SimpleChanges,

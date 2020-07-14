@@ -1,6 +1,6 @@
 {
   "name": "ng-eventstore-listing",
-  "version": "0.0.8-alpha",
+  "version": "0.1.0-alpha",
   "description": "A listing library utilizing an eventstore implementation",
   "scripts": {
     "ng": "ng",
@@ -11,8 +11,8 @@
     "publish:lib": "cd dist/ng-eventstore-listing && npm publish && cd .. && cd ..",
     "build:showcase": "ng build ng-eventstore-listing-showcase --base-href='https://saperiumrocks.github.io/ng-eventstore-listing/'",
     "publish:demo": "npx angular-cli-ghpages --dir=./dist/ng-eventstore-listing-showcase",
-    "test": "ng test",
-    "lint": "ng lint",
+    "test:showcase": "ng test ng-eventstore-listing-showcase --watch=false --sourceMap=false --browsers=ChromeHeadless",
+    "lint": "ng lint ng-eventstore-listing && ng lint ng-eventstore-listing-showcase",
     "e2e": "ng e2e",
     "copy:readme": "copyfiles ./README.md ./dist/ng-eventstore-listing",
     "format:check": "prettier --list-different 'projects/**/*.ts'",
