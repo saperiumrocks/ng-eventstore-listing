@@ -6,7 +6,7 @@
     "ng": "ng",
     "start": "node --max_old_space_size=8048 ./node_modules/@angular/cli/bin/ng serve",
     "test": "ng test",
-    "lint": "ng lint",
+    "lint": "cd lib && ng lint && cd ..",
     "e2e": "ng e2e",
     "test:lib": "ng test --watch=false --sourceMap=false --browsers=ChromeHeadless",
     "build": "npm run build:lib && npm run build:showcase",
@@ -39,6 +39,7 @@
     "zone.js": "^0.8.19"
   },
   "devDependencies": {
+    "@angular-devkit/core": "0.0.29",
     "@angular/cli": "1.6.0",
     "@angular/compiler-cli": "5.2.0",
     "@angular/language-service": "5.2.0",

@@ -1,4 +1,5 @@
-import { Component, OnInit, ComponentFactoryResolver, Input, Output, EventEmitter, ViewChild, OnChanges, ComponentRef, SimpleChanges, AfterViewInit } from '@angular/core';
+import { Component, OnInit, ComponentFactoryResolver, Input, Output,
+  EventEmitter, ViewChild, OnChanges, ComponentRef, SimpleChanges, AfterViewInit } from '@angular/core';
 import { HeaderFooterTemplateComponent } from '../template-components/index';
 import { TemplateDirective } from '../../directives/template.directive';
 

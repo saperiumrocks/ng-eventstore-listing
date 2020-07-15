@@ -9,10 +9,10 @@ import {
 import {
   FilterOperator,
   SortDirection
-} from 'ng-eventstore-listing'
+} from 'ng-eventstore-listing';
 
 import { ScriptStore } from './script.store';
-import { FormControl } from '@angular/forms';;
+import { FormControl } from '@angular/forms';
 
 @Component({
   selector: 'app-root',

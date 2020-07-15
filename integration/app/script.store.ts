@@ -1,8 +1,8 @@
 import { Script } from 'ng-eventstore-listing/models';
 // import { environment } from '../environments/environment';
 const environment = {
-  scriptUrl: "http://localhost:3000/"
-}
+  scriptUrl: 'http://localhost:3000/'
+};
 
 // TODO: Can be simplified
 export const ScriptStore: Script[] = [

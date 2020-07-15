@@ -1,8 +1,14 @@
 import { NgEventstoreListingComponent } from './ng-eventstore-listing.component';
 import * as Immutable from 'immutable';
-import { RowItem, PlaybackListResponse } from './models';
-import { Observable, of } from 'rxjs';
+import { RowItem } from './models';
 import { SimpleChanges, SimpleChange } from '@angular/core';
+
+const MOCK_DATA_LIST: RowItem[] = [
+  { rowId: 'test-1', revision: 0, data: { testProp1: 1 }, meta: {} },
+  { rowId: 'test-2', revision: 0, data: { testProp1: 3 }, meta: {} },
+  { rowId: 'test-3', revision: 0, data: { testProp1: 5 }, meta: {} },
+  { rowId: 'test-4', revision: 0, data: { testProp1: 7 }, meta: {} },
+];
 
 describe('NgEventstoreListingComponent', () => {
   let component: NgEventstoreListingComponent;
@@ -181,10 +187,3 @@ describe('NgEventstoreListingComponent', () => {
     });
   });
 });
-
-const MOCK_DATA_LIST: RowItem[] = [
-  { rowId: 'test-1', revision: 0, data: { testProp1: 1 }, meta: {} },
-  { rowId: 'test-2', revision: 0, data: { testProp1: 3 }, meta: {} },
-  { rowId: 'test-3', revision: 0, data: { testProp1: 5 }, meta: {} },
-  { rowId: 'test-4', revision: 0, data: { testProp1: 7 }, meta: {} },
-];

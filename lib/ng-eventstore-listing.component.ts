@@ -38,7 +38,8 @@ import _cloneDeep from 'lodash-es/cloneDeep';
 import _clone from 'lodash-es/clone';
 import _uniq from 'lodash-es/uniq';
 import _merge from 'lodash-es/defaults';
-import { Subscription, Subject } from 'rxjs';
+import { Subscription } from 'rxjs/Subscription';
+import { Subject } from 'rxjs/Subject';
 
 @Component({
   selector: 'lib-ng-eventstore-listing',

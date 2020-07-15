@@ -63,7 +63,8 @@ describe('ItemTemplate', () => {
   //     spyOn(component.onUpdateEmitter, 'emit');
 
   //     component.onUpdate(mockPropertyName, mockActionData);
-  //     expect(component.onUpdateEmitter.emit).toHaveBeenCalledWith({ propertyName: mockPropertyName, id: 'test-id', data: mockActionData });
+  //     expect(component.onUpdateEmitter.emit).toHaveBeenCalledWith({ propertyName: mockPropertyName,
+  //     id: 'test-id', data: mockActionData });
   //   });
   // });
 
