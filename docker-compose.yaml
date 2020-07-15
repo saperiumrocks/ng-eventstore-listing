@@ -1,0 +1,35 @@
+version: '3'
+
+services:
+  db_server:
+    image: mysql:5.7
+    ports:
+      - '3306:3306'
+    restart: always
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=eventstore
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=root
+  redis_server:
+    image: redis
+    ports:
+      - '6379:6379'
+  api_server:
+    build: './server-test'
+    volumes: 
+      - './server-test:/app'
+    ports: 
+      - '3000:3000'
+    links: 
+      - 'db_server'
+      - 'redis_server'
+    environment: 
+      - REDIS_HOST=redis_server
+      - REDIS_PORT=6379
+      - EVENTSTORE_MYSQL_HOST=db_server
+      - EVENTSTORE_MYSQL_PORT=3306
+      - EVENTSTORE_MYSQL_USERNAME=root
+      - EVENTSTORE_MYSQL_PASSWORD=root
+      - EVENTSTORE_MYSQL_DATABASE=eventstore
+    command: bash start.sh redis_server:6379 db_server:3306

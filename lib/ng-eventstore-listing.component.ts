@@ -1,0 +1,330 @@
+import {
+  Component,
+  OnInit,
+  Input,
+  Output,
+  EventEmitter,
+  OnChanges,
+  SimpleChanges,
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  OnDestroy,
+} from '@angular/core';
+
+import { switchMap, debounceTime } from 'rxjs/operators';
+
+import {
+  SubscriptionConfiguration,
+  ListHeaderGroups,
+  Script,
+  PlaybackListResponse,
+  PlaybackList,
+  RowItem,
+  Filter,
+  Query,
+  Sort,
+  PlaybackListRequest,
+} from './models';
+
+import { ScriptService } from './services/script.service';
+import { PlaybackService } from './services/playback.service';
+import { PlaybackListService } from './services/playback-list.service';
+
+import * as Immutable from 'immutable';
+import _defaultsDeep from 'lodash-es/defaultsDeep';
+import _isEmpty from 'lodash-es/isEmpty';
+import _isEqual from 'lodash-es/isEqual';
+import _cloneDeep from 'lodash-es/cloneDeep';
+import _clone from 'lodash-es/clone';
+import _uniq from 'lodash-es/uniq';
+import _merge from 'lodash-es/defaults';
+import { Subscription, Subject } from 'rxjs';
+
+@Component({
+  selector: 'lib-ng-eventstore-listing',
+  templateUrl: './ng-eventstore-listing.component.html',
+  styles: [],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+export class NgEventstoreListingComponent
+  implements OnInit, OnChanges, OnDestroy {
+  @Output() updateEmitter: EventEmitter<any> = new EventEmitter();
+  @Output() updateLookupsEmitter: EventEmitter<any> = new EventEmitter();
+  @Output() showModalEmitter: EventEmitter<any> = new EventEmitter();
+  @Output() deleteEmitter: EventEmitter<any> = new EventEmitter();
+  @Output() playbackListLoadedEmitter: EventEmitter<any> = new EventEmitter();
+
+  @Input() itemComponentClass: any;
+  @Input() lookups = {};
+  @Input() socketUrl: string;
+  @Input() playbackListBaseUrl: string;
+  @Input() scriptStore: Script[];
+  @Input() itemSubscriptionConfiguration: SubscriptionConfiguration;
+  @Input() listSubscriptionConfiguration: SubscriptionConfiguration;
+  @Input() playbackListName: string;
+  @Input() filters: Filter[] = null;
+  @Input() sort: Sort = null;
+  @Input() pageIndex = 1;
+  @Input() itemsPerPage: number;
+
+  dataList: Immutable.List<RowItem>;
+  dataCount: number;
+  dataTotalCount: number;
+  initialized = false;
+  getPlaybackListSubscription: Subscription;
+  getPlaybackListSubject: Subject<PlaybackListRequest> = new Subject();
+  subscriptionTokens: string[] = [];
+  playbackList: PlaybackList = {
+    get: (rowId: string, callback: (err, item) => void) => {
+      const rowIndex = this.dataList.findIndex((value: any) => {
+        return value.get('rowId') === rowId;
+      });
+
+      if (rowIndex > -1) {
+        callback(null, this.dataList.get(rowIndex));
+      } else {
+        callback(new Error(`Row with rowId: ${rowIndex} does not exist`), null);
+      }
+    },
+    add: (
+      rowId: string,
+      revision: number,
+      data: any,
+      meta: any,
+      callback: (err?: any) => void
+    ) => {
+      const newEntry = {
+        rowId: rowId,
+        revision: revision,
+        data: data,
+        meta: meta,
+      };
+
+      this.changeDetectorRef.markForCheck();
+      this.dataList = this.dataList.push(Immutable.fromJS(newEntry));
+      callback();
+    },
+    update: (
+      rowId: string,
+      revision: number,
+      oldData: any,
+      newData: any,
+      meta: any,
+      callback: (err?) => void
+    ) => {
+      const rowIndex = this.dataList.findIndex((value: any) => {
+        return value.get('rowId') === rowId;
+      });
+
+      const newEntry = Immutable.fromJS({
+        rowId: rowId,
+        revision: revision,
+        data: {
+          ...oldData,
+          ...newData,
+        },
+        meta: meta,
+      });
+
+      if (rowIndex > -1) {
+        this.dataList = this.dataList.set(rowIndex, newEntry);
+        callback();
+      } else {
+        callback(new Error(`Row with rowId: ${rowIndex} does not exist`));
+      }
+    },
+    delete: (rowId: string, callback: (error?: any) => void) => {
+      const rowIndex = this.dataList.findIndex((value: any) => {
+        return value.get('rowId') === rowId;
+      });
+
+      if (rowIndex > -1) {
+        this.dataList = this.dataList.remove(rowIndex);
+        callback(null);
+      } else {
+        callback(new Error(`Row with rowId: ${rowIndex} does not exist`));
+      }
+    },
+  };
+
+  stateFunctions = {
+    getState: (id: string) => {
+      const index = this.dataList.findIndex((row: any) => {
+        return row.get('rowId') === id;
+      });
+      return (this.dataList.get(index) as any).toJS();
+    },
+    setState: (id: string, data: any) => {
+      const index = this.dataList.findIndex((row: any) => {
+        return row.get('rowId') === id;
+      });
+      this.dataList = this.dataList.set(index, Immutable.fromJS(data));
+      this.changeDetectorRef.markForCheck();
+    },
+  };
+
+  constructor(
+    private changeDetectorRef: ChangeDetectorRef,
+    private scriptService: ScriptService,
+    private playbackService: PlaybackService,
+    private playbackListService: PlaybackListService
+  ) {}
+
+  ngOnInit() {
+    this.playbackService.init(this.socketUrl);
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    const self = this;
+    if (!this.initialized) {
+      this._initializeRequests();
+      this._loadScripts();
+      this.initialized = true;
+    }
+
+    const changesKeys = Object.keys(changes);
+    changesKeys.forEach((key) => {
+      self[key] = changes[key].currentValue;
+      switch (key) {
+        case 'pageIndex':
+        case 'filters':
+        case 'sort': {
+          this.requestPlaybackList();
+          break;
+        }
+      }
+    });
+  }
+
+  ngOnDestroy() {
+    this._resetSubscriptions();
+  }
+
+  trackByFn(index: number, item: any) {
+    return item.get('rowId');
+  }
+
+  private _initializeRequests(): void {
+    this.getPlaybackListSubscription = this.getPlaybackListSubject
+      .pipe(
+        debounceTime(100),
+        switchMap((params) => {
+          return this.playbackListService.getPlaybackList(
+            this.playbackListBaseUrl,
+            params.playbackListName,
+            params.startIndex,
+            params.limit,
+            params.filters,
+            params.sort
+          );
+        })
+      )
+      .subscribe((res: PlaybackListResponse) => {
+        this.dataList = Immutable.fromJS(res.rows);
+        this.dataCount = res.rows.length;
+        this.dataTotalCount = res.count;
+
+        this._resetSubscriptions();
+        this._initSubscriptions();
+
+        this.changeDetectorRef.markForCheck();
+
+        this.playbackListLoadedEmitter.emit({
+          totalItems: this.dataTotalCount,
+          dataCount: this.dataCount,
+        });
+      });
+  }
+
+  getPlaybackList(
+    playbackListName: string,
+    startIndex: number,
+    limit: number,
+    filters?: Filter[],
+    sort?: Sort
+  ) {
+    const playbackListRequestParams: PlaybackListRequest = {
+      playbackListName: playbackListName,
+      startIndex: startIndex,
+      limit: limit,
+      filters: filters,
+      sort: sort,
+    };
+    this.getPlaybackListSubject.next(playbackListRequestParams);
+  }
+
+  requestPlaybackList() {
+    const startIndex = this.itemsPerPage * (this.pageIndex - 1);
+    this.getPlaybackList(
+      this.playbackListName,
+      startIndex,
+      this.itemsPerPage,
+      this.filters,
+      this.sort
+    );
+  }
+
+  private _loadScripts() {
+    if (this.scriptStore) {
+      this.scriptService.init(this.scriptStore);
+    }
+  }
+
+  private async _initSubscriptions() {
+    const self = this;
+    // Per row subscriptions
+    self.dataList.forEach(async (row: any) => {
+      const query: Query = _clone(self.itemSubscriptionConfiguration.query);
+      query.aggregateId = query.aggregateId.replace(
+        /{{rowId}}/g,
+        row.get('rowId')
+      );
+      this.subscriptionTokens.push(
+        await self.playbackService.registerForPlayback(
+          self.itemSubscriptionConfiguration.playbackScriptName,
+          self,
+          query,
+          self.stateFunctions,
+          row.get('revision') + 1,
+          self.playbackList
+        )
+      );
+    });
+
+    // List subscription
+    this.subscriptionTokens.push(
+      await self.playbackService.registerForPlayback(
+        self.listSubscriptionConfiguration.playbackScriptName,
+        self,
+        self.listSubscriptionConfiguration.query,
+        self.stateFunctions,
+        // TODO: Revision response from getPlaybackList
+        0,
+        self.playbackList
+      )
+    );
+  }
+
+  private _resetSubscriptions() {
+    this.subscriptionTokens.forEach((subscriptionToken) => {
+      this.playbackService.unRegisterForPlayback(subscriptionToken);
+    });
+    this.subscriptionTokens = [];
+  }
+
+  onUpdate(payload: any) {
+    this.updateEmitter.emit(payload);
+  }
+
+  onUpdateLookups(payload: any) {
+    this.updateLookupsEmitter.emit(payload);
+  }
+
+  onShowModal(payload: any) {
+    this.showModalEmitter.emit(payload);
+  }
+
+  onDelete(payload: any) {
+    this.deleteEmitter.emit(payload);
+  }
+}

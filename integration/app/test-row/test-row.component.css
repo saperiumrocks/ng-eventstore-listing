@@ -1,0 +1,26 @@
+div.row-item {
+  border: solid gray 1px;
+  min-height: 200px;
+  margin-bottom: 20px;
+  min-width: 1200px;
+}
+
+div.border-right {
+  border-right: solid gray 1px;
+}
+
+.text-md {
+  font-size: 14px !important;
+}
+
+button.btn.btn-default {
+  color: #333;
+  background-color: #fff;
+  border-color: #ccc;
+  font-weight: 500 !important;
+}
+
+div.bottom-align {
+  position: absolute !important;
+  bottom: 10px !important;
+}

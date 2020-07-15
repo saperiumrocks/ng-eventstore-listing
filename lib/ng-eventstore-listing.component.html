@@ -1,0 +1,29 @@
+<!-- <div *ngIf="listHeaderGroups && listHeaderGroups.groups && listHeaderGroups.groups.length > 0"  [class]="'row ' + (listHeaderGroups && listHeaderGroups.generalRowClassName ? listHeaderGroups.generalRowClassName : '')">
+  <div class="col-12">
+    <div class="header bg-white p-2">
+      <div [class]="'row ' + listHeaderGroups.generalRowClassName">
+        <div *ngFor="let listHeaderGroup of listHeaderGroups.groups" [class]="listHeaderGroup.className">
+          <div [class]="'row ' + listHeaderGroups.generalRowClassName">
+            <div *ngFor="let listHeader of listHeaderGroup.listHeaders" [class]="listHeader.className">
+              <span (click)="onSort(listHeader.sortProperty)" [ngClass]="{ 'sort-header': listHeader.sortProperty }">{{ listHeader.displayName }} <i *ngIf="sortFields[listHeader.sortProperty] && sortFields[listHeader.sortProperty].icon" [class]="'sort-icon ' + sortFields[listHeader.sortProperty].icon"></i></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div> -->
+<!-- <div [class]="'row ' + (listHeaderGroups && listHeaderGroups.generalRowClassName) ? listHeaderGroups.generalRowClassName : ''" *ngFor="let item of dataList; trackBy: trackByFn"> -->
+<div class="row" *ngFor="let item of dataList; trackBy: trackByFn">
+  <div class="col-12">
+    <lib-item-template-holder
+      [data]="item"
+      [itemComponentClass]="itemComponentClass"
+      [lookups]="lookups"
+      (updateEmitter)="onUpdate($event)"
+      (updateLookupsEmitter)="onUpdateLookups($event)"
+      (showModalEmitter)="onShowModal($event)"
+      (deleteEmitter)="onDelete($event)">
+    </lib-item-template-holder>
+  </div>
+</div>

@@ -1,0 +1,50 @@
+language: node_js
+node_js:
+- "12.0"
+dist: trusty
+sudo: required
+
+os:
+- linux
+addons:
+  chrome: stable
+before_install:
+- export CHROME_BIN=chromium-browser
+- export DISPLAY=:99.0
+- sh -e /etc/init.d/xvfb start
+
+jobs:
+  include:
+  - stage: lint
+    script:
+    - ng lint
+  - stage: test
+    script:
+    - npm run test:lib
+    if: branch = publish
+  - stage: build & publish showcase
+    script:
+    - npm install
+    - npm run build:showcase
+    deploy:
+      provider: pages
+      skip_cleanup: true
+      github_token: $GH_TOKEN
+      local_dir: dist/ng-eventstore-listing-showcase
+    if: branch = publish
+  - stage: build & publish lib
+    script:
+    - npm run build:lib
+    before_deploy:
+      - cd dist
+    deploy:
+      provider: npm
+      email: "saperium.rocks@gmail.com"
+      api_key: $NPM_TOKEN
+      on:
+        branch: publish
+      skip_cleanup: true
+      local_dir: ng-eventstore-listing
+    after_deploy:
+      - cd ..
+

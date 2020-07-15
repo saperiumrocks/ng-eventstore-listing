@@ -1,0 +1,40 @@
+<div class="container-fluid pt-4">
+  <h3>NG Eventstore Listing Demo</h3>
+
+
+  <h5> Filters </h5>
+
+  <label for="dealership-filter">Seller Dealership: </label>
+  <select [formControl]="dealershipFilterFormControl" id="dealership-filter">
+    <option value="dealership-1">Glendale Toyota</option>
+    <option value="dealership-2">Honda of Vacaville</option>
+    <option value="dealership-3">Airport Marina Ford</option>
+    <!-- <option [value]="dealership-4">Dealership 4</option>
+    <option [value]="dealership-5">Dealership 5</option> -->
+  </select>
+
+  <label for="sort">Sort By: </label>
+  <select [formControl]="sortFormControl" id="sort">
+    <option *ngFor="let sortOption of sortOptions" [ngValue]="sortOption">{{ sortOption.label }}</option>
+  </select>
+
+  <pagination [totalItems]="totalItems" [itemsPerPage]="itemsPerPage" (pageChanged)="onPageChanged($event)"></pagination>
+
+  <lib-ng-eventstore-listing
+    (playbackListLoadedEmitter)="playbackListLoaded($event)"
+    [itemComponentClass]="rowComponentClass"
+    [itemSubscriptionConfiguration]="itemSubscriptionConfiguration"
+    [listSubscriptionConfiguration]="listSubscriptionConfiguration"
+    [socketUrl]="socketUrl"
+    [playbackListBaseUrl]="playbackListBaseUrl"
+    [scriptStore]="scriptStore"
+    [playbackListName]="playbackListName"
+    [pageIndex]="pageIndex"
+    [itemsPerPage]="itemsPerPage"
+    [filters]="filters"
+    [sort]="sort">
+  </lib-ng-eventstore-listing>
+
+  <pagination [totalItems]="totalItems" [itemsPerPage]="itemsPerPage" (pageChanged)="onPageChanged($event)"></pagination>
+
+</div>
