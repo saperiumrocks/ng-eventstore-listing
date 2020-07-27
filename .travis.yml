@@ -43,7 +43,10 @@ jobs:
       email: "saperium.rocks@gmail.com"
       api_key: $NPM_TOKEN
       on:
-        branch: publish
+        branches:
+          only:
+            - alpha
+            - master
       skip_cleanup: true
       local_dir: ng-eventstore-listing
     after_deploy:
