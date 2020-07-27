@@ -17,25 +17,26 @@ jobs:
   include:
   - stage: lint
     script:
-    - ng lint
+    - npm run lint
   - stage: test
     script:
     - npm run test:lib
-    if: branch = publish
-  - stage: build & publish showcase
-    script:
-    - npm install
-    - npm run build:showcase
-    deploy:
-      provider: pages
-      skip_cleanup: true
-      github_token: $GH_TOKEN
-      local_dir: dist/ng-eventstore-listing-showcase
-    if: branch = publish
+  #   if: branch = publish
+  # - stage: build & publish showcase
+  #   script:
+  #   - npm install
+  #   - npm run build:showcase
+  #   deploy:
+  #     provider: pages
+  #     skip_cleanup: true
+  #     github_token: $GH_TOKEN
+  #     local_dir: dist/ng-eventstore-listing-showcase
+  #   if: branch = publish
   - stage: build & publish lib
     script:
     - npm run build:lib
     before_deploy:
+      - ls
       - cd dist
     deploy:
       provider: npm

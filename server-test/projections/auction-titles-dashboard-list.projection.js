@@ -45,7 +45,7 @@ const projection = {
         titles_vehicle_sold_amount_updated: function(state, event, funcs, done) {
             funcs.getPlaybackList('auction_titles_list', function(err, playbackList) {
                 const eventPayload = event.payload.payload;
-                playbackList.get(event.aggregate, (err, oldData) => {
+                playbackList.get(event.aggregateId, (err, oldData) => {
                     const data = {
                         soldAmount: eventPayload.soldAmount
                     };

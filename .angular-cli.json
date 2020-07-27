@@ -5,6 +5,7 @@
   },
   "apps": [
     {
+      "name": "integration",
       "root": "integration",
       "outDir": "dist",
       "assets": [
@@ -30,6 +31,15 @@
         "dev": "environments/environment.ts",
         "prod": "environments/environment.prod.ts"
       }
+    },
+    {
+      "name": "lib",
+      "root": "lib",
+      "outDir": "dist",
+      "main": "main.ts",
+      "test": "test.ts",
+      "tsconfig": "tsconfig.json",
+      "prefix": "lib"
     }
   ],
   "e2e": {

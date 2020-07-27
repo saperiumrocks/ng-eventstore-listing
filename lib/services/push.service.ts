@@ -106,13 +106,8 @@ export class PushService {
         if (sub) {
           if (sub.token && this.ioPush.connected) {
             //  NOTE: need to handle unsubscribe/emit errors
-            this.ioPush.emit('unsubscribe', sub.token, (ack) => {
-              if (ack.error) {
-                console.error(ack.error);
-                reject(ack.error);
-              } else {
+            this.ioPush.emit('unsubscribe', sub.token, () => {
                 resolve();
-              }
             });
           }
           delete this.subscriptions[clientToken];

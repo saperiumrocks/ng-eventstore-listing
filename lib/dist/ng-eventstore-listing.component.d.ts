@@ -4,7 +4,8 @@ import { ScriptService } from './services/script.service';
 import { PlaybackService } from './services/playback.service';
 import { PlaybackListService } from './services/playback-list.service';
 import * as Immutable from 'immutable';
-import { Subscription, Subject } from 'rxjs';
+import { Subscription } from 'rxjs/Subscription';
+import { Subject } from 'rxjs/Subject';
 export declare class NgEventstoreListingComponent implements OnInit, OnChanges, OnDestroy {
     private changeDetectorRef;
     private scriptService;
@@ -27,6 +28,7 @@ export declare class NgEventstoreListingComponent implements OnInit, OnChanges, 
     sort: Sort;
     pageIndex: number;
     itemsPerPage: number;
+    responseBasePath: string;
     dataList: Immutable.List<RowItem>;
     dataCount: number;
     dataTotalCount: number;

@@ -67,6 +67,7 @@ export class NgEventstoreListingComponent
   @Input() sort: Sort = null;
   @Input() pageIndex = 1;
   @Input() itemsPerPage: number;
+  @Input() responseBasePath = 'data';
 
   dataList: Immutable.List<RowItem>;
   dataCount: number;
@@ -220,7 +221,7 @@ export class NgEventstoreListingComponent
           );
         })
       )
-      .subscribe((res: PlaybackListResponse) => {
+      .subscribe((res: any) => {
         this.dataList = Immutable.fromJS(res.rows);
         this.dataCount = res.rows.length;
         this.dataTotalCount = res.count;

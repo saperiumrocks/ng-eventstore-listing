@@ -1,7 +1,8 @@
 import { NgEventstoreListingComponent } from './ng-eventstore-listing.component';
 import * as Immutable from 'immutable';
 import { RowItem } from './models';
-import { SimpleChanges, SimpleChange } from '@angular/core';
+import { SimpleChanges } from '@angular/core';
+import { Observable } from 'rxjs/Observable';
 
 const MOCK_DATA_LIST: RowItem[] = [
   { rowId: 'test-1', revision: 0, data: { testProp1: 1 }, meta: {} },
@@ -140,7 +141,7 @@ describe('NgEventstoreListingComponent', () => {
     beforeEach(() => {
       mockPlaybackListService.getPlaybackList.and.callFake(
         (playbackListName, startIndex, limit, filters, sort) => {
-          return of({
+          return Observable.of({
             count: 2,
             rows: [MOCK_DATA_LIST[2], MOCK_DATA_LIST[3]],
           });

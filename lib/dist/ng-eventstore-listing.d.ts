@@ -3,7 +3,6 @@
  */
 export * from './public-api';
 export { ItemTemplateHolderComponent as ɵg } from './components/item-template-holder/item-template-holder.component';
-export { NgHeaderFooterTemplateHolderComponent as ɵi } from './components/ng-header-footer-template-holder/ng-header-footer-template-holder.component';
 export { TemplateDirective as ɵh } from './directives/template.directive';
 export { NgEventstoreListingComponent as ɵa } from './ng-eventstore-listing.component';
 export { PlaybackListService as ɵf } from './services/playback-list.service';
