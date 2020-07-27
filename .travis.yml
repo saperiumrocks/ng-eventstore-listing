@@ -31,13 +31,12 @@ jobs:
   #     skip_cleanup: true
   #     github_token: $GH_TOKEN
   #     local_dir: dist/ng-eventstore-listing-showcase
-    if: (branch = alpha) AND (branch = master)
+    if: (branch = alpha)
   - stage: build & publish lib
     script:
     - npm run build:lib
     before_deploy:
       - cd lib
-      - ls
     deploy:
       provider: npm
       email: "saperium.rocks@gmail.com"
@@ -45,6 +44,7 @@ jobs:
       on:
         branch: alpha
       skip_cleanup: true
+      tag: alpha
       local_dir: dist
     after_deploy:
       - cd ..
