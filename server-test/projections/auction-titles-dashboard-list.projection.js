@@ -9,7 +9,7 @@ const projection = {
         sales_channel_instance_vehicle_sold: function(state, event, funcs, done) {
             funcs.getPlaybackList('auction_titles_list', function(err, playbackList) {
                 const eventPayload = event.payload.payload;
-                
+
                 const data = {
                     salesChannelInstanceVehicleId: eventPayload.salesChannelInstanceVehicleId,
                     soldAt: eventPayload.soldAt,
@@ -34,7 +34,7 @@ const projection = {
                         salesChannelInstanceVehicleId: eventPayload.salesChannelInstanceVehicleId,
                         titleStatus: eventPayload.titleStatus
                     };
-                    playbackList.update(event.aggregateId, event.streamRevision, oldData, data, {}, function(err) {
+                    playbackList.update(event.aggregateId, event.streamRevision, oldData.data, data, {}, function(err) {
                         if (!err) {
                             done();
                         }
@@ -49,14 +49,37 @@ const projection = {
                     const data = {
                         soldAmount: eventPayload.soldAmount
                     };
-                    playbackList.update(event.aggregateId, event.streamRevision, oldData, data, {}, function(err) {
+
+                    console.log('TESTING THIS WORKS');
+                    console.log(data);
+                    console.log(oldData);
+
+                    playbackList.update(event.aggregateId, event.streamRevision, oldData.data, data, {}, function(err) {
                         if (!err) {
                             done();
+                        } else {
+                          console.log(err);
                         }
                     });
                 });
             });
         }
+
+        // titles_vehicle_sold_amount_updated: function(state, event, funcs, done) {
+        //   funcs.getPlaybackList('auction_sciv_list', function(err, playbackList) {
+        //     playbackList.get(event.aggregateId, (err, oldData) => {
+        //       const eventPayload = event.payload.payload;
+        //       const newData = {
+        //           soldAmount: eventPayload.soldAmount
+        //       };
+        //       console.log('TESTING THIS WORKS');
+        //       console.log(newData);
+        //       console.log(oldData);
+        //       playbackList.update(event.aggregateId, event.streamRevision, oldData.data, newData, {}, function(err) {
+        //           done();
+        //       });
+        //     });
+        // });
     },
     query: {
         context: 'auction',

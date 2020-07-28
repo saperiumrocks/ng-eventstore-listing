@@ -29,6 +29,6 @@ import { PushService } from './services/push.service';
     PlaybackListService,
     PushService,
     { provide: IO_TOKEN, useValue: io }
-  ],
+  ]
 })
 export class NgEventstoreListingModule {}

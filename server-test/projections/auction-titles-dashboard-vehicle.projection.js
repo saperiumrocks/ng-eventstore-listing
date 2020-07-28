@@ -21,7 +21,7 @@ const auctionTitlesDashboardVehicle = {
         },
         titles_vehicle_sold_amount_updated: function(state, event, funcs, done) {
             const eventPayload = event.payload.payload;
-            state.soldAmount = eventPayload.soldAmount;
+            // state.soldAmount = eventPayload.soldAmount;
             const targetQuery = {
                 context: 'auction',
                 aggregate: 'auction-titles-dashboard-vehicle',

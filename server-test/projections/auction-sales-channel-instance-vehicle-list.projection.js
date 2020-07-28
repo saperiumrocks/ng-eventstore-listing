@@ -12,7 +12,7 @@
         //                     soldAt: eventPayload.soldAt,
         //                     soldAmount: eventPayload.soldAmount
         //                 });
-    
+
         //                 playbackList.update(event.aggregateId, event.streamRevision, oldData, newData, {}, function(err) {
         //                     done();
         //                 })
@@ -37,7 +37,7 @@
                 })
             });
         }
-    };
+    },
     exports.query = {
         context: 'auction',
         aggregate: 'sales-channel-instance-vehicle'

@@ -23,5 +23,8 @@ import { NgEventstoreListingModule } from 'ng-eventstore-listing';
   ],
   providers: [],
   bootstrap: [AppComponent],
+  entryComponents: [
+    TestRowComponent
+  ]
 })
 export class AppModule {}

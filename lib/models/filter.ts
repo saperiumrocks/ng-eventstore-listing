@@ -4,7 +4,7 @@ export interface Filter {
   field: string;
   operator: FilterOperator;
   group?: string;
-  groupBooleanOperator: GroupBooleanOperator;
+  groupBooleanOperator?: GroupBooleanOperator;
   from?: number;
   to?: number;
   value?: any;

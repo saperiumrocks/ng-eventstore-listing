@@ -130,6 +130,7 @@ export class NgEventstoreListingComponent
 
       if (rowIndex > -1) {
         this.dataList = this.dataList.set(rowIndex, newEntry);
+        this.changeDetectorRef.markForCheck();
         callback();
       } else {
         callback(new Error(`Row with rowId: ${rowIndex} does not exist`));
