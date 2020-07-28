@@ -2,7 +2,7 @@ import { NgEventstoreListingComponent } from './ng-eventstore-listing.component'
 import * as Immutable from 'immutable';
 import { RowItem } from './models';
 import { SimpleChanges } from '@angular/core';
-import { Observable } from 'rxjs/Observable';
+import { Observable } from 'rxjs';
 
 const MOCK_DATA_LIST: RowItem[] = [
   { rowId: 'test-1', revision: 0, data: { testProp1: 1 }, meta: {} },

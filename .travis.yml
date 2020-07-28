@@ -36,7 +36,7 @@ jobs:
     script:
     - npm run build:lib
     before_deploy:
-      - cd lib
+      - cd lib/dist
     deploy:
       provider: npm
       email: "saperium.rocks@gmail.com"
@@ -45,7 +45,6 @@ jobs:
         branch: alpha
       skip_cleanup: true
       tag: alpha
-      local_dir: dist
     after_deploy:
       - cd ..
 
