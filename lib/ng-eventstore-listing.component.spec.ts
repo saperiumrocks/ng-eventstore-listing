@@ -47,7 +47,7 @@ describe('NgEventstoreListingComponent', () => {
     it('should define get properly', (done) => {
       const rowId = 'test-2';
       component.playbackList.get(rowId, (err, item) => {
-        expect(item).toEqual(component.dataList.get(1));
+        expect(item).toEqual((component.dataList.get(1) as any).toJS());
         done();
       });
     });
@@ -72,7 +72,7 @@ describe('NgEventstoreListingComponent', () => {
     it('should define update properly', (done) => {
       const rowId = 'test-3';
       const revision = 0;
-      const oldData = Immutable.fromJS({ testProp1: 8, testProp2: 123 });
+      const oldData = { testProp1: 8, testProp2: 123 };
       const newData = { testProp1: 9 };
       const meta = { testMeta: 123 };
       component.playbackList.update(

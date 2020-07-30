@@ -85,7 +85,12 @@ export class NgEventstoreListingComponent
       });
 
       if (rowIndex > -1) {
-        callback(null, this.dataList.get(rowIndex));
+        const data = this.dataList.get(rowIndex);
+        if (data) {
+          callback(null, (data as any).toJS());
+        } else {
+          callback(null, {});
+        }
       } else {
         callback(new Error(`Row with rowId: ${rowIndex} does not exist`), null);
       }
@@ -121,13 +126,11 @@ export class NgEventstoreListingComponent
       });
 
       // oldData is Immutable
-      const oldDataJs = oldData.toJS();
-
       const newEntry = Immutable.fromJS({
         rowId: rowId,
         revision: revision,
         data: {
-          ...oldDataJs,
+          ...oldData,
           ...newData,
         },
         meta: meta,

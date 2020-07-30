@@ -9,6 +9,7 @@
     "lint": "cd lib && ng lint && cd ..",
     "e2e": "ng e2e",
     "test:lib": "node --max_old_space_size=8048 ./node_modules/@angular/cli/bin/ng test --watch=false -sm=false --app=lib",
+    "test:lib:forever": "node --max_old_space_size=8048 ./node_modules/@angular/cli/bin/ng test -sm=false --app=lib",
     "build": "npm run build:lib && npm run build:showcase",
     "build:lib": "ng-packagr -p lib/package.json",
     "publish:lib:alpha": "cd lib/dist && npm publish --tag alpha && cd .. && cd ..",
