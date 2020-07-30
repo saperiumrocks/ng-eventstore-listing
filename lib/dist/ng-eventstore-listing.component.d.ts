@@ -29,6 +29,7 @@ export declare class NgEventstoreListingComponent implements OnInit, OnChanges, 
     pageIndex: number;
     itemsPerPage: number;
     responseBasePath: string;
+    debugging: boolean;
     dataList: Immutable.List<RowItem>;
     dataCount: number;
     dataTotalCount: number;

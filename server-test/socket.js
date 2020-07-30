@@ -58,6 +58,8 @@ module.exports = function(server, es) {
 
       const subscriptionToken = subscriptions[key]
 
+      console.log('SUBSCRIBER FUNC');
+
       socketInstance.of('events').emit('message', event, subscriptionToken);
       done();
     }
@@ -70,6 +72,8 @@ module.exports = function(server, es) {
         aggregate: data.aggregate,
         aggregateId: data.aggregateId
       };
+
+      console.log(data);
 
       const subscriptionToken = es.subscribe(query, data.offset, subscriberFunc);
       socket.join(subscriptionToken);

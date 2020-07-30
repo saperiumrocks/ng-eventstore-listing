@@ -57,6 +57,7 @@
     "karma-jasmine-html-reporter": "^0.2.2",
     "karma-safari-launcher": "^1.0.0",
     "karma-spec-reporter": "0.0.31",
+    "ng-eventstore-listing": "file:lib/dist",
     "ng-packagr": "^2.4.2",
     "protractor": "~5.1.2",
     "ts-node": "~4.1.0",

@@ -69,6 +69,8 @@ export class NgEventstoreListingComponent
   @Input() itemsPerPage: number;
   @Input() responseBasePath = 'data';
 
+  @Input() debugging = false;
+
   dataList: Immutable.List<RowItem>;
   dataCount: number;
   dataTotalCount: number;
@@ -118,18 +120,35 @@ export class NgEventstoreListingComponent
         return value.get('rowId') === rowId;
       });
 
+      // oldData is Immutable
+      const oldDataJs = oldData.toJS();
+
       const newEntry = Immutable.fromJS({
         rowId: rowId,
         revision: revision,
         data: {
-          ...oldData,
+          ...oldDataJs,
           ...newData,
         },
         meta: meta,
       });
 
+      if (this.debugging) {
+        console.log(newEntry);
+      }
+
       if (rowIndex > -1) {
+        if (this.debugging) {
+          console.log(rowIndex);
+          console.log(newEntry);
+
+          console.log(this.dataList.toJS());
+        }
         this.dataList = this.dataList.set(rowIndex, newEntry);
+
+        if (this.debugging) {
+          console.log(this.dataList.toJS());
+        }
         this.changeDetectorRef.markForCheck();
         callback();
       } else {
