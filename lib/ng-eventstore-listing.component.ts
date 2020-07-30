@@ -151,7 +151,7 @@ export class NgEventstoreListingComponent
         if (this.debugging) {
           console.log(this.dataList.toJS());
         }
-        this.changeDetectorRef.markForCheck();
+        this.changeDetectorRef.detectChanges();
         callback();
       } else {
         callback(new Error(`Row with rowId: ${rowIndex} does not exist`));
