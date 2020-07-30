@@ -108,9 +108,8 @@ export class NgEventstoreListingComponent
         data: data,
         meta: meta,
       };
-
-      this.changeDetectorRef.markForCheck();
       this.dataList = this.dataList.push(Immutable.fromJS(newEntry));
+      this.changeDetectorRef.detectChanges();
       callback();
     },
     update: (
