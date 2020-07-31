@@ -86,7 +86,7 @@ export class PlaybackService {
             };
 
             const doneCallback = () => {
-              stateFunctions.setState(row.rowId, row);
+              // stateFunctions.setState(row.rowId, row);
             };
 
             playbackFunction(state, eventObj, funcs, doneCallback);
