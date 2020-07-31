@@ -12,6 +12,7 @@
     "test:lib:forever": "node --max_old_space_size=8048 ./node_modules/@angular/cli/bin/ng test -sm=false --app=lib",
     "build": "npm run build:lib && npm run build:showcase",
     "build:lib": "ng-packagr -p lib/package.json",
+    "reinstall": "npm run build:lib && npm install",
     "publish:lib:alpha": "cd lib/dist && npm publish --tag alpha && cd .. && cd ..",
     "build:showcase": "ng build ng-eventstore-listing-showcase --base-href='https://saperiumrocks.github.io/ng-eventstore-listing/'",
     "publish:demo": "npx angular-cli-ghpages --dir=./dist/ng-eventstore-listing-showcase",
