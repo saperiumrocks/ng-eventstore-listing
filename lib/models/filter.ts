@@ -8,4 +8,5 @@ export interface Filter {
   from?: number;
   to?: number;
   value?: any;
+  caseInsensitive?: boolean;
 }
