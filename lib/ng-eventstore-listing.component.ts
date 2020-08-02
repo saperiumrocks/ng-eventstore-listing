@@ -201,9 +201,14 @@ export class NgEventstoreListingComponent
   ngOnChanges(changes: SimpleChanges): void {
     const self = this;
     if (!this.initialized) {
+<<<<<<< Updated upstream
       this.playbackService.init(this.socketUrl);
       this._initializeRequests();
+=======
+>>>>>>> Stashed changes
       this._loadScripts();
+      this.playbackService.init(this.socketUrl);
+      this._initializeRequests();
       this.initialized = true;
     }
 

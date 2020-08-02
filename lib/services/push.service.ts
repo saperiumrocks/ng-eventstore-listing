@@ -1,4 +1,4 @@
-import { Injectable, Inject } from '@angular/core';
+import { Injectable, Inject, NgZone } from '@angular/core';
 import { IO_TOKEN } from './socket.io.service';
 
 // TODO: Make environment pluggable or derivable
@@ -7,7 +7,7 @@ import { IO_TOKEN } from './socket.io.service';
 export class PushService {
   private ioPush: any;
   private subscriptions: any = {};
-  constructor(@Inject(IO_TOKEN) private io: any) {}
+  constructor(@Inject(IO_TOKEN) private io: any, private ngZone: NgZone) {}
 
   init(socketUrl: string) {
     this.ioPush = this.io(`${socketUrl}/events`);
@@ -55,9 +55,17 @@ export class PushService {
         }
       });
     });
+
+    // this.ioPush.on('connect', (socket) => {
+
+    // })
+
+    console.log('SOCKET INIT');
   }
 
   async subscribe(query, offset, owner, cb) {
+    console.log('SUBSCRIBE!');
+    // await this.waitForSocketConnection();
     const clientToken =
       Math.random().toString(36).substr(2, 9) + '-' + Date.now().toString();
     // map new subscription, then try to subscribe to server asap
@@ -74,8 +82,13 @@ export class PushService {
     return clientToken;
   }
 
-  subscribeStreams() {
+  async subscribeStreams() {
+    console.log('subscribeStreams');
+    console.log(this.ioPush.connected);
+    // await this.waitForSocketConnection();
     if (this.ioPush.connected) {
+      // this.ioPush.on('connected', () => {
+      console.log(this.subscriptions);
       const clientTokens = Object.keys(this.subscriptions);
       clientTokens.forEach((clientToken) => {
         const sub = this.subscriptions[clientToken];
@@ -86,6 +99,7 @@ export class PushService {
             offset: sub.offset,
           });
           this.ioPush.emit('subscribe', query, (token: string) => {
+            console.log('SUBSCRIBE EMIT');
             if (token) {
               console.log('Server Subscribed:', token, query);
               sub.token = token;
@@ -95,6 +109,7 @@ export class PushService {
           });
         }
       });
+      // })
     }
   }
 
@@ -121,6 +136,28 @@ export class PushService {
         console.error('error in unsubscribing: ', error);
       }
     });
+  }
+
+  async waitForSocketConnection(): Promise<any> {
+    return new Promise((resolve, reject) => {
+      let timeout;
+      this.ngZone.runOutsideAngular(() => {
+        timeout = setTimeout(() => {
+          this.ngZone.run(() => {
+            console.error('IO Connectioned timedout');
+            reject();
+          });
+        }, 10000)
+      })
+
+
+      while(!this.ioPush.connected) {
+        console.log(this.ioPush);
+      }
+      clearTimeout(timeout);
+      return resolve();
+
+    })
   }
 
   // monitorMeta(clientToken, tag, timeout, cb) {

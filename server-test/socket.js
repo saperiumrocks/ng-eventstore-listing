@@ -102,7 +102,7 @@ module.exports = function(server, es) {
       // );
     });
 
-    socket.on('remove-subscriptions', function(data, fn) {
+    socket.on('unsubscribe', function(data, fn) {
         /*
             data = ['subscriptionToken1', 'subscriptionToken2']
         */
@@ -117,6 +117,7 @@ module.exports = function(server, es) {
         fn();
     });
   });
+
 
   return socketInstance
 }
