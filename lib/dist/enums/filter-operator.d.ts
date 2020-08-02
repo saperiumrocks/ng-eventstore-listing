@@ -3,5 +3,7 @@ export declare enum FilterOperator {
     is = "is",
     any = "any",
     contains = "contains",
+    endsWith = "endsWith",
+    startsWith = "startsWith",
     arrayContains = "arrayContains"
 }
