@@ -68,6 +68,7 @@ export class NgEventstoreListingComponent
   @Input() pageIndex = 1;
   @Input() itemsPerPage: number;
   @Input() responseBasePath = 'data';
+  @Input() emptyListDisplayText = 'No Results';
 
   @Input() debugging = false;
 
