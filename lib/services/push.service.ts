@@ -85,6 +85,7 @@ export class PushService {
           const query = Object.assign(sub.query, {
             offset: sub.offset,
           });
+          console.log('SUBSCRIBE IS CALLED:', query);
           this.ioPush.emit('subscribe', query, (token: string) => {
             if (token) {
               console.log('Server Subscribed:', token, query);

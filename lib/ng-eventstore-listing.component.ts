@@ -196,12 +196,12 @@ export class NgEventstoreListingComponent
   ) {}
 
   ngOnInit() {
+    this.playbackService.init(this.socketUrl);
   }
 
   ngOnChanges(changes: SimpleChanges): void {
     const self = this;
     if (!this.initialized) {
-      this.playbackService.init(this.socketUrl);
       this._initializeRequests();
       this._loadScripts();
       this.initialized = true;
@@ -252,7 +252,7 @@ export class NgEventstoreListingComponent
         this._resetSubscriptions();
         this._initSubscriptions();
 
-        this.changeDetectorRef.markForCheck();
+        this.changeDetectorRef.detectChanges();
 
         this.playbackListLoadedEmitter.emit({
           totalItems: this.dataTotalCount,
