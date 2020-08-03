@@ -56,10 +56,6 @@ export class PushService {
       });
     });
 
-    // this.ioPush.on('connect', (socket) => {
-
-    // })
-
     console.log('SOCKET INIT');
   }
 
@@ -77,41 +73,60 @@ export class PushService {
       monitorTags: {},
     };
 
-    this.subscribeStreams();
+    // this.subscribeStreams();
 
-    return clientToken;
-  }
-
-  async subscribeStreams() {
-    console.log('subscribeStreams');
-    console.log(this.ioPush.connected);
-    // await this.waitForSocketConnection();
-    if (this.ioPush.connected) {
-      // this.ioPush.on('connected', () => {
-      console.log(this.subscriptions);
-      const clientTokens = Object.keys(this.subscriptions);
-      clientTokens.forEach((clientToken) => {
-        const sub = this.subscriptions[clientToken];
-        // do server subsribe for those without tokens yet
-        if (!sub.token) {
-          // build up proper subscribe request query
-          const query = Object.assign(sub.query, {
-            offset: sub.offset,
-          });
-          this.ioPush.emit('subscribe', query, (token: string) => {
-            console.log('SUBSCRIBE EMIT');
-            if (token) {
-              console.log('Server Subscribed:', token, query);
-              sub.token = token;
-            } else {
-              console.error('Subscribe error for query', query);
-            }
-          });
+    const sub = this.subscriptions[clientToken];
+    if (sub && !sub.token) {
+      // build up proper subscribe request query
+      const query = Object.assign(sub.query, {
+        offset: sub.offset,
+      });
+      console.log('SUBSCRIBE IS CALLED:', query);
+      this.ioPush.emit('subscribe', query, (token: string) => {
+        console.log('SUBSCRIBE EMIT');
+        if (token) {
+          console.log('Server Subscribed:', token, query);
+          sub.token = token;
+        } else {
+          console.error('Subscribe error for query', query);
         }
       });
       // })
     }
+
+
+    return clientToken;
   }
+
+  // async subscribeStreams() {
+  //   // await this.waitForSocketConnection();
+  //   if (this.ioPush.connected) {
+  //     // this.ioPush.on('connected', () => {
+  //     console.log(this.subscriptions);
+  //     const clientTokens = Object.keys(this.subscriptions);
+  //     clientTokens.forEach((clientToken) => {
+  //       const sub = this.subscriptions[clientToken];
+  //       // do server subsribe for those without tokens yet
+  //       if (!sub.token) {
+  //         // build up proper subscribe request query
+  //         const query = Object.assign(sub.query, {
+  //           offset: sub.offset,
+  //         });
+  //         console.log('SUBSCRIBE IS CALLED:', query);
+  //         this.ioPush.emit('subscribe', query, (token: string) => {
+  //           console.log('SUBSCRIBE EMIT');
+  //           if (token) {
+  //             console.log('Server Subscribed:', token, query);
+  //             sub.token = token;
+  //           } else {
+  //             console.error('Subscribe error for query', query);
+  //           }
+  //         });
+  //       }
+  //     });
+  //     // })
+  //   }
+  // }
 
   unsubscribe(clientToken): Promise<void> {
     return new Promise((resolve, reject) => {
@@ -138,27 +153,27 @@ export class PushService {
     });
   }
 
-  async waitForSocketConnection(): Promise<any> {
-    return new Promise((resolve, reject) => {
-      let timeout;
-      this.ngZone.runOutsideAngular(() => {
-        timeout = setTimeout(() => {
-          this.ngZone.run(() => {
-            console.error('IO Connectioned timedout');
-            reject();
-          });
-        }, 10000)
-      })
+  // async waitForSocketConnection(): Promise<any> {
+  //   return new Promise((resolve, reject) => {
+  //     let timeout;
+  //     this.ngZone.runOutsideAngular(() => {
+  //       timeout = setTimeout(() => {
+  //         this.ngZone.run(() => {
+  //           console.error('IO Connectioned timedout');
+  //           reject();
+  //         });
+  //       }, 10000)
+  //     })
 
 
-      while(!this.ioPush.connected) {
-        console.log(this.ioPush);
-      }
-      clearTimeout(timeout);
-      return resolve();
+  //     while(!this.ioPush.connected) {
+  //       console.log(this.ioPush);
+  //     }
+  //     clearTimeout(timeout);
+  //     return resolve();
 
-    })
-  }
+  //   })
+  // }
 
   // monitorMeta(clientToken, tag, timeout, cb) {
   //   const self = this;

@@ -14,23 +14,21 @@
   </div>
 </div> -->
 <!-- <div [class]="'row ' + (listHeaderGroups && listHeaderGroups.generalRowClassName) ? listHeaderGroups.generalRowClassName : ''" *ngFor="let item of dataList; trackBy: trackByFn"> -->
-<ng-template *ngIf="(dataList && dataList.size > 0)">
-  <div class="row" *ngFor="let item of dataList; trackBy: trackByFn">
-    <div class="col-12">
-      <lib-item-template-holder
-        [data]="item"
-        [itemComponentClass]="itemComponentClass"
-        [lookups]="lookups"
-        (updateEmitter)="onUpdate($event)"
-        (updateLookupsEmitter)="onUpdateLookups($event)"
-        (showModalEmitter)="onShowModal($event)"
-        (deleteEmitter)="onDelete($event)">
-      </lib-item-template-holder>
-    </div>
+<div class="row" *ngFor="let item of dataList; trackBy: trackByFn">
+  <div class="col-12">
+    <lib-item-template-holder
+      [data]="item"
+      [itemComponentClass]="itemComponentClass"
+      [lookups]="lookups"
+      (updateEmitter)="onUpdate($event)"
+      (updateLookupsEmitter)="onUpdateLookups($event)"
+      (showModalEmitter)="onShowModal($event)"
+      (deleteEmitter)="onDelete($event)">
+    </lib-item-template-holder>
   </div>
-</ng-template>
+</div>
 
-<div class="row" *ngIf="(!dataList || dataList.size === 0)">
+<div class="row" *ngIf="!dataCount || dataCount === 0">
   <div class="col-12">
     <div class="row">
       <div class="col-12 no-results-container">

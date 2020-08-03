@@ -45,7 +45,7 @@ export class AppComponent implements OnInit {
       aggregate: 'auction-titles-dashboard-vehicle',
       aggregateId: `{{rowId}}`,
     },
-    playbackScriptName: 'auction-titles-dashboard-vehicle-list',
+    playbackScriptName: 'titles-dashboard-list-projection',
   };
 
   listSubscriptionConfiguration: SubscriptionConfiguration = {
@@ -54,7 +54,7 @@ export class AppComponent implements OnInit {
       aggregate: 'titles-dashboard-list-projection',
       aggregateId: 'titles-dashboard-list-projection-result',
     },
-    playbackScriptName: 'auction-titles-dashboard-vehicle',
+    playbackScriptName: 'titles-dashboard-list-projection',
   };
 
   sortOptions: any[] = [
