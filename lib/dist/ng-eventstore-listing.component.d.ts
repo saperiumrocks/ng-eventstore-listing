@@ -45,7 +45,7 @@ export declare class NgEventstoreListingComponent implements OnInit, OnChanges, 
     };
     constructor(changeDetectorRef: ChangeDetectorRef, scriptService: ScriptService, playbackService: PlaybackService, playbackListService: PlaybackListService);
     ngOnInit(): void;
-    ngOnChanges(changes: SimpleChanges): void;
+    ngOnChanges(changes: SimpleChanges): Promise<void>;
     ngOnDestroy(): void;
     trackByFn(index: number, item: any): any;
     private _initializeRequests;

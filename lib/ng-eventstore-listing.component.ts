@@ -198,10 +198,10 @@ export class NgEventstoreListingComponent
   ngOnInit() {
   }
 
-  ngOnChanges(changes: SimpleChanges): void {
+  async ngOnChanges(changes: SimpleChanges): Promise<void> {
     const self = this;
     if (!this.initialized) {
-      this._loadScripts();
+      await this._loadScripts();
       this.playbackService.init(this.socketUrl);
       this._initializeRequests();
       this.initialized = true;
@@ -289,9 +289,9 @@ export class NgEventstoreListingComponent
     );
   }
 
-  private _loadScripts() {
+  private async _loadScripts() {
     if (this.scriptStore) {
-      this.scriptService.init(this.scriptStore);
+      await this.scriptService.init(this.scriptStore);
     }
   }
 

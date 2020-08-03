@@ -10,6 +10,7 @@ export class ScriptService {
   constructor() {}
 
   init(scriptStore: Script[]) {
+    const promises = [];
     scriptStore.forEach((script: Script) => {
       // console.log('SCRIPT STORE LOGGING');
       this.scripts[script.name] = {
@@ -17,8 +18,10 @@ export class ScriptService {
         src: script.src,
         meta: script.meta,
       };
-      this.load(script.name);
+      promises.push(this.load(script.name));
     });
+
+    return Promise.all(promises);
   }
 
   load(...scripts: string[]): Promise<any> {
