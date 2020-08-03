@@ -73,25 +73,23 @@ export class PushService {
       monitorTags: {},
     };
 
-    // this.subscribeStreams();
-
     const sub = this.subscriptions[clientToken];
     if (sub && !sub.token) {
       // build up proper subscribe request query
-      const query = Object.assign(sub.query, {
+      const subscriptionQuery = Object.assign(sub.query, {
         offset: sub.offset,
       });
-      console.log('SUBSCRIBE IS CALLED:', query);
-      this.ioPush.emit('subscribe', query, (token: string) => {
+
+      console.log('SUBSCRIBE IS CALLED:', subscriptionQuery);
+      this.ioPush.emit('subscribe', subscriptionQuery, (token: string) => {
         console.log('SUBSCRIBE EMIT');
         if (token) {
-          console.log('Server Subscribed:', token, query);
+          console.log('Server Subscribed:', token, subscriptionQuery);
           sub.token = token;
         } else {
-          console.error('Subscribe error for query', query);
+          console.error('Subscribe error for query', subscriptionQuery);
         }
       });
-      // })
     }
 
 
