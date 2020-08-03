@@ -201,10 +201,10 @@ export class NgEventstoreListingComponent
   async ngOnChanges(changes: SimpleChanges): Promise<void> {
     const self = this;
     if (!this.initialized) {
+      this.initialized = true;
       await this._loadScripts();
       this.playbackService.init(this.socketUrl);
       this._initializeRequests();
-      this.initialized = true;
     }
 
     const changesKeys = Object.keys(changes);
