@@ -196,14 +196,14 @@ export class NgEventstoreListingComponent
   ) {}
 
   ngOnInit() {
-    this.playbackService.init(this.socketUrl);
   }
 
   ngOnChanges(changes: SimpleChanges): void {
     const self = this;
     if (!this.initialized) {
-      this._initializeRequests();
       this._loadScripts();
+      this.playbackService.init(this.socketUrl);
+      this._initializeRequests();
       this.initialized = true;
     }
 

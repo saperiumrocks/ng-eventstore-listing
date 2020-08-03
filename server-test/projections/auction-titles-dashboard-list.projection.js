@@ -1,4 +1,4 @@
-const projection = {
+const titlesDashboardListProjection = {
     projectionId: 'titles-dashboard-list-projection',
     playbackInterface: {
         $init: function() {
@@ -118,7 +118,7 @@ const projection = {
 
 
 (function(exports) {
-    Object.keys(projection).forEach((key) => {
-        exports[key] = projection[key];
+    Object.keys(titlesDashboardListProjection).forEach((key) => {
+        exports[key] = titlesDashboardListProjection[key];
     });
-})(typeof(exports) === 'undefined' ? this['auction-titles-dashboard-vehicle-list'] = {} : exports);
+})(typeof(exports) === 'undefined' ? this[titlesDashboardListProjection.projectionId] = {} : exports);

@@ -42,4 +42,4 @@ const auctionTitlesDashboardVehicle = {
     Object.keys(auctionTitlesDashboardVehicle).forEach((key) => {
         exports[key] = auctionTitlesDashboardVehicle[key];
     });
-})(typeof(exports) === 'undefined' ? this['auction-titles-dashboard-vehicle'] = {} : exports);
+})(typeof(exports) === 'undefined' ? this[auctionTitlesDashboardVehicle.projectionId] = {} : exports);

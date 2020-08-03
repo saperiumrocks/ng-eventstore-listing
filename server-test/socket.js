@@ -7,6 +7,7 @@ const getKeyFromQuery = (query) =>{
 };
 
 const subscriptions = {};
+const clients = {};
 
 module.exports = function(server, es) {
   const _self = this;
@@ -58,8 +59,6 @@ module.exports = function(server, es) {
 
       const subscriptionToken = subscriptions[key]
 
-      console.log('SUBSCRIBER FUNC');
-
       socketInstance.of('events').emit('message', event, subscriptionToken);
       done();
     }
@@ -67,42 +66,26 @@ module.exports = function(server, es) {
 
   socketInstance.of('events').on('connection', (socket) => {
     socket.on('subscribe', function(data, fn) {
+      if (!clients[socket.id]) {
+        clients[socket.id] = { subscriptionTokens: [] };
+      }
+
       const query = {
         context: data.context,
         aggregate: data.aggregate,
         aggregateId: data.aggregateId
       };
 
-      console.log(data);
-
       const subscriptionToken = es.subscribe(query, data.offset, subscriberFunc);
       socket.join(subscriptionToken);
 
+      clients[socket.id].subscriptionTokens.push(subscriptionToken);
+
       subscriptions[getKeyFromQuery(query)] = subscriptionToken;
       fn(subscriptionToken);
-
-      /*
-          data = [
-            { streamId: 'streamId', offset: 1 }
-          ]
-      */
-      // _self._addTopics(
-      //   topics,
-      //   (message) => {
-      //       socket.emit('events', JSON.stringify(message));
-      //   },
-      //   (subscriptionToken) => {
-      //       // socket.join(topic, function() {
-      //       //     // logger.debug(socket.id + " now in rooms ", socket.rooms);
-      //       //     console.log(socket.id + " now in rooms ", socket.rooms);
-      //       // });
-      //       socket.join(subscriptionToken);
-      //   },
-      //   fn
-      // );
     });
 
-    socket.on('remove-subscriptions', function(data, fn) {
+    socket.on('unsubscribe', function(data, fn) {
         /*
             data = ['subscriptionToken1', 'subscriptionToken2']
         */
@@ -116,7 +99,21 @@ module.exports = function(server, es) {
         );
         fn();
     });
+
+    socket.on('disconnect', () => {
+      const client = clients[socket.id] || {};
+      clientSubscriptionTokens = client.subscriptionTokens || [];
+      clientSubscriptionTokens.forEach((token) => {
+        console.log('Socket unsubscription: ', token);
+        es.unsubscribe(token);
+        socket.leave(token);
+      });
+
+      delete clients[socket.id];
+    });
+
   });
+
 
   return socketInstance
 }

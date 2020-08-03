@@ -11,11 +11,13 @@ export class ScriptService {
 
   init(scriptStore: Script[]) {
     scriptStore.forEach((script: Script) => {
+      // console.log('SCRIPT STORE LOGGING');
       this.scripts[script.name] = {
         loaded: false,
         src: script.src,
         meta: script.meta,
       };
+      this.load(script.name);
     });
   }
 
@@ -79,5 +81,9 @@ export class ScriptService {
         document.getElementsByTagName('head')[0].appendChild(script);
       }
     });
+  }
+
+  getScript(scriptName: string) {
+    return this.scripts[scriptName];
   }
 }

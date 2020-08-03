@@ -1,4 +1,4 @@
-const projection = {
+const auctionDealershipListProjection = {
     projectionId: 'auction-dealership-list-projection',
     playbackInterface: {
         $init: function() {
@@ -9,7 +9,7 @@ const projection = {
         dealership_created: function(state, event, funcs, done) {
             funcs.getPlaybackList('auction_dealership_list', function(err, playbackList) {
                 const eventPayload = event.payload.payload;
-                
+
                 const data = {
                     dealershipId: eventPayload.dealershipId,
                     dealershipName: eventPayload.dealershipName,
@@ -53,7 +53,7 @@ const projection = {
 
 
 (function(exports) {
-    Object.keys(projection).forEach((key) => {
-        exports[key] = projection[key];
+    Object.keys(auctionDealershipListProjection).forEach((key) => {
+        exports[key] = auctionDealershipListProjection[key];
     });
-})(typeof(exports) === 'undefined' ? this['auction-dealership-list'] = {} : exports);
+})(typeof(exports) === 'undefined' ? this[auctionDealershipListProjection.projectionId] = {} : exports);

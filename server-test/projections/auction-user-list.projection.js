@@ -1,4 +1,4 @@
-const projection = {
+const auctionUserListProjection = {
     projectionId: 'auction-user-list-projection',
     playbackInterface: {
         $init: function() {
@@ -9,7 +9,7 @@ const projection = {
         user_created: function(state, event, funcs, done) {
             funcs.getPlaybackList('auction_user_list', function(err, playbackList) {
                 const eventPayload = event.payload.payload;
-                
+
                 const data = {
                     userId: eventPayload.userId,
                     name: eventPayload.name,
@@ -48,7 +48,7 @@ const projection = {
 
 
 (function(exports) {
-    Object.keys(projection).forEach((key) => {
-        exports[key] = projection[key];
+    Object.keys(auctionUserListProjection).forEach((key) => {
+        exports[key] = auctionUserListProjection[key];
     });
-})(typeof(exports) === 'undefined' ? this['auction-user-list'] = {} : exports);
+})(typeof(exports) === 'undefined' ? this[auctionUserListProjection.projectionId] = {} : exports);
