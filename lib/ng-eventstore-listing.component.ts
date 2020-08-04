@@ -195,47 +195,33 @@ export class NgEventstoreListingComponent
     private playbackListService: PlaybackListService
   ) {}
 
-  ngOnInit() {
+  async ngOnInit() {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
     const self = this;
-    const changesKeys = Object.keys(changes);
-    if (!this.initialized) {
-      this._init().then(() => {
-        changesKeys.forEach((key) => {
-          self[key] = changes[key].currentValue;
-          switch (key) {
-            case 'pageIndex':
-            case 'filters':
-            case 'sort': {
-              this.requestPlaybackList();
-              break;
-            }
-          }
-        });
-      });
-    } else {
-      changesKeys.forEach((key) => {
-        self[key] = changes[key].currentValue;
-        switch (key) {
-          case 'pageIndex':
-          case 'filters':
-          case 'sort': {
-            this.requestPlaybackList();
-            break;
-          }
-        }
-      });
+
+    if (!self.initialized) {
+      this._initializeRequests();
+      this._loadScripts();
+      this.playbackService.init(this.socketUrl);
+      this.initialized = true;
     }
+
+    const changesKeys = Object.keys(changes);
+    changesKeys.forEach((key) => {
+      self[key] = changes[key].currentValue;
+      switch (key) {
+        case 'pageIndex':
+        case 'filters':
+        case 'sort': {
+          this.requestPlaybackList();
+          break;
+        }
+      }
+    });
   }
 
-  async _init() {
-    this.initialized = true;
-    await this._loadScripts();
-    this.playbackService.init(this.socketUrl);
-    this._initializeRequests();
-  }
 
   ngOnDestroy() {
     this._resetSubscriptions();

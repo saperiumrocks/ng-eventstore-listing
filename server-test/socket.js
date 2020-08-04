@@ -47,6 +47,7 @@ module.exports = function(server, es) {
 
 
   const subscriberFunc = (err, event, done) => {
+    console.log('SUBSCRIBER FUNC');
     if (err) {
       console.error(err);
     } else {

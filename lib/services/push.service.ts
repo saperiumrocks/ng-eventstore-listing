@@ -55,12 +55,9 @@ export class PushService {
         }
       });
     });
-
-    console.log('SOCKET INIT');
   }
 
   async subscribe(query, offset, owner, cb) {
-    console.log('SUBSCRIBE!');
     // await this.waitForSocketConnection();
     const clientToken =
       Math.random().toString(36).substr(2, 9) + '-' + Date.now().toString();
