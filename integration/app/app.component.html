@@ -23,6 +23,7 @@
   <lib-ng-eventstore-listing
     (playbackListLoadedEmitter)="playbackListLoaded($event)"
     [itemComponentClass]="rowComponentClass"
+    [lookups]="lookups"
     [itemSubscriptionConfiguration]="itemSubscriptionConfiguration"
     [listSubscriptionConfiguration]="listSubscriptionConfiguration"
     [socketUrl]="socketUrl"

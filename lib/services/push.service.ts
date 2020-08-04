@@ -80,9 +80,7 @@ export class PushService {
         offset: sub.offset,
       });
 
-      console.log('SUBSCRIBE IS CALLED:', subscriptionQuery);
       this.ioPush.emit('subscribe', subscriptionQuery, (token: string) => {
-        console.log('SUBSCRIBE EMIT');
         if (token) {
           console.log('Server Subscribed:', token, subscriptionQuery);
           sub.token = token;

@@ -70,9 +70,12 @@ export class AppComponent implements OnInit {
     },
   ];
 
+  lookups = {};
+
   constructor() {}
 
   ngOnInit() {
+    const self = this;
     this.dealershipFilterFormControl.valueChanges.subscribe((value) => {
       if (value) {
         const newFilter: Filter = {
@@ -92,6 +95,14 @@ export class AppComponent implements OnInit {
       };
       this.sort = sort;
     });
+
+    setTimeout(() => {
+      self.lookups['test'] = { groupName: 'test', groupItems: [
+        { lookupId: 'id-1', lookupName: 'Test 1', lookupValue: '1' },
+        { lookupId: 'id-2', lookupName: 'Test 2', lookupValue: '2' },
+        { lookupId: 'id-3', lookupName: 'Test 3', lookupValue: '3' }
+      ] }
+    }, 1000);
   }
 
   onPageChanged(pageEvent: any) {

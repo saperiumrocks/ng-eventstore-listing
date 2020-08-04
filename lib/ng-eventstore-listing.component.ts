@@ -198,27 +198,43 @@ export class NgEventstoreListingComponent
   ngOnInit() {
   }
 
-  async ngOnChanges(changes: SimpleChanges): Promise<void> {
+  ngOnChanges(changes: SimpleChanges): void {
     const self = this;
-    if (!this.initialized) {
-      this.initialized = true;
-      await this._loadScripts();
-      this.playbackService.init(this.socketUrl);
-      this._initializeRequests();
-    }
-
     const changesKeys = Object.keys(changes);
-    changesKeys.forEach((key) => {
-      self[key] = changes[key].currentValue;
-      switch (key) {
-        case 'pageIndex':
-        case 'filters':
-        case 'sort': {
-          this.requestPlaybackList();
-          break;
+    if (!this.initialized) {
+      this._init().then(() => {
+        changesKeys.forEach((key) => {
+          self[key] = changes[key].currentValue;
+          switch (key) {
+            case 'pageIndex':
+            case 'filters':
+            case 'sort': {
+              this.requestPlaybackList();
+              break;
+            }
+          }
+        });
+      });
+    } else {
+      changesKeys.forEach((key) => {
+        self[key] = changes[key].currentValue;
+        switch (key) {
+          case 'pageIndex':
+          case 'filters':
+          case 'sort': {
+            this.requestPlaybackList();
+            break;
+          }
         }
-      }
-    });
+      });
+    }
+  }
+
+  async _init() {
+    this.initialized = true;
+    await this._loadScripts();
+    this.playbackService.init(this.socketUrl);
+    this._initializeRequests();
   }
 
   ngOnDestroy() {

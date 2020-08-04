@@ -16,6 +16,8 @@ export class TestRowComponent extends ItemTemplateComponent implements OnInit {
     this.registerChangeFunction(this.onChanges);
   }
 
-  onChanges(changes: SimpleChanges) { }
+  onChanges(changes: SimpleChanges) {
+    console.log(changes);
+  }
 
 }
