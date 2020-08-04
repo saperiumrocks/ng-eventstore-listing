@@ -57,6 +57,7 @@ describe('NgEventstoreListingComponent', () => {
       const revision = 0;
       const data = { testProp: 9 };
       const meta = { testMeta: 123 };
+      spyOn(component.newItemNotifyEmitter, 'emit');
       component.playbackList.add(rowId, revision, data, meta, (err) => {
         const newEntry = {
           rowId: rowId,
@@ -64,7 +65,8 @@ describe('NgEventstoreListingComponent', () => {
           data: data,
           meta: meta,
         };
-        expect(Immutable.fromJS(newEntry)).toEqual(component.dataList.last());
+        // expect(Immutable.fromJS(newEntry)).toEqual(component.dataList.last());
+        expect(component.newItemNotifyEmitter.emit).toHaveBeenCalledWith(newEntry);
         done();
       });
     });

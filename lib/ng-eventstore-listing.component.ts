@@ -15,9 +15,7 @@ import { switchMap, debounceTime } from 'rxjs/operators';
 
 import {
   SubscriptionConfiguration,
-  ListHeaderGroups,
   Script,
-  PlaybackListResponse,
   PlaybackList,
   RowItem,
   Filter,
@@ -54,6 +52,7 @@ export class NgEventstoreListingComponent
   @Output() showModalEmitter: EventEmitter<any> = new EventEmitter();
   @Output() deleteEmitter: EventEmitter<any> = new EventEmitter();
   @Output() playbackListLoadedEmitter: EventEmitter<any> = new EventEmitter();
+  @Output() newItemNotifyEmitter: EventEmitter<any> = new EventEmitter();
 
   @Input() itemComponentClass: any;
   @Input() lookups = {};
@@ -103,14 +102,22 @@ export class NgEventstoreListingComponent
       meta: any,
       callback: (err?: any) => void
     ) => {
-      const newEntry = {
-        rowId: rowId,
-        revision: revision,
-        data: data,
-        meta: meta,
-      };
-      this.dataList = this.dataList.push(Immutable.fromJS(newEntry));
-      this.changeDetectorRef.detectChanges();
+      // const newEntry = {
+      //   rowId: rowId,
+      //   revision: revision,
+      //   data: data,
+      //   meta: meta,
+      // };
+      // this.dataList = this.dataList.push(Immutable.fromJS(newEntry));
+      // this.changeDetectorRef.detectChanges();
+      // Do refresh trigger
+      const newItem = {
+        rowId,
+        revision,
+        data,
+        meta
+      }
+      this.newItemNotifyEmitter.emit(newItem);
       callback();
     },
     update: (
