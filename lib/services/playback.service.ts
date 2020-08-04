@@ -36,11 +36,7 @@ export class PlaybackService {
     offset?: number,
     playbackList?: PlaybackList
   ) {
-    // console.log(scriptName);
     const script = await this.scriptService.getScript(scriptName);
-    // console.log(script);
-    // const playbackScript = window[script[0].meta.objectName];
-    // console.log(playbackScript);
     const playbackScript = window[script.meta.objectName];
     const subscriptionId = await this.pushService.subscribe(
       query,

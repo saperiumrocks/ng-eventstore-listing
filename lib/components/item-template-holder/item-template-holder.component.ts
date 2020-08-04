@@ -50,8 +50,6 @@ export class ItemTemplateHolderComponent
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    console.log('TEMPLATE HOLDER CHANGES:');
-    console.log(changes);
     const self = this;
     if (self.componentRef) {
       const changesKeys = Object.keys(changes);
