@@ -116,7 +116,7 @@ export class NgEventstoreListingComponent
         revision,
         data,
         meta
-      }
+      };
       this.newItemNotifyEmitter.emit(newItem);
       callback();
     },
