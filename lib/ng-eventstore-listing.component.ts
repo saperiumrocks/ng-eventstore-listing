@@ -12,6 +12,8 @@ import {
 } from '@angular/core';
 
 import { switchMap, debounceTime } from 'rxjs/operators';
+import { Subscription } from 'rxjs/Subscription';
+import { Subject } from 'rxjs/Subject';
 
 import {
   SubscriptionConfiguration,
@@ -23,6 +25,7 @@ import {
   Sort,
   PlaybackListRequest,
 } from './models';
+
 
 import { ScriptService } from './services/script.service';
 import { PlaybackService } from './services/playback.service';
@@ -36,8 +39,9 @@ import _cloneDeep from 'lodash-es/cloneDeep';
 import _clone from 'lodash-es/clone';
 import _uniq from 'lodash-es/uniq';
 import _merge from 'lodash-es/defaults';
-import { Subscription } from 'rxjs/Subscription';
-import { Subject } from 'rxjs/Subject';
+import * as moment_ from 'moment-mini-ts';
+
+import saveAs from 'file-saver';
 
 @Component({
   selector: 'lib-ng-eventstore-listing',
@@ -68,24 +72,27 @@ export class NgEventstoreListingComponent
   @Input() itemsPerPage: number;
   @Input() responseBasePath = 'data';
   @Input() emptyListDisplayText = 'No Results';
+  @Input() csvFileName = this.playbackListName;
 
   @Input() debugging = false;
 
-  dataList: Immutable.List<RowItem>;
-  dataCount: number;
-  dataTotalCount: number;
-  initialized = false;
-  getPlaybackListSubscription: Subscription;
-  getPlaybackListSubject: Subject<PlaybackListRequest> = new Subject();
-  subscriptionTokens: string[] = [];
-  playbackList: PlaybackList = {
+  _dataList: Immutable.List<RowItem>;
+  _dataCount: number;
+  _dataTotalCount: number;
+  _initialized = false;
+  _getPlaybackListSubscription: Subscription;
+  _getPlaybackListSubject: Subject<PlaybackListRequest> = new Subject();
+  _exportPlaybackListSubscription: Subscription;
+  _exportPlaybackListSubject: Subject<PlaybackListRequest> = new Subject();
+  _subscriptionTokens: string[] = [];
+  _playbackList: PlaybackList = {
     get: (rowId: string, callback: (err, item) => void) => {
-      const rowIndex = this.dataList.findIndex((value: any) => {
+      const rowIndex = this._dataList.findIndex((value: any) => {
         return value.get('rowId') === rowId;
       });
 
       if (rowIndex > -1) {
-        const data = this.dataList.get(rowIndex);
+        const data = this._dataList.get(rowIndex);
         if (data) {
           callback(null, (data as any).toJS());
         } else {
@@ -128,7 +135,7 @@ export class NgEventstoreListingComponent
       meta: any,
       callback: (err?) => void
     ) => {
-      const rowIndex = this.dataList.findIndex((value: any) => {
+      const rowIndex = this._dataList.findIndex((value: any) => {
         return value.get('rowId') === rowId;
       });
 
@@ -152,12 +159,12 @@ export class NgEventstoreListingComponent
           console.log(rowIndex);
           console.log(newEntry);
 
-          console.log(this.dataList.toJS());
+          console.log(this._dataList.toJS());
         }
-        this.dataList = this.dataList.set(rowIndex, newEntry);
+        this._dataList = this._dataList.set(rowIndex, newEntry);
 
         if (this.debugging) {
-          console.log(this.dataList.toJS());
+          console.log(this._dataList.toJS());
         }
         this.changeDetectorRef.detectChanges();
         callback();
@@ -166,12 +173,12 @@ export class NgEventstoreListingComponent
       }
     },
     delete: (rowId: string, callback: (error?: any) => void) => {
-      const rowIndex = this.dataList.findIndex((value: any) => {
+      const rowIndex = this._dataList.findIndex((value: any) => {
         return value.get('rowId') === rowId;
       });
 
       if (rowIndex > -1) {
-        this.dataList = this.dataList.remove(rowIndex);
+        this._dataList = this._dataList.remove(rowIndex);
         callback(null);
       } else {
         callback(new Error(`Row with rowId: ${rowIndex} does not exist`));
@@ -179,18 +186,18 @@ export class NgEventstoreListingComponent
     },
   };
 
-  stateFunctions = {
+  _stateFunctions = {
     getState: (id: string) => {
-      const index = this.dataList.findIndex((row: any) => {
+      const index = this._dataList.findIndex((row: any) => {
         return row.get('rowId') === id;
       });
-      return (this.dataList.get(index) as any).toJS();
+      return (this._dataList.get(index) as any).toJS();
     },
     setState: (id: string, data: any) => {
-      const index = this.dataList.findIndex((row: any) => {
+      const index = this._dataList.findIndex((row: any) => {
         return row.get('rowId') === id;
       });
-      this.dataList = this.dataList.set(index, Immutable.fromJS(data));
+      this._dataList = this._dataList.set(index, Immutable.fromJS(data));
       this.changeDetectorRef.markForCheck();
     },
   };
@@ -208,11 +215,11 @@ export class NgEventstoreListingComponent
   ngOnChanges(changes: SimpleChanges): void {
     const self = this;
 
-    if (!self.initialized) {
+    if (!self._initialized) {
       this._initializeRequests();
       this._loadScripts();
       this.playbackService.init(this.socketUrl);
-      this.initialized = true;
+      this._initialized = true;
     }
 
     const changesKeys = Object.keys(changes);
@@ -239,7 +246,7 @@ export class NgEventstoreListingComponent
   }
 
   private _initializeRequests(): void {
-    this.getPlaybackListSubscription = this.getPlaybackListSubject
+    this._getPlaybackListSubscription = this._getPlaybackListSubject
       .pipe(
         debounceTime(100),
         switchMap((params) => {
@@ -254,9 +261,9 @@ export class NgEventstoreListingComponent
         })
       )
       .subscribe((res: any) => {
-        this.dataList = Immutable.fromJS(res.rows);
-        this.dataCount = res.rows.length;
-        this.dataTotalCount = res.count;
+        this._dataList = Immutable.fromJS(res.rows);
+        this._dataCount = res.rows.length;
+        this._dataTotalCount = res.count;
 
         this._resetSubscriptions();
         this._initSubscriptions();
@@ -264,10 +271,32 @@ export class NgEventstoreListingComponent
         this.changeDetectorRef.detectChanges();
 
         this.playbackListLoadedEmitter.emit({
-          totalItems: this.dataTotalCount,
-          dataCount: this.dataCount,
+          totalItems: this._dataTotalCount,
+          dataCount: this._dataCount,
         });
       });
+
+    this._exportPlaybackListSubscription = this._exportPlaybackListSubject
+    .pipe(
+      debounceTime(100),
+      switchMap((params) => {
+        return this.playbackListService.getPlaybackList(
+          this.playbackListBaseUrl,
+          params.playbackListName,
+          params.startIndex,
+          params.limit,
+          params.filters,
+          params.sort
+        );
+      })
+    )
+    .subscribe((result: any) => {
+      const csv = new Blob([result.data], { type: 'text/csv' });
+      const moment = moment_;
+      const now = moment();
+      const fileName = `${now.format('YYYY_MM_DD_HH_mm_ss')}_${this.csvFileName}.csv`;
+      saveAs(csv, fileName);
+    });
   }
 
   getPlaybackList(
@@ -284,7 +313,7 @@ export class NgEventstoreListingComponent
       filters: filters,
       sort: sort,
     };
-    this.getPlaybackListSubject.next(playbackListRequestParams);
+    this._getPlaybackListSubject.next(playbackListRequestParams);
   }
 
   requestPlaybackList() {
@@ -307,58 +336,71 @@ export class NgEventstoreListingComponent
   private async _initSubscriptions() {
     const self = this;
     // Per row subscriptions
-    self.dataList.forEach(async (row: any) => {
+    self._dataList.forEach(async (row: any) => {
       const query: Query = _clone(self.itemSubscriptionConfiguration.query);
       query.aggregateId = query.aggregateId.replace(
         /{{rowId}}/g,
         row.get('rowId')
       );
-      this.subscriptionTokens.push(
+      this._subscriptionTokens.push(
         await self.playbackService.registerForPlayback(
           self.itemSubscriptionConfiguration.playbackScriptName,
           self,
           query,
-          self.stateFunctions,
+          self._stateFunctions,
           row.get('revision') + 1,
-          self.playbackList
+          self._playbackList
         )
       );
     });
 
     // List subscription
-    this.subscriptionTokens.push(
+    this._subscriptionTokens.push(
       await self.playbackService.registerForPlayback(
         self.listSubscriptionConfiguration.playbackScriptName,
         self,
         self.listSubscriptionConfiguration.query,
-        self.stateFunctions,
+        self._stateFunctions,
         // TODO: Revision response from getPlaybackList
         0,
-        self.playbackList
+        self._playbackList
       )
     );
   }
 
   private _resetSubscriptions() {
-    this.subscriptionTokens.forEach((subscriptionToken) => {
+    this._subscriptionTokens.forEach((subscriptionToken) => {
       this.playbackService.unRegisterForPlayback(subscriptionToken);
     });
-    this.subscriptionTokens = [];
+    this._subscriptionTokens = [];
   }
 
-  onUpdate(payload: any) {
+  _onUpdate(payload: any) {
     this.updateEmitter.emit(payload);
   }
 
-  onUpdateLookups(payload: any) {
+  _onUpdateLookups(payload: any) {
     this.updateLookupsEmitter.emit(payload);
   }
 
-  onShowModal(payload: any) {
+  _onShowModal(payload: any) {
     this.showModalEmitter.emit(payload);
   }
 
-  onDelete(payload: any) {
+  _onDelete(payload: any) {
     this.deleteEmitter.emit(payload);
+  }
+
+  exportCSV() {
+    const startIndex = this.itemsPerPage * (this.pageIndex - 1);
+    const exportPlaybackListRequestParams: PlaybackListRequest = {
+      playbackListName: this.playbackListName,
+      startIndex: startIndex,
+      limit: 1000000,
+      filters: this.filters,
+      sort: this.sort,
+    };
+
+    this._exportPlaybackListSubject.next(exportPlaybackListRequestParams);
   }
 }

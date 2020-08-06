@@ -3,6 +3,8 @@ import * as Immutable from 'immutable';
 import { RowItem } from './models';
 import { SimpleChanges } from '@angular/core';
 import { Observable } from 'rxjs';
+import { FilterOperator, SortDirection } from './enums';
+import { c } from '@angular/core/src/render3';
 
 const MOCK_DATA_LIST: RowItem[] = [
   { rowId: 'test-1', revision: 0, data: { testProp1: 1 }, meta: {} },
@@ -41,13 +43,13 @@ describe('NgEventstoreListingComponent', () => {
 
   describe('playbackList functions initialization', () => {
     beforeEach(() => {
-      component.dataList = Immutable.fromJS(MOCK_DATA_LIST);
+      component._dataList = Immutable.fromJS(MOCK_DATA_LIST);
     });
 
     it('should define get properly', (done) => {
       const rowId = 'test-2';
-      component.playbackList.get(rowId, (err, item) => {
-        expect(item).toEqual((component.dataList.get(1) as any).toJS());
+      component._playbackList.get(rowId, (err, item) => {
+        expect(item).toEqual((component._dataList.get(1) as any).toJS());
         done();
       });
     });
@@ -58,7 +60,7 @@ describe('NgEventstoreListingComponent', () => {
       const data = { testProp: 9 };
       const meta = { testMeta: 123 };
       spyOn(component.newItemNotifyEmitter, 'emit');
-      component.playbackList.add(rowId, revision, data, meta, (err) => {
+      component._playbackList.add(rowId, revision, data, meta, (err) => {
         const newEntry = {
           rowId: rowId,
           revision: revision,
@@ -77,7 +79,7 @@ describe('NgEventstoreListingComponent', () => {
       const oldData = { testProp1: 8, testProp2: 123 };
       const newData = { testProp1: 9 };
       const meta = { testMeta: 123 };
-      component.playbackList.update(
+      component._playbackList.update(
         rowId,
         revision,
         oldData,
@@ -90,7 +92,7 @@ describe('NgEventstoreListingComponent', () => {
             data: { testProp1: 9, testProp2: 123 },
             meta: meta,
           };
-          expect(Immutable.fromJS(newEntry)).toEqual(component.dataList.get(2));
+          expect(Immutable.fromJS(newEntry)).toEqual(component._dataList.get(2));
           done();
         }
       );
@@ -98,9 +100,9 @@ describe('NgEventstoreListingComponent', () => {
 
     it('should define delete properly', (done) => {
       const rowId = 'test-3';
-      component.playbackList.delete(rowId, (err) => {
+      component._playbackList.delete(rowId, (err) => {
         expect(
-          component.dataList.findIndex((item: any) => {
+          component._dataList.findIndex((item: any) => {
             return item.get('rowId') === rowId;
           })
         ).toEqual(-1);
@@ -111,14 +113,14 @@ describe('NgEventstoreListingComponent', () => {
 
   describe('stateFunctions initialization', () => {
     beforeEach(() => {
-      component.dataList = Immutable.fromJS(MOCK_DATA_LIST);
+      component._dataList = Immutable.fromJS(MOCK_DATA_LIST);
     });
 
     it('should define getState properly', () => {
       const rowId = 'test-2';
 
-      const state = component.stateFunctions.getState(rowId);
-      expect(state).toEqual((component.dataList.get(1) as any).toJS());
+      const state = component._stateFunctions.getState(rowId);
+      expect(state).toEqual((component._dataList.get(1) as any).toJS());
     });
 
     it('should define setState properly', () => {
@@ -133,8 +135,8 @@ describe('NgEventstoreListingComponent', () => {
         meta: {},
       };
 
-      component.stateFunctions.setState(rowId, row);
-      expect(row).toEqual((component.dataList.get(1) as any).toJS());
+      component._stateFunctions.setState(rowId, row);
+      expect(row).toEqual((component._dataList.get(1) as any).toJS());
       expect(mockChangeDetectorRef.markForCheck).toHaveBeenCalled();
     });
   });
@@ -180,13 +182,44 @@ describe('NgEventstoreListingComponent', () => {
           },
         };
         component.ngOnChanges(mockChanges);
-        expect((component.dataList.get(0) as any).toJS()).toEqual(
+        expect((component._dataList.get(0) as any).toJS()).toEqual(
           MOCK_DATA_LIST[2]
         );
-        expect((component.dataList.get(1) as any).toJS()).toEqual(
+        expect((component._dataList.get(1) as any).toJS()).toEqual(
           MOCK_DATA_LIST[3]
         );
       });
+    });
+  });
+
+
+  describe('exportCSV', () => {
+    it('should call exportPlaybackListSubject.next with the proper params', () => {
+      spyOn(component._exportPlaybackListSubject, 'next');
+      component.playbackListName = 'test_playback_list_name';
+      component.itemsPerPage = 25;
+      component.pageIndex = 2;
+
+      component.filters = [
+        {
+          operator: FilterOperator.is,
+          field: 'dealershipId',
+          value: 'test-id'
+        }
+      ];
+
+      component.sort = { field: 'dealershipName', sortDirection: SortDirection.ASC };
+
+      component.exportCSV();
+
+      const expectedParams = {
+        playbackListName: 'test_playback_list_name',
+        startIndex: component.itemsPerPage * (component.pageIndex - 1),
+        limit: 1000000,
+        filters: component.filters,
+        sort: component.sort
+      };
+      expect(component._exportPlaybackListSubject.next).toHaveBeenCalledWith(expectedParams);
     });
   });
 });

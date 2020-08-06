@@ -1,11 +1,11 @@
 import { OnInit, EventEmitter, OnChanges, SimpleChanges, ChangeDetectorRef, OnDestroy } from '@angular/core';
+import { Subscription } from 'rxjs/Subscription';
+import { Subject } from 'rxjs/Subject';
 import { SubscriptionConfiguration, Script, PlaybackList, RowItem, Filter, Sort, PlaybackListRequest } from './models';
 import { ScriptService } from './services/script.service';
 import { PlaybackService } from './services/playback.service';
 import { PlaybackListService } from './services/playback-list.service';
 import * as Immutable from 'immutable';
-import { Subscription } from 'rxjs/Subscription';
-import { Subject } from 'rxjs/Subject';
 export declare class NgEventstoreListingComponent implements OnInit, OnChanges, OnDestroy {
     private changeDetectorRef;
     private scriptService;
@@ -16,6 +16,7 @@ export declare class NgEventstoreListingComponent implements OnInit, OnChanges, 
     showModalEmitter: EventEmitter<any>;
     deleteEmitter: EventEmitter<any>;
     playbackListLoadedEmitter: EventEmitter<any>;
+    newItemNotifyEmitter: EventEmitter<any>;
     itemComponentClass: any;
     lookups: {};
     socketUrl: string;
@@ -30,15 +31,18 @@ export declare class NgEventstoreListingComponent implements OnInit, OnChanges, 
     itemsPerPage: number;
     responseBasePath: string;
     emptyListDisplayText: string;
+    csvFileName: string;
     debugging: boolean;
-    dataList: Immutable.List<RowItem>;
-    dataCount: number;
-    dataTotalCount: number;
-    initialized: boolean;
-    getPlaybackListSubscription: Subscription;
-    getPlaybackListSubject: Subject<PlaybackListRequest>;
-    subscriptionTokens: string[];
-    playbackList: PlaybackList;
+    _dataList: Immutable.List<RowItem>;
+    _dataCount: number;
+    _dataTotalCount: number;
+    _initialized: boolean;
+    _getPlaybackListSubscription: Subscription;
+    _getPlaybackListSubject: Subject<PlaybackListRequest>;
+    _exportPlaybackListSubscription: Subscription;
+    _exportPlaybackListSubject: Subject<PlaybackListRequest>;
+    _subscriptionTokens: string[];
+    _playbackList: PlaybackList;
     stateFunctions: {
         getState: (id: string) => any;
         setState: (id: string, data: any) => void;
@@ -54,8 +58,9 @@ export declare class NgEventstoreListingComponent implements OnInit, OnChanges, 
     private _loadScripts;
     private _initSubscriptions;
     private _resetSubscriptions;
-    onUpdate(payload: any): void;
-    onUpdateLookups(payload: any): void;
-    onShowModal(payload: any): void;
-    onDelete(payload: any): void;
+    _onUpdate(payload: any): void;
+    _onUpdateLookups(payload: any): void;
+    _onShowModal(payload: any): void;
+    _onDelete(payload: any): void;
+    exportCSV(): void;
 }
