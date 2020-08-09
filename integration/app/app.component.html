@@ -20,6 +20,8 @@
 
   <pagination [totalItems]="totalItems" [itemsPerPage]="itemsPerPage" (pageChanged)="onPageChanged($event)"></pagination>
 
+  <button class="btn btn-primary" (click)="exportButtonClicked()">Export CSV</button>
+
   <lib-ng-eventstore-listing
     (playbackListLoadedEmitter)="playbackListLoaded($event)"
     [itemComponentClass]="rowComponentClass"

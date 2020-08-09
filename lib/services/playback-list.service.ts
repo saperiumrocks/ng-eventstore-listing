@@ -27,4 +27,25 @@ export class PlaybackListService {
 
     return this.http.get<PlaybackListResponse>(url);
   }
+
+  getPlaybackListCsv(
+    playbackListBaseUrl: string,
+    playbackListName: string,
+    startIndex: number,
+    limit: number,
+    filters?: Filter[],
+    sort?: Sort
+  ): Observable<any> {
+    let url = `${playbackListBaseUrl}/playback-list/${playbackListName}/export?startIndex=${startIndex}&limit=${limit}`;
+
+    if (filters) {
+      url += `&filters=${JSON.stringify(filters)}`;
+    }
+
+    if (sort) {
+      url += `&sort=${JSON.stringify(sort)}`;
+    }
+
+    return this.http.get<PlaybackListResponse>(url);
+  }
 }

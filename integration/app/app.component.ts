@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, OnInit } from '@angular/core';
+import { Component, ChangeDetectionStrategy, OnInit, ViewChild } from '@angular/core';
 import { TestRowComponent } from './test-row/test-row.component';
 import {
   SubscriptionConfiguration,
@@ -8,11 +8,13 @@ import {
 
 import {
   FilterOperator,
-  SortDirection
+  SortDirection,
+  NgEventstoreListingComponent
 } from 'ng-eventstore-listing';
 
 import { ScriptStore } from './script.store';
 import { FormControl } from '@angular/forms';
+// import { NgEventstoreListingComponent };
 
 @Component({
   selector: 'app-root',
@@ -21,6 +23,7 @@ import { FormControl } from '@angular/forms';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppComponent implements OnInit {
+  @ViewChild(NgEventstoreListingComponent) ngEventstoreListingComponent: NgEventstoreListingComponent;
   rowComponentClass = TestRowComponent;
 
   dealershipFilterFormControl = new FormControl();
@@ -111,5 +114,9 @@ export class AppComponent implements OnInit {
 
   playbackListLoaded(data) {
     this.totalItems = data.totalItems;
+  }
+
+  exportButtonClicked() {
+    this.ngEventstoreListingComponent.exportCSV();
   }
 }

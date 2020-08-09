@@ -72,7 +72,7 @@ export class NgEventstoreListingComponent
   @Input() itemsPerPage: number;
   @Input() responseBasePath = 'data';
   @Input() emptyListDisplayText = 'No Results';
-  @Input() csvFileName = this.playbackListName;
+  @Input() csvFileName = '';
 
   @Input() debugging = false;
 
@@ -280,7 +280,7 @@ export class NgEventstoreListingComponent
     .pipe(
       debounceTime(100),
       switchMap((params) => {
-        return this.playbackListService.getPlaybackList(
+        return this.playbackListService.getPlaybackListCsv(
           this.playbackListBaseUrl,
           params.playbackListName,
           params.startIndex,
@@ -291,10 +291,10 @@ export class NgEventstoreListingComponent
       })
     )
     .subscribe((result: any) => {
-      const csv = new Blob([result.data], { type: 'text/csv' });
+      const csv = new Blob([result], { type: 'text/csv' });
       const moment = moment_;
       const now = moment();
-      const fileName = `${now.format('YYYY_MM_DD_HH_mm_ss')}_${this.csvFileName}.csv`;
+      const fileName = `${now.format('YYYY_MM_DD_HH_mm_ss')}_${this.csvFileName || this.playbackListName}.csv`;
       saveAs(csv, fileName);
     });
   }

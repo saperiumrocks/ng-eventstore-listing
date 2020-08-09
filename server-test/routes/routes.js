@@ -1,6 +1,8 @@
 var express = require('express');
 var router = express.Router();
 const shortid = require('shortid');
+const Parser = require('json2csv').Parser;
+const csvFields = require('../utils/csv-fields');
 
 const getEventStreamAsync = async function(es, query, revMin, revMax) {
   return new Promise((resolve, reject) => {
@@ -167,7 +169,7 @@ const routes = function (es) {
 
     stream.addEvent(event);
     await commitStream(stream);
-  
+
     res.json(event);
   });
 
@@ -201,7 +203,7 @@ const routes = function (es) {
       stream.addEvent(vehicleCreatedEvent);
       await commitStream(stream);
     });
-  
+
     res.json(vehicleCreatedEvents);
   });
 
@@ -228,7 +230,7 @@ const routes = function (es) {
     const stream = await getEventStreamAsync(es, query, 0, 1);
     stream.addEvent(event);
     await commitStream(stream);
-  
+
     res.json(event);
   });
 
@@ -256,7 +258,7 @@ const routes = function (es) {
     const stream = await getEventStreamAsync(es, query, 0, 1);
     stream.addEvent(event);
     await commitStream(stream);
-  
+
     res.json(event);
   });
 
@@ -284,7 +286,7 @@ const routes = function (es) {
     const stream = await getEventStreamAsync(es, query, 0, 1);
     stream.addEvent(event);
     await commitStream(stream);
-  
+
     res.json(event);
   });
 
@@ -311,11 +313,11 @@ const routes = function (es) {
     const stream = await getEventStreamAsync(es, query, 0, 1);
     stream.addEvent(event);
     await commitStream(stream);
-  
+
     res.json(event);
   });
 
-    
+
   router.get('/titles', async function(req, res) {
     const playbackList = await getPlaybackListViewAsync(es, 'auction_titles_list_view');
     const results = await queryPlaybackListAsync(playbackList, 0, 1000);
@@ -325,7 +327,7 @@ const routes = function (es) {
 
   router.post('/users', async function(req, res, next) {
     const body = req.body;
-    
+
     const userId = shortid.generate();
     const event = {
       name: 'user_created',
@@ -344,13 +346,13 @@ const routes = function (es) {
     const stream = await getEventStreamAsync(es, query, 0, 1);
     stream.addEvent(event);
     await commitStream(stream);
-  
+
     res.json(event);
   });
 
   router.post('/dealerships', async function(req, res, next) {
     const body = req.body;
-    
+
     const dealershipId = shortid.generate();
     const event = {
       name: 'dealership_created',
@@ -374,13 +376,13 @@ const routes = function (es) {
     const stream = await getEventStreamAsync(es, query, 0, 1);
     stream.addEvent(event);
     await commitStream(stream);
-  
+
     res.json(event);
   });
 
   // router.put('dealerships/:dealershipId', async function(req, res, next) {
   //   const body = req.body;
-    
+
   // });
 
   router.get('/playback-list/:playbackListName', async function(req, res) {
@@ -398,6 +400,37 @@ const routes = function (es) {
     const results = await queryPlaybackListAsync(playbackList, +startIndex, +limit, filters, sort);
 
     res.json(results);
+  });
+
+  router.get('/playback-list/:playbackListName/export', async function(req, res) {
+    const query = req.query;
+    const param = req.params;
+
+    const playbackListName = param.playbackListName;
+    const playbackListCsvFields = csvFields[playbackListName];
+
+    if (!playbackListCsvFields) {
+      res.status(404).json({ message: 'csvFields do not exist' });
+    }
+
+    const startIndex = query.startIndex;
+    const limit = query.limit;
+
+    const filters = query.filters ? JSON.parse(query.filters) : null;
+    const sort = query.sort ? JSON.parse(query.sort) : null;
+
+    const playbackList = await getPlaybackListViewAsync(es, playbackListName);
+    const results = await queryPlaybackListAsync(playbackList, +startIndex, +limit, filters, sort);
+
+    const rows = results.rows.map(row => row.data);
+
+    const parser = new Parser({
+      fields: csvFields[playbackListName]
+    });
+
+    const csv = parser.parse(rows);
+
+    return res.status(200).json(csv);
   });
 
   router.get('/initialize', async function(req, res, next) {
@@ -418,13 +451,13 @@ const routes = function (es) {
            name: user.name
         }
       };
-  
+
       const query = {
         context: 'profile',
         aggregate: 'user',
         aggregateId: user.userId
       };
-  
+
       const stream = await getEventStreamAsync(es, query, 0, 1);
       stream.addEvent(event);
       await commitStream(stream);
@@ -474,20 +507,20 @@ const routes = function (es) {
               isPaidOnFaxApproved: dealership.isPaidOnFaxApproved
           }
         };
-    
+
         const query = {
           context: 'profile',
           aggregate: 'dealership',
           aggregateId: dealership.dealershipName
         };
-    
+
         const stream = await getEventStreamAsync(es, query, 0, 1);
         stream.addEvent(event);
         await commitStream(stream);
       });
 
-    });    
-  
+    });
+
     res.json(mockUsers);
   });
 

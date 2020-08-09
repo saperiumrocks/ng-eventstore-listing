@@ -14,21 +14,21 @@
   </div>
 </div> -->
 <!-- <div [class]="'row ' + (listHeaderGroups && listHeaderGroups.generalRowClassName) ? listHeaderGroups.generalRowClassName : ''" *ngFor="let item of dataList; trackBy: trackByFn"> -->
-<div class="row" *ngFor="let item of dataList; trackBy: trackByFn">
+<div class="row" *ngFor="let item of _dataList; trackBy: trackByFn">
   <div class="col-12">
     <lib-item-template-holder
       [data]="item"
       [itemComponentClass]="itemComponentClass"
       [lookups]="lookups"
-      (updateEmitter)="onUpdate($event)"
-      (updateLookupsEmitter)="onUpdateLookups($event)"
-      (showModalEmitter)="onShowModal($event)"
-      (deleteEmitter)="onDelete($event)">
+      (updateEmitter)="_onUpdate($event)"
+      (updateLookupsEmitter)="_onUpdateLookups($event)"
+      (showModalEmitter)="_onShowModal($event)"
+      (deleteEmitter)="_onDelete($event)">
     </lib-item-template-holder>
   </div>
 </div>
 
-<div class="row" *ngIf="!dataCount || dataCount === 0">
+<div class="row" *ngIf="!_dataCount || _dataCount === 0">
   <div class="col-12">
     <div class="row">
       <div class="col-12 no-results-container">

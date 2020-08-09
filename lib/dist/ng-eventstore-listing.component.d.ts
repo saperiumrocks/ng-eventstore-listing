@@ -43,7 +43,7 @@ export declare class NgEventstoreListingComponent implements OnInit, OnChanges, 
     _exportPlaybackListSubject: Subject<PlaybackListRequest>;
     _subscriptionTokens: string[];
     _playbackList: PlaybackList;
-    stateFunctions: {
+    _stateFunctions: {
         getState: (id: string) => any;
         setState: (id: string, data: any) => void;
     };
