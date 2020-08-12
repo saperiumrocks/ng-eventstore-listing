@@ -31,7 +31,7 @@ describe('NgEventstoreListingComponent', () => {
       'unregisterForPlayback',
     ]);
     mockPlaybackListService = jasmine.createSpyObj('mockPlaybackListService', [
-      'getPlaybackList',
+      '_getPlaybackList',
     ]);
     component = new NgEventstoreListingComponent(
       mockChangeDetectorRef,
@@ -100,12 +100,14 @@ describe('NgEventstoreListingComponent', () => {
 
     it('should define delete properly', (done) => {
       const rowId = 'test-3';
+      spyOn(component.removedItemNotifyEmitter, 'emit');
       component._playbackList.delete(rowId, (err) => {
-        expect(
-          component._dataList.findIndex((item: any) => {
-            return item.get('rowId') === rowId;
-          })
-        ).toEqual(-1);
+        // expect(
+        //   component._dataList.findIndex((item: any) => {
+        //     return item.get('rowId') === rowId;
+        //   })
+        // ).toEqual(-1);
+        expect(component.removedItemNotifyEmitter.emit).toHaveBeenCalledWith(rowId);
         done();
       });
     });
@@ -143,7 +145,7 @@ describe('NgEventstoreListingComponent', () => {
 
   describe('ngOnChanges', () => {
     beforeEach(() => {
-      mockPlaybackListService.getPlaybackList.and.callFake(
+      mockPlaybackListService._getPlaybackList.and.callFake(
         (playbackListName, startIndex, limit, filters, sort) => {
           return Observable.of({
             count: 2,

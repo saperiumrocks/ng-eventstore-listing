@@ -57,6 +57,7 @@ export class NgEventstoreListingComponent
   @Output() deleteEmitter: EventEmitter<any> = new EventEmitter();
   @Output() playbackListLoadedEmitter: EventEmitter<any> = new EventEmitter();
   @Output() newItemNotifyEmitter: EventEmitter<any> = new EventEmitter();
+  @Output() removedItemNotifyEmitter: EventEmitter<any> = new EventEmitter();
 
   @Input() itemComponentClass: any;
   @Input() lookups = {};
@@ -178,7 +179,8 @@ export class NgEventstoreListingComponent
       });
 
       if (rowIndex > -1) {
-        this._dataList = this._dataList.remove(rowIndex);
+        // this._dataList = this._dataList.remove(rowIndex);
+        this.removedItemNotifyEmitter.emit(rowId);
         callback(null);
       } else {
         callback(new Error(`Row with rowId: ${rowIndex} does not exist`));
@@ -299,7 +301,7 @@ export class NgEventstoreListingComponent
     });
   }
 
-  getPlaybackList(
+  _getPlaybackList(
     playbackListName: string,
     startIndex: number,
     limit: number,
@@ -318,7 +320,7 @@ export class NgEventstoreListingComponent
 
   requestPlaybackList() {
     const startIndex = this.itemsPerPage * (this.pageIndex - 1);
-    this.getPlaybackList(
+    this._getPlaybackList(
       this.playbackListName,
       startIndex,
       this.itemsPerPage,
@@ -336,36 +338,40 @@ export class NgEventstoreListingComponent
   private async _initSubscriptions() {
     const self = this;
     // Per row subscriptions
-    self._dataList.forEach(async (row: any) => {
-      const query: Query = _clone(self.itemSubscriptionConfiguration.query);
-      query.aggregateId = query.aggregateId.replace(
-        /{{rowId}}/g,
-        row.get('rowId')
-      );
+    if (self.itemSubscriptionConfiguration) {
+      self._dataList.forEach(async (row: any) => {
+        const query: Query = _clone(self.itemSubscriptionConfiguration.query);
+        query.aggregateId = query.aggregateId.replace(
+          /{{rowId}}/g,
+          row.get('rowId')
+        );
+        this._subscriptionTokens.push(
+          await self.playbackService.registerForPlayback(
+            self.itemSubscriptionConfiguration.playbackScriptName,
+            self,
+            query,
+            self._stateFunctions,
+            row.get('revision') + 1,
+            self._playbackList
+          )
+        );
+      });
+    }
+
+    if (self.listSubscriptionConfiguration) {
+      // List subscription
       this._subscriptionTokens.push(
         await self.playbackService.registerForPlayback(
-          self.itemSubscriptionConfiguration.playbackScriptName,
+          self.listSubscriptionConfiguration.playbackScriptName,
           self,
-          query,
+          self.listSubscriptionConfiguration.query,
           self._stateFunctions,
-          row.get('revision') + 1,
+          // TODO: Revision response from getPlaybackList
+          0,
           self._playbackList
         )
       );
-    });
-
-    // List subscription
-    this._subscriptionTokens.push(
-      await self.playbackService.registerForPlayback(
-        self.listSubscriptionConfiguration.playbackScriptName,
-        self,
-        self.listSubscriptionConfiguration.query,
-        self._stateFunctions,
-        // TODO: Revision response from getPlaybackList
-        0,
-        self._playbackList
-      )
-    );
+    }
   }
 
   private _resetSubscriptions() {
