@@ -17,6 +17,7 @@ export declare class NgEventstoreListingComponent implements OnInit, OnChanges, 
     deleteEmitter: EventEmitter<any>;
     playbackListLoadedEmitter: EventEmitter<any>;
     newItemNotifyEmitter: EventEmitter<any>;
+    removedItemNotifyEmitter: EventEmitter<any>;
     itemComponentClass: any;
     lookups: {};
     socketUrl: string;
@@ -53,7 +54,7 @@ export declare class NgEventstoreListingComponent implements OnInit, OnChanges, 
     ngOnDestroy(): void;
     trackByFn(index: number, item: any): any;
     private _initializeRequests;
-    getPlaybackList(playbackListName: string, startIndex: number, limit: number, filters?: Filter[], sort?: Sort): void;
+    _getPlaybackList(playbackListName: string, startIndex: number, limit: number, filters?: Filter[], sort?: Sort): void;
     requestPlaybackList(): void;
     private _loadScripts;
     private _initSubscriptions;

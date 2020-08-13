@@ -41,18 +41,32 @@ export class ScriptService {
           meta: this.scripts[name].meta,
         });
       } else {
-        // load script
-        const script = document.createElement('script');
-        script.type = 'text/javascript';
-        script.src = this.scripts[name].src;
-        if (script.readyState) {
-          // IE
-          script.onreadystatechange = () => {
-            if (
-              script.readyState === 'loaded' ||
-              script.readyState === 'complete'
-            ) {
-              script.onreadystatechange = null;
+        const existingScript = document.querySelectorAll(`head script[src="${this.scripts[name].src}"]`);
+        if (!existingScript) {
+          // load script
+          const script = document.createElement('script');
+          script.type = 'text/javascript';
+          script.src = this.scripts[name].src;
+          if (script.readyState) {
+            // IE
+            script.onreadystatechange = () => {
+              if (
+                script.readyState === 'loaded' ||
+                script.readyState === 'complete'
+              ) {
+                script.onreadystatechange = null;
+                this.scripts[name].loaded = true;
+                resolve({
+                  script: name,
+                  loaded: true,
+                  status: 'Loaded',
+                  meta: this.scripts[name].meta,
+                });
+              }
+            };
+          } else {
+            // Others
+            script.onload = () => {
               this.scripts[name].loaded = true;
               resolve({
                 script: name,
@@ -60,28 +74,17 @@ export class ScriptService {
                 status: 'Loaded',
                 meta: this.scripts[name].meta,
               });
-            }
-          };
-        } else {
-          // Others
-          script.onload = () => {
-            this.scripts[name].loaded = true;
+            };
+          }
+          script.onerror = (error: any) =>
             resolve({
               script: name,
-              loaded: true,
+              loaded: false,
               status: 'Loaded',
               meta: this.scripts[name].meta,
             });
-          };
+          document.getElementsByTagName('head')[0].appendChild(script);
         }
-        script.onerror = (error: any) =>
-          resolve({
-            script: name,
-            loaded: false,
-            status: 'Loaded',
-            meta: this.scripts[name].meta,
-          });
-        document.getElementsByTagName('head')[0].appendChild(script);
       }
     });
   }
