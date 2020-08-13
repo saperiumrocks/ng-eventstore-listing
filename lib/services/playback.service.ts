@@ -54,11 +54,11 @@ export class PlaybackService {
         //   eventObj = eventObj.eventSource;
 
         if (eventObj.context === 'states') {
-          const scriptName = registration.scriptName;
+          const thisScriptName = registration.scriptName;
           const fromEvent = eventObj.payload._meta.fromEvent;
-          const eventName = fromEvent.payload.name
-          const playbackScript = window[scriptName];
-          const playbackFunction = playbackScript.playbackInterface[eventName];
+          const eventName = fromEvent.payload.name;
+          const thisPlaybackScript = window[thisScriptName];
+          const playbackFunction = thisPlaybackScript.playbackInterface[eventName];
 
           if (playbackFunction) {
             const row = stateFunctions.getState(eventObj.aggregateId);
@@ -91,13 +91,10 @@ export class PlaybackService {
             playbackFunction(state, fromEvent, funcs, doneCallback);
           }
         } else {
-          const scriptName = registration.scriptName;
-          // const playbackFunction =
-          //   registration.playbackScript.playbackInterface[
-          //     eventObj.payload.name
-          //   ];
-          const playbackScript = window[scriptName];
-          const playbackFunction = playbackScript.playbackInterface[eventObj.payload.name];
+
+          const thisScriptName = registration.scriptName;
+          const thisPlaybackScript = window[thisScriptName];
+          const playbackFunction = thisPlaybackScript.playbackInterface[eventObj.payload.name];
 
           if (playbackFunction) {
             const row = stateFunctions.getState(eventObj.aggregateId);
@@ -141,9 +138,6 @@ export class PlaybackService {
       playbackList: playbackList,
       scriptName: scriptName
     };
-
-    console.log('SHOW PLAYBACK SCRIPT');
-    console.log(playbackScript)
 
     console.log('subscribed to playback: ', subscriptionId, query);
     return subscriptionId;

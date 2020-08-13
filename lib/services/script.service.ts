@@ -34,7 +34,7 @@ export class ScriptService {
     return new Promise((resolve, reject) => {
       // resolve if already loaded
       if (this.scripts[name].loaded) {
-        console.log('LOADED');
+        // console.log('LOADED');
         resolve({
           script: name,
           loaded: true,
@@ -51,7 +51,7 @@ export class ScriptService {
           if (script.readyState) {
             // IE
             script.onreadystatechange = () => {
-              console.log('ON READYSTATECHANGE');
+              // console.log('ON READYSTATECHANGE');
               if (
                 script.readyState === 'loaded' ||
                 script.readyState === 'complete'
@@ -68,7 +68,7 @@ export class ScriptService {
             };
           } else {
             // Others
-            console.log('ONLOAD');
+            // console.log('ONLOAD');
             script.onload = () => {
               this.scripts[name].loaded = true;
               resolve({
@@ -80,7 +80,7 @@ export class ScriptService {
             };
           }
           script.onerror = (error: any) =>
-          console.log('ON ERROR', error);;
+          console.log('ON ERROR', error);
             resolve({
               script: name,
               loaded: false,
