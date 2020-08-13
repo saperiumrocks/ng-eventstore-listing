@@ -11,6 +11,7 @@ import {
 @Injectable()
 export class PlaybackService {
   private playbackRegistry: PlaybackRegistry = {};
+  private playbackInterfaceMap = {};
   constructor(
     private scriptService: ScriptService,
     private pushService: PushService
@@ -53,12 +54,50 @@ export class PlaybackService {
         //   eventObj = eventObj.eventSource;
 
         if (eventObj.context === 'states') {
-          //
+          const scriptName = registration.scriptName;
+          const fromEvent = eventObj.payload._meta.fromEvent;
+          const eventName = fromEvent.payload.name
+          const playbackScript = window[scriptName];
+          const playbackFunction = playbackScript.playbackInterface[eventName];
+
+          if (playbackFunction) {
+            const row = stateFunctions.getState(eventObj.aggregateId);
+            const state = row.data;
+            const funcs = {
+              emit: (targetQuery, payload, done) => {
+                done();
+              },
+              getPlaybackList: (
+                playbackListName: string,
+                callback: (err, playbackList: PlaybackList) => void
+              ) => {
+                if (registration.playbackList) {
+                  callback(null, registration.playbackList);
+                } else {
+                  callback(
+                    new Error(
+                      'PlaybackList does not exist in this registration'
+                    ),
+                    null
+                  );
+                }
+              },
+            };
+
+            const doneCallback = () => {
+              // stateFunctions.setState(row.rowId, row);
+            };
+
+            playbackFunction(state, fromEvent, funcs, doneCallback);
+          }
         } else {
-          const playbackFunction =
-            registration.playbackScript.playbackInterface[
-              eventObj.payload.name
-            ];
+          const scriptName = registration.scriptName;
+          // const playbackFunction =
+          //   registration.playbackScript.playbackInterface[
+          //     eventObj.payload.name
+          //   ];
+          const playbackScript = window[scriptName];
+          const playbackFunction = playbackScript.playbackInterface[eventObj.payload.name];
 
           if (playbackFunction) {
             const row = stateFunctions.getState(eventObj.aggregateId);
@@ -100,7 +139,11 @@ export class PlaybackService {
       owner: owner,
       registrationId: subscriptionId,
       playbackList: playbackList,
+      scriptName: scriptName
     };
+
+    console.log('SHOW PLAYBACK SCRIPT');
+    console.log(playbackScript)
 
     console.log('subscribed to playback: ', subscriptionId, query);
     return subscriptionId;

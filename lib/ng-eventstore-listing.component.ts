@@ -218,24 +218,40 @@ export class NgEventstoreListingComponent
     const self = this;
 
     if (!self._initialized) {
-      this._initializeRequests();
-      this._loadScripts();
-      this.playbackService.init(this.socketUrl);
       this._initialized = true;
-    }
+      this._loadScripts().then(() => {
+        this._initializeRequests();
+        this.playbackService.init(this.socketUrl);
 
-    const changesKeys = Object.keys(changes);
-    changesKeys.forEach((key) => {
-      self[key] = changes[key].currentValue;
-      switch (key) {
-        case 'pageIndex':
-        case 'filters':
-        case 'sort': {
-          this.requestPlaybackList();
-          break;
+        const changesKeys = Object.keys(changes);
+        changesKeys.forEach((key) => {
+          self[key] = changes[key].currentValue;
+          switch (key) {
+            case 'pageIndex':
+            case 'filters':
+            case 'sort': {
+              this.requestPlaybackList();
+              break;
+            }
+          }
+        });
+
+      });
+    } else {
+
+      const changesKeys = Object.keys(changes);
+      changesKeys.forEach((key) => {
+        self[key] = changes[key].currentValue;
+        switch (key) {
+          case 'pageIndex':
+          case 'filters':
+          case 'sort': {
+            this.requestPlaybackList();
+            break;
+          }
         }
-      }
-    });
+      });
+    }
   }
 
 

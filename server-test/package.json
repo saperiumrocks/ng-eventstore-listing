@@ -6,7 +6,7 @@
     "start": "nodemon ./bin/www"
   },
   "dependencies": {
-    "@saperiuminc/eventstore": "^1.15.12-alpha.42",
+    "@saperiuminc/eventstore": "^1.15.12-alpha.52",
     "cookie-parser": "~1.4.4",
     "cors": "^2.8.5",
     "debug": "~2.6.9",

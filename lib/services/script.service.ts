@@ -9,7 +9,7 @@ export class ScriptService {
 
   constructor() {}
 
-  init(scriptStore: Script[]) {
+  async init(scriptStore: Script[]) {
     const promises = [];
     scriptStore.forEach((script: Script) => {
       // console.log('SCRIPT STORE LOGGING');
@@ -21,19 +21,20 @@ export class ScriptService {
       promises.push(this.load(script.name));
     });
 
-    return Promise.all(promises);
+    return await Promise.all(promises);
   }
 
-  load(...scripts: string[]): Promise<any> {
+  async load(...scripts: string[]): Promise<any> {
     const promises: any[] = [];
     scripts.forEach((script) => promises.push(this.loadScript(script)));
-    return Promise.all(promises);
+    return await Promise.all(promises);
   }
 
   loadScript(name: string): Promise<any> {
     return new Promise((resolve, reject) => {
       // resolve if already loaded
       if (this.scripts[name].loaded) {
+        console.log('LOADED');
         resolve({
           script: name,
           loaded: true,
@@ -42,7 +43,7 @@ export class ScriptService {
         });
       } else {
         const existingScript = document.querySelectorAll(`head script[src="${this.scripts[name].src}"]`);
-        if (!existingScript) {
+        if (existingScript.length === 0) {
           // load script
           const script = document.createElement('script');
           script.type = 'text/javascript';
@@ -50,6 +51,7 @@ export class ScriptService {
           if (script.readyState) {
             // IE
             script.onreadystatechange = () => {
+              console.log('ON READYSTATECHANGE');
               if (
                 script.readyState === 'loaded' ||
                 script.readyState === 'complete'
@@ -66,6 +68,7 @@ export class ScriptService {
             };
           } else {
             // Others
+            console.log('ONLOAD');
             script.onload = () => {
               this.scripts[name].loaded = true;
               resolve({
@@ -77,6 +80,7 @@ export class ScriptService {
             };
           }
           script.onerror = (error: any) =>
+          console.log('ON ERROR', error);;
             resolve({
               script: name,
               loaded: false,

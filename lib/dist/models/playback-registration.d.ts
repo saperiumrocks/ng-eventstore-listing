@@ -4,4 +4,5 @@ export interface PlaybackRegistration {
     owner: object;
     registrationId: string;
     playbackList: PlaybackList;
+    scriptName?: string;
 }

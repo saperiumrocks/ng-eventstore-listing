@@ -5,6 +5,7 @@ export declare class PlaybackService {
     private scriptService;
     private pushService;
     private playbackRegistry;
+    private playbackInterfaceMap;
     constructor(scriptService: ScriptService, pushService: PushService);
     init(socketUrl: string): void;
     unRegisterForPlayback(token: any): Promise<void>;
