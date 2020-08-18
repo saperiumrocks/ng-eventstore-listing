@@ -193,7 +193,11 @@ export class NgEventstoreListingComponent
       const index = this._dataList.findIndex((row: any) => {
         return row.get('rowId') === id;
       });
-      return (this._dataList.get(index) as any).toJS();
+      if (index > 0) {
+        return (this._dataList.get(index) as any).toJS();
+      }
+
+      return {};
     },
     setState: (id: string, data: any) => {
       const index = this._dataList.findIndex((row: any) => {
