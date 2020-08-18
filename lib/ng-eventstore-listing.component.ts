@@ -273,6 +273,7 @@ export class NgEventstoreListingComponent
       .pipe(
         debounceTime(100),
         switchMap((params) => {
+          console.log('GET PLAYBACK LIST HERE');
           return this.playbackListService.getPlaybackList(
             this.playbackListBaseUrl,
             params.playbackListName,

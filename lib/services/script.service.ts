@@ -88,6 +88,9 @@ export class ScriptService {
               meta: this.scripts[name].meta,
             });
           document.getElementsByTagName('head')[0].appendChild(script);
+        } else {
+          console.log('Script already exists');
+          resolve();
         }
       }
     });

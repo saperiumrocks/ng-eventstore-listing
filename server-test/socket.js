@@ -90,11 +90,12 @@ module.exports = function(server, es) {
         /*
             data = ['subscriptionToken1', 'subscriptionToken2']
         */
-        const subscriptionTokens = JSON.parse(data);
+        const subscriptionTokens = [data];
         _self._removeTopics(
           subscriptionTokens,
             (subscriptionToken) => {
               es.unsubscribe(subscriptionToken);
+              console.log('UNSUBSCRIBED TOKEN:', subscriptionToken);
               socket.leave(subscriptionToken);
             }
         );

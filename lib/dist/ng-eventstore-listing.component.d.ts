@@ -58,7 +58,7 @@ export declare class NgEventstoreListingComponent implements OnInit, OnChanges, 
     requestPlaybackList(): void;
     private _loadScripts;
     private _initSubscriptions;
-    private _resetSubscriptions;
+    _resetSubscriptions(): void;
     _onUpdate(payload: any): void;
     _onUpdateLookups(payload: any): void;
     _onShowModal(payload: any): void;

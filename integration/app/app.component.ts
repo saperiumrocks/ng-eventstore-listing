@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, OnInit, ViewChild } from '@angular/core';
+import { Component, ChangeDetectionStrategy, OnInit, ViewChild, ChangeDetectorRef } from '@angular/core';
 import { TestRowComponent } from './test-row/test-row.component';
 import {
   SubscriptionConfiguration,
@@ -75,7 +75,9 @@ export class AppComponent implements OnInit {
 
   lookups = {};
 
-  constructor() {}
+  show = false;
+
+  constructor(private cdr: ChangeDetectorRef) {}
 
   ngOnInit() {
     const self = this;
@@ -118,5 +120,11 @@ export class AppComponent implements OnInit {
 
   exportButtonClicked() {
     this.ngEventstoreListingComponent.exportCSV();
+  }
+
+  toggleShow() {
+    this.show = !this.show;
+    console.log(this.show);
+    this.cdr.detectChanges();
   }
 }

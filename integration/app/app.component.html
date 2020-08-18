@@ -22,21 +22,27 @@
 
   <button class="btn btn-primary" (click)="exportButtonClicked()">Export CSV</button>
 
-  <lib-ng-eventstore-listing
-    (playbackListLoadedEmitter)="playbackListLoaded($event)"
-    [itemComponentClass]="rowComponentClass"
-    [lookups]="lookups"
-    [itemSubscriptionConfiguration]="itemSubscriptionConfiguration"
-    [listSubscriptionConfiguration]="listSubscriptionConfiguration"
-    [socketUrl]="socketUrl"
-    [playbackListBaseUrl]="playbackListBaseUrl"
-    [scriptStore]="scriptStore"
-    [playbackListName]="playbackListName"
-    [pageIndex]="pageIndex"
-    [itemsPerPage]="itemsPerPage"
-    [filters]="filters"
-    [sort]="sort">
-  </lib-ng-eventstore-listing>
+  <button (click)="toggleShow()" class="btn btn-primary">Toggle Visibility</button>
+
+  <div *ngIf="show">
+    <lib-ng-eventstore-listing
+      (playbackListLoadedEmitter)="playbackListLoaded($event)"
+      [itemComponentClass]="rowComponentClass"
+      [lookups]="lookups"
+      [itemSubscriptionConfiguration]="itemSubscriptionConfiguration"
+      [listSubscriptionConfiguration]="listSubscriptionConfiguration"
+      [socketUrl]="socketUrl"
+      [playbackListBaseUrl]="playbackListBaseUrl"
+      [scriptStore]="scriptStore"
+      [playbackListName]="playbackListName"
+      [pageIndex]="pageIndex"
+      [itemsPerPage]="itemsPerPage"
+      [filters]="filters"
+      [sort]="sort">
+    </lib-ng-eventstore-listing>
+  </div>
+
+
 
   <pagination [totalItems]="totalItems" [itemsPerPage]="itemsPerPage" (pageChanged)="onPageChanged($event)"></pagination>
 
