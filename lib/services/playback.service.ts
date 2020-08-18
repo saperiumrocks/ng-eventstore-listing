@@ -59,10 +59,11 @@ export class PlaybackService {
           const eventName = fromEvent.payload.name;
           const thisPlaybackScript = window[thisScriptName];
           const playbackFunction = thisPlaybackScript.playbackInterface[eventName];
+          // const stateInitFn = thisPlaybackScript.playbackInterface.$init;
 
           if (playbackFunction) {
-            const row = stateFunctions.getState(eventObj.aggregateId);
-            const state = row.data;
+            // const row = stateFunctions.getState(eventObj.aggregateId);
+            const state = eventObj.payload;
             const funcs = {
               emit: (targetQuery, payload, done) => {
                 done();
