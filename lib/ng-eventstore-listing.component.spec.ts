@@ -143,6 +143,18 @@ describe('NgEventstoreListingComponent', () => {
     });
   });
 
+  describe('ngOnDestroy', () => {
+    it('should call resetSubscriptions', () => {
+      spyOn(component, '_resetSubscriptions');
+      component._initialized = true;
+
+      component.ngOnDestroy();
+
+      expect(component._resetSubscriptions).toHaveBeenCalled();
+      expect(component._initialized).toEqual(false);
+    });
+  });
+
   describe('ngOnChanges', () => {
     beforeEach(() => {
       mockPlaybackListService._getPlaybackList.and.callFake(

@@ -261,6 +261,7 @@ export class NgEventstoreListingComponent
 
   ngOnDestroy() {
     this._resetSubscriptions();
+    this._initialized = false;
   }
 
   trackByFn(index: number, item: any) {
@@ -394,7 +395,7 @@ export class NgEventstoreListingComponent
     }
   }
 
-  private _resetSubscriptions() {
+  _resetSubscriptions() {
     this._subscriptionTokens.forEach((subscriptionToken) => {
       this.playbackService.unRegisterForPlayback(subscriptionToken);
     });
