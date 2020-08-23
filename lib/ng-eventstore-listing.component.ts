@@ -419,17 +419,20 @@ export class NgEventstoreListingComponent
     this.deleteEmitter.emit(payload);
   }
 
-  exportCSV(type?: string) {
-    const startIndex = this.itemsPerPage * (this.pageIndex - 1);
-    const exportPlaybackListRequestParams: PlaybackListRequest = {
-      playbackListName: this.playbackListName,
-      startIndex: startIndex,
-      limit: 1000000,
-      filters: this.filters,
-      sort: this.sort,
-      type: type
-    };
+  exportCSV(overrideParams?: PlaybackListRequest) {
+    if (overrideParams) {
+      this._exportPlaybackListSubject.next(overrideParams);
+    } else {
+      const startIndex = this.itemsPerPage * (this.pageIndex - 1);
+      const exportPlaybackListRequestParams: PlaybackListRequest = {
+        playbackListName: this.playbackListName,
+        startIndex: startIndex,
+        limit: 1000000,
+        filters: this.filters,
+        sort: this.sort
+      };
 
-    this._exportPlaybackListSubject.next(exportPlaybackListRequestParams);
+      this._exportPlaybackListSubject.next(exportPlaybackListRequestParams);
+    }
   }
 }

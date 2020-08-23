@@ -224,17 +224,14 @@ describe('NgEventstoreListingComponent', () => {
 
       component.sort = { field: 'dealershipName', sortDirection: SortDirection.ASC };
 
-      const mockType = 'default';
-
-      component.exportCSV(mockType);
+      component.exportCSV();
 
       const expectedParams = {
         playbackListName: 'test_playback_list_name',
         startIndex: component.itemsPerPage * (component.pageIndex - 1),
         limit: 1000000,
         filters: component.filters,
-        sort: component.sort,
-        type: mockType
+        sort: component.sort
       };
       expect(component._exportPlaybackListSubject.next).toHaveBeenCalledWith(expectedParams);
     });
