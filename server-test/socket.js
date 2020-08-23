@@ -67,6 +67,7 @@ module.exports = function(server, es) {
 
   socketInstance.of('events').on('connection', (socket) => {
     socket.on('subscribe', function(data, fn) {
+      console.log('SOCKET SUBSCRIBE');
       if (!clients[socket.id]) {
         clients[socket.id] = { subscriptionTokens: [] };
       }
@@ -87,6 +88,7 @@ module.exports = function(server, es) {
     });
 
     socket.on('unsubscribe', function(data, fn) {
+      console.log('SOCKET UNSUBSCRIBE');
         /*
             data = ['subscriptionToken1', 'subscriptionToken2']
         */
@@ -103,6 +105,7 @@ module.exports = function(server, es) {
     });
 
     socket.on('disconnect', () => {
+      console.log('SOCKET DISCONNECT');
       const client = clients[socket.id] || {};
       clientSubscriptionTokens = client.subscriptionTokens || [];
       clientSubscriptionTokens.forEach((token) => {

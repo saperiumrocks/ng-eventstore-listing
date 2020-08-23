@@ -91,36 +91,6 @@ export class PushService {
     return clientToken;
   }
 
-  // async subscribeStreams() {
-  //   // await this.waitForSocketConnection();
-  //   if (this.ioPush.connected) {
-  //     // this.ioPush.on('connected', () => {
-  //     console.log(this.subscriptions);
-  //     const clientTokens = Object.keys(this.subscriptions);
-  //     clientTokens.forEach((clientToken) => {
-  //       const sub = this.subscriptions[clientToken];
-  //       // do server subsribe for those without tokens yet
-  //       if (!sub.token) {
-  //         // build up proper subscribe request query
-  //         const query = Object.assign(sub.query, {
-  //           offset: sub.offset,
-  //         });
-  //         console.log('SUBSCRIBE IS CALLED:', query);
-  //         this.ioPush.emit('subscribe', query, (token: string) => {
-  //           console.log('SUBSCRIBE EMIT');
-  //           if (token) {
-  //             console.log('Server Subscribed:', token, query);
-  //             sub.token = token;
-  //           } else {
-  //             console.error('Subscribe error for query', query);
-  //           }
-  //         });
-  //       }
-  //     });
-  //     // })
-  //   }
-  // }
-
   unsubscribe(clientToken): Promise<void> {
     return new Promise((resolve, reject) => {
       try {
@@ -145,52 +115,4 @@ export class PushService {
       }
     });
   }
-
-  // async waitForSocketConnection(): Promise<any> {
-  //   return new Promise((resolve, reject) => {
-  //     let timeout;
-  //     this.ngZone.runOutsideAngular(() => {
-  //       timeout = setTimeout(() => {
-  //         this.ngZone.run(() => {
-  //           console.error('IO Connectioned timedout');
-  //           reject();
-  //         });
-  //       }, 10000)
-  //     })
-
-
-  //     while(!this.ioPush.connected) {
-  //       console.log(this.ioPush);
-  //     }
-  //     clearTimeout(timeout);
-  //     return resolve();
-
-  //   })
-  // }
-
-  // monitorMeta(clientToken, tag, timeout, cb) {
-  //   const self = this;
-  //   const sub = self.subscriptions[clientToken];
-  //   if (sub && typeof tag === 'string' && typeof cb === 'function') {
-  //     const monitorToken =
-  //       Math.random().toString(36).substr(2, 9) + '-' + Date.now().toString();
-  //     // setup monitor token/filter/callback mapping
-  //     if (!sub.monitorTags[tag]) { sub.monitorTags[tag] = []; }
-  //     sub.monitorTags[tag].push({
-  //       token: monitorToken,
-  //       callback: cb,
-  //     });
-  //     setTimeout(() => {
-  //       const sub = self.subscriptions[clientToken];
-  //       if (sub && Array.isArray(sub.monitorTags[tag])) {
-  //         const idx = sub.monitorTags[tag].findIndex(
-  //           (x) => x.token === monitorToken
-  //         );
-  //         if (idx != -1) { sub.monitorTags[tag].splice(idx, 1); }
-  //         if (sub.monitorTags[tag].length <= 0) { delete sub.monitorTags[tag]; }
-  //         // console.log('TAGS:', clientToken, sub.monitorTags);
-  //       }
-  //     }, timeout);
-  //   }
-  // }
 }
