@@ -7,4 +7,5 @@ export interface PlaybackListRequest {
   limit: number;
   filters?: Filter[];
   sort?: Sort;
+  type?: string;
 }

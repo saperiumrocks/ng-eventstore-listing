@@ -419,7 +419,7 @@ export class NgEventstoreListingComponent
     this.deleteEmitter.emit(payload);
   }
 
-  exportCSV() {
+  exportCSV(type?: string) {
     const startIndex = this.itemsPerPage * (this.pageIndex - 1);
     const exportPlaybackListRequestParams: PlaybackListRequest = {
       playbackListName: this.playbackListName,
@@ -427,6 +427,7 @@ export class NgEventstoreListingComponent
       limit: 1000000,
       filters: this.filters,
       sort: this.sort,
+      type: type
     };
 
     this._exportPlaybackListSubject.next(exportPlaybackListRequestParams);
