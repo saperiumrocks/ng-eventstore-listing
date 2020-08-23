@@ -310,7 +310,8 @@ export class NgEventstoreListingComponent
           params.startIndex,
           params.limit,
           params.filters,
-          params.sort
+          params.sort,
+          params.type
         );
       })
     )
