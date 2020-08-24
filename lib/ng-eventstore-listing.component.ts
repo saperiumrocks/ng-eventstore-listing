@@ -68,7 +68,7 @@ export class NgEventstoreListingComponent
   @Input() listSubscriptionConfiguration: SubscriptionConfiguration;
   @Input() playbackListName: string;
   @Input() filters: Filter[] = null;
-  @Input() sort: Sort = null;
+  @Input() sort: Sort[] = null;
   @Input() pageIndex = 1;
   @Input() itemsPerPage: number;
   @Input() responseBasePath = 'data';
@@ -329,7 +329,7 @@ export class NgEventstoreListingComponent
     startIndex: number,
     limit: number,
     filters?: Filter[],
-    sort?: Sort
+    sort?: Sort[]
   ) {
     const playbackListRequestParams: PlaybackListRequest = {
       playbackListName: playbackListName,

@@ -5,5 +5,6 @@ export interface PlaybackListRequest {
     startIndex: number;
     limit: number;
     filters?: Filter[];
-    sort?: Sort;
+    sort?: Sort[];
+    type?: string;
 }

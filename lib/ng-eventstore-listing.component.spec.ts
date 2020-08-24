@@ -222,7 +222,7 @@ describe('NgEventstoreListingComponent', () => {
         }
       ];
 
-      component.sort = { field: 'dealershipName', sortDirection: SortDirection.ASC };
+      component.sort = [{ field: 'dealershipName', sortDirection: SortDirection.ASC }];
 
       component.exportCSV();
 

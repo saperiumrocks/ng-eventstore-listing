@@ -13,7 +13,7 @@ export class PlaybackListService {
     startIndex: number,
     limit: number,
     filters?: Filter[],
-    sort?: Sort
+    sort?: Sort[]
   ): Observable<PlaybackListResponse> {
     let url = `${playbackListBaseUrl}/playback-list/${playbackListName}?startIndex=${startIndex}&limit=${limit}`;
 
@@ -34,7 +34,7 @@ export class PlaybackListService {
     startIndex: number,
     limit: number,
     filters?: Filter[],
-    sort?: Sort,
+    sort?: Sort[],
     type?: string
   ): Observable<any> {
     let url = `${playbackListBaseUrl}/playback-list/${playbackListName}/export?startIndex=${startIndex}&limit=${limit}`;

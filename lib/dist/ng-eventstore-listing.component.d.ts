@@ -27,7 +27,7 @@ export declare class NgEventstoreListingComponent implements OnInit, OnChanges, 
     listSubscriptionConfiguration: SubscriptionConfiguration;
     playbackListName: string;
     filters: Filter[];
-    sort: Sort;
+    sort: Sort[];
     pageIndex: number;
     itemsPerPage: number;
     responseBasePath: string;
@@ -54,7 +54,7 @@ export declare class NgEventstoreListingComponent implements OnInit, OnChanges, 
     ngOnDestroy(): void;
     trackByFn(index: number, item: any): any;
     private _initializeRequests;
-    _getPlaybackList(playbackListName: string, startIndex: number, limit: number, filters?: Filter[], sort?: Sort): void;
+    _getPlaybackList(playbackListName: string, startIndex: number, limit: number, filters?: Filter[], sort?: Sort[]): void;
     requestPlaybackList(): void;
     private _loadScripts;
     private _initSubscriptions;
@@ -63,5 +63,5 @@ export declare class NgEventstoreListingComponent implements OnInit, OnChanges, 
     _onUpdateLookups(payload: any): void;
     _onShowModal(payload: any): void;
     _onDelete(payload: any): void;
-    exportCSV(): void;
+    exportCSV(overrideParams?: PlaybackListRequest): void;
 }
