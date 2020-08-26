@@ -6,7 +6,10 @@ module.exports = function (config) {
     basePath: '',
     browserDisconnectTolerance: 2,
     browserNoActivityTimeout: 50000,
-    frameworks: ['jasmine', '@angular/cli'],
+    frameworks: [
+      'jasmine',
+      '@angular/cli'
+    ],
     plugins: [
       require('karma-jasmine'),
       require('karma-chrome-launcher'),

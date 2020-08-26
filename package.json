@@ -5,6 +5,7 @@
   "scripts": {
     "ng": "ng",
     "start": "node --max_old_space_size=8048 ./node_modules/@angular/cli/bin/ng serve",
+    "start:prod": "node --max_old_space_size=8048 ./node_modules/@angular/cli/bin/ng serve --prod",
     "test": "npm run test:lib",
     "lint": "cd lib && ng lint && cd ..",
     "lint:fix": "cd lib && ng lint --fix && cd ..",

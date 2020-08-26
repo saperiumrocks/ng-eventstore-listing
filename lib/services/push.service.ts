@@ -1,5 +1,6 @@
 import { Injectable, Inject, NgZone } from '@angular/core';
-import { IO_TOKEN } from './socket.io.service';
+// import { IO_TOKEN } from './socket.io.service';
+import * as io from 'socket.io-client';
 
 // TODO: Make environment pluggable or derivable
 
@@ -7,13 +8,13 @@ import { IO_TOKEN } from './socket.io.service';
 export class PushService {
   private ioPush: any;
   private subscriptions: any = {};
-  constructor(@Inject(IO_TOKEN) private io: any, private ngZone: NgZone) {}
+  constructor() { }
 
   init(socketUrl: string) {
-    this.ioPush = this.io(`${socketUrl}/events`);
-
     const self = this;
-    this.ioPush.on('message', (eventObj, token) => {
+    self.ioPush = io.connect(`${socketUrl}/events`);
+
+    self.ioPush.on('message', (eventObj, token) => {
       console.log('got message from push server: ', eventObj, token);
       const clientTokens = Object.keys(self.subscriptions);
       // redirect to mapped subscription/token callback
@@ -54,6 +55,10 @@ export class PushService {
           });
         }
       });
+    });
+
+    self.ioPush.on('reconnect', () => {
+      console.log('TEST RECONNECTION');
     });
   }
 
