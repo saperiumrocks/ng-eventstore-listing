@@ -8,3 +8,4 @@ export { PlaybackListService as ɵd } from './services/playback-list.service';
 export { PlaybackService as ɵb } from './services/playback.service';
 export { PushService as ɵc } from './services/push.service';
 export { ScriptService as ɵa } from './services/script.service';
+export { SocketIoService as ɵg } from './services/socket.io.service';

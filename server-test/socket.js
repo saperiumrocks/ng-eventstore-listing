@@ -3,11 +3,19 @@ const _ = require('lodash');
 let socketInstance;
 
 const getKeyFromQuery = (query) =>{
-  return `${query.context}${query.aggregateId}.${query.aggregateId}`;
+  return `${query.context}.${query.aggregate}.${query.aggregateId}`;
 };
 
-const subscriptions = {};
-const clients = {};
+const queryTokenMap = {};
+const tokenSocketIdMap = {};
+const socketIdTokenMap = {};
+
+// setInterval(() => {
+//   console.log(queryTokenMap);
+//   console.log(tokenSocketIdMap);
+//   console.log(socketIdTokenMap);
+//   console.log('===============================================');
+// }, 5000)
 
 module.exports = function(server, es) {
   const _self = this;
@@ -45,7 +53,6 @@ module.exports = function(server, es) {
   socketInstance = SocketIO(server);
   socketInstance.origins('*:*');
 
-
   const subscriberFunc = (err, event, done) => {
     console.log('SUBSCRIBER FUNC');
     if (err) {
@@ -54,22 +61,20 @@ module.exports = function(server, es) {
       // Get Token Subscription
       const key = getKeyFromQuery({
         context: event.context,
-        aggregate: event.aggregateId,
+        aggregate: event.aggregate,
         aggregateId: event.aggregateId
       });
 
-      const subscriptionToken = subscriptions[key]
-
-      socketInstance.of('events').emit('message', event, subscriptionToken);
+      const subscriptionToken = queryTokenMap[key];
+      socketInstance.of('events').to(subscriptionToken).emit('message', event, subscriptionToken);
       done();
     }
   };
 
   socketInstance.of('events').on('connection', (socket) => {
     socket.on('subscribe', function(data, fn) {
-      console.log('SOCKET SUBSCRIBE');
-      if (!clients[socket.id]) {
-        clients[socket.id] = { subscriptionTokens: [] };
+      if (!socketIdTokenMap[socket.id]) {
+        socketIdTokenMap[socket.id] = [];
       }
 
       const query = {
@@ -78,43 +83,71 @@ module.exports = function(server, es) {
         aggregateId: data.aggregateId
       };
 
-      const subscriptionToken = es.subscribe(query, data.offset, subscriberFunc);
-      socket.join(subscriptionToken);
+      // Get if subscription token for query already exists
+      let subscriptionToken = queryTokenMap[getKeyFromQuery(query)];
 
-      clients[socket.id].subscriptionTokens.push(subscriptionToken);
+      console.log('TEST');
+      console.log(subscriptionToken);
+      if (subscriptionToken) {
+        socket.join(subscriptionToken);
+      } else {
+        subscriptionToken = es.subscribe(query, data.offset, subscriberFunc);
+        socket.join(subscriptionToken);
+        queryTokenMap[getKeyFromQuery(query)] = subscriptionToken;
+      }
 
-      subscriptions[getKeyFromQuery(query)] = subscriptionToken;
+      socketIdTokenMap[socket.id].push(subscriptionToken);
+
+      if (tokenSocketIdMap[subscriptionToken]) {
+        tokenSocketIdMap[subscriptionToken].push(socket.id);
+      } else {
+        tokenSocketIdMap[subscriptionToken] = [socket.id];
+      }
+
       fn(subscriptionToken);
     });
 
-    socket.on('unsubscribe', function(data, fn) {
-      console.log('SOCKET UNSUBSCRIBE');
-        /*
-            data = ['subscriptionToken1', 'subscriptionToken2']
-        */
-        const subscriptionTokens = [data];
-        _self._removeTopics(
-          subscriptionTokens,
-            (subscriptionToken) => {
-              es.unsubscribe(subscriptionToken);
-              console.log('UNSUBSCRIBED TOKEN:', subscriptionToken);
-              socket.leave(subscriptionToken);
+    socket.on('unsubscribe', function(subscriptionToken, fn) {
+      const subscriberList = tokenSocketIdMap[subscriptionToken];
+      if (Array.isArray(subscriberList)) {
+        const index = subscriberList.indexOf(socket.id);
+        let socketIds = [];
+        if (index > -1) {
+          socketIds = subscriberList.splice(index, 1);
+          // Delete token from socketId map
+          delete socketIdTokenMap[socketIds[0]];
+        }
+
+        socket.leave(subscriptionToken);
+        if (subscriberList.length === 0) {
+          delete tokenSocketIdMap[subscriptionToken];
+          es.unsubscribe(subscriptionToken);
+          // Remove queryMapping
+          _.forOwn(queryTokenMap, (value, key) => {
+            if (value === subscriptionToken) {
+              delete queryTokenMap[key];
+              return false;
             }
-        );
-        fn();
+          });
+        }
+      }
+
+      fn();
     });
 
     socket.on('disconnect', () => {
-      console.log('SOCKET DISCONNECT');
-      const client = clients[socket.id] || {};
-      clientSubscriptionTokens = client.subscriptionTokens || [];
-      clientSubscriptionTokens.forEach((token) => {
-        console.log('Socket unsubscription: ', token);
-        es.unsubscribe(token);
-        socket.leave(token);
+      const tokensToRemove = (socketIdTokenMap[socket.id] || []);
+      tokensToRemove.forEach((token) => {
+        const index = (tokenSocketIdMap[token] || []).indexOf(socket.id);
+        if (index > -1) {
+          const socketIdToRemove = tokenSocketIdMap[token].splice(index, 1);
+          delete socketIdTokenMap[socketIdToRemove];
+          if (tokenSocketIdMap[token].length === 0) {
+            es.unsubscribe(token);
+            delete tokenSocketIdMap[token];
+          }
+        }
       });
-
-      delete clients[socket.id];
     });
 
   });

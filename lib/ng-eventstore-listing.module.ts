@@ -4,13 +4,14 @@ import { ItemTemplateHolderComponent } from './components/item-template-holder/i
 
 import { CommonModule } from '@angular/common';
 import { TemplateDirective } from './directives/template.directive';
-// import { IO_TOKEN } from './services/socket.io.service';
+// import { IO_TOKEN, SocketIoService } from './services/socket.io.service';
 
 // import * as io from 'socket.io-client';
 import { ScriptService } from './services/script.service';
 import { PlaybackService } from './services/playback.service';
 import { PlaybackListService } from './services/playback-list.service';
 import { PushService } from './services/push.service';
+import { SocketIoService } from './services/socket.io.service';
 
 @NgModule({
   declarations: [
@@ -27,7 +28,8 @@ import { PushService } from './services/push.service';
     ScriptService,
     PlaybackService,
     PlaybackListService,
-    PushService
+    PushService,
+    SocketIoService
     // ,
     // { provide: IO_TOKEN, useValue: io }
   ]

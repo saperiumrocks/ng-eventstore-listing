@@ -1,5 +1,5 @@
 import { Injectable, Inject, NgZone } from '@angular/core';
-// import { IO_TOKEN } from './socket.io.service';
+import _forOwn from 'lodash-es/forOwn';
 import * as io from 'socket.io-client';
 
 // TODO: Make environment pluggable or derivable
@@ -11,16 +11,15 @@ export class PushService {
   constructor() { }
 
   init(socketUrl: string) {
+    this.ioPush = io.connect(`${socketUrl}/events`);
     const self = this;
-    self.ioPush = io.connect(`${socketUrl}/events`);
-
-    self.ioPush.on('message', (eventObj, token) => {
+    this.ioPush.on('message', (eventObj, token) => {
       console.log('got message from push server: ', eventObj, token);
       const clientTokens = Object.keys(self.subscriptions);
       // redirect to mapped subscription/token callback
       clientTokens.forEach((clientToken) => {
         const sub = self.subscriptions[clientToken];
-        if (sub.token === token) {
+        // if (sub.token === token) {
           // update next offset (from stream revision) for this subscription, so for reconnecting
           if (!isNaN(eventObj.streamRevision)) {
             sub.offset = eventObj.streamRevision + 1;
@@ -53,12 +52,29 @@ export class PushService {
               });
             }
           });
-        }
+        // }
       });
     });
 
-    self.ioPush.on('reconnect', () => {
-      console.log('TEST RECONNECTION');
+    this.ioPush.on('reconnect', () => {
+      // console.log('TEST RECONNECTION');
+      // this.ioPush.emit('resubscribe', () => {
+        // console.log(this.subscriptions);
+        _forOwn(this.subscriptions, (sub) => {
+          const subscriptionQuery = Object.assign(sub.query, {
+            offset: sub.offset,
+          });
+
+          this.ioPush.emit('subscribe', subscriptionQuery, (token: string) => {
+            if (token) {
+              console.log('Reconnected:', token, subscriptionQuery);
+              sub.token = token;
+            } else {
+              console.error('Reconnect error for query', subscriptionQuery);
+            }
+          });
+        });
+      // });
     });
   }
 
