@@ -29,7 +29,7 @@ const titlesDashboardListProjection = {
         titles_vehicle_title_status_updated: function(state, event, funcs, done) {
             funcs.getPlaybackList('auction_titles_list', function(err, playbackList) {
                 const eventPayload = event.payload.payload;
-                playbackList.get(event.aggregate, (err, oldData) => {
+                playbackList.get(event.aggregateId, (err, oldData) => {
                     const data = {
                         salesChannelInstanceVehicleId: eventPayload.salesChannelInstanceVehicleId,
                         titleStatus: eventPayload.titleStatus
@@ -50,10 +50,6 @@ const titlesDashboardListProjection = {
                         soldAmount: eventPayload.soldAmount
                     };
 
-                    console.log('TESTING THIS WORKS');
-                    console.log(data);
-                    console.log(oldData);
-
                     playbackList.update(event.aggregateId, event.streamRevision, oldData.data, data, {}, function(err) {
                         if (!err) {
                             done();
@@ -63,6 +59,24 @@ const titlesDashboardListProjection = {
                     });
                 });
             });
+        },
+        subscription_flag_updated: function(state, event, funcs, done) {
+          funcs.getPlaybackList('auction_titles_list', function(err, playbackList) {
+            const eventPayload = event.payload.payload;
+            playbackList.get(event.aggregateId, (err, oldData) => {
+                const data = {
+                    subscriptionFlag: eventPayload.subscriptionFlag
+                };
+
+                playbackList.update(event.aggregateId, event.streamRevision, oldData.data, data, {}, function(err) {
+                    if (!err) {
+                        done();
+                    } else {
+                      console.log(err);
+                    }
+                });
+            });
+          });
         }
 
         // titles_vehicle_sold_amount_updated: function(state, event, funcs, done) {

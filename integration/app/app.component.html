@@ -24,12 +24,14 @@
 
   <button (click)="toggleShow()" class="btn btn-primary">Toggle Visibility</button>
 
+  <button (click)="switchPlaybackListName()" class="btn btn-primary">Toggle PlaybackListName</button>
+
   <div *ngIf="show">
     <lib-ng-eventstore-listing
       (playbackListLoadedEmitter)="playbackListLoaded($event)"
       [itemComponentClass]="rowComponentClass"
       [lookups]="lookups"
-      [itemSubscriptionConfiguration]="itemSubscriptionConfiguration"
+      [itemSubscriptionConfigurations]="itemSubscriptionConfigurations"
       [listSubscriptionConfiguration]="listSubscriptionConfiguration"
       [socketUrl]="socketUrl"
       [playbackListBaseUrl]="playbackListBaseUrl"

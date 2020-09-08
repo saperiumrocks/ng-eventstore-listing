@@ -1,4 +1,5 @@
 import { EventEmitter, OnInit, OnChanges, SimpleChanges, ChangeDetectorRef } from '@angular/core';
+import { FormGroup, Validators, FormControl } from '@angular/forms';
 export declare abstract class ItemTemplateComponent implements OnInit, OnChanges {
     protected changeDetectorRef?: ChangeDetectorRef;
     onUpdateEmitter: EventEmitter<any>;
@@ -8,6 +9,8 @@ export declare abstract class ItemTemplateComponent implements OnInit, OnChanges
     idPropertyName: string;
     data: any;
     lookups: any;
+    private _formGroup;
+    private _formGroupKeys;
     _changeFn: (changes: any) => void;
     constructor(changeDetectorRef?: ChangeDetectorRef);
     ngOnInit(): void;
@@ -17,4 +20,6 @@ export declare abstract class ItemTemplateComponent implements OnInit, OnChanges
     onUpdateLookups: (lookup: any) => void;
     onShowModal: (modalName: any, data: any) => void;
     onDelete: (actionData?: any) => void;
+    registerFormGroup: (formGroup: FormGroup) => void;
+    createFormControl(propertyName: string, initialValue: any, validators: Validators): FormControl;
 }

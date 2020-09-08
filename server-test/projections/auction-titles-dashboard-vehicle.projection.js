@@ -28,6 +28,14 @@ const auctionTitlesDashboardVehicle = {
                 aggregateId: event.aggregateId
             }
             funcs.emit(targetQuery, event.payload, done);
+        },
+        subscription_flag_updated: function(state, event, funcs, done) {
+          const targetQuery = {
+            context: 'auction',
+            aggregate: 'auction-titles-dashboard-vehicle',
+            aggregateId: event.aggregateId
+        }
+        funcs.emit(targetQuery, event.payload, done);
         }
     },
     query: {

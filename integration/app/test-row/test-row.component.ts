@@ -1,3 +1,4 @@
+import { FormControl } from '@angular/forms';
 import { Component, OnInit, ChangeDetectorRef, SimpleChanges } from '@angular/core';
 import { ItemTemplateComponent } from 'ng-eventstore-listing';
 
@@ -7,6 +8,8 @@ import { ItemTemplateComponent } from 'ng-eventstore-listing';
   styleUrls: ['./test-row.component.css']
 })
 export class TestRowComponent extends ItemTemplateComponent implements OnInit {
+  titleStatusFormControl: FormControl;
+
   constructor(changeDetectorRef: ChangeDetectorRef) {
     super(changeDetectorRef);
   }
@@ -14,6 +17,9 @@ export class TestRowComponent extends ItemTemplateComponent implements OnInit {
   ngOnInit(): void {
     // Bind onChanges
     this.registerChangeFunction(this.onChanges);
+
+    this.titleStatusFormControl = this.createFormControl('titleStatus', this.data.get('data').get('titleStatus'), null);
+
   }
 
   onChanges(changes: SimpleChanges) {

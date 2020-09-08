@@ -89,7 +89,7 @@ export class ScriptService {
             });
           document.getElementsByTagName('head')[0].appendChild(script);
         } else {
-          console.log('Script already exists');
+          // console.log('Script already exists');
           resolve();
         }
       }

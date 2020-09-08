@@ -31,6 +31,8 @@ describe('ItemTemplate', () => {
       // expect(spyChangeFn).toHaveBeenCalledWith(mockChanges);
       expect(component._changeFn).toHaveBeenCalledWith(mockChanges);
     });
+
+    // it('should call ')
   });
 
   describe('registerChangeFunction', () => {

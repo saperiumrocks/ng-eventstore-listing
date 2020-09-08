@@ -6,12 +6,14 @@ import {
   PlaybackList,
   PlaybackRegistry,
   Query,
+  ConditionalSubscriptionRegistry,
 } from '../models';
 
 @Injectable()
 export class PlaybackService {
   private playbackRegistry: PlaybackRegistry = {};
-  private playbackInterfaceMap = {};
+  private conditionalSubscriptionRegistry: ConditionalSubscriptionRegistry = {};
+
   constructor(
     private scriptService: ScriptService,
     private pushService: PushService
@@ -21,126 +23,356 @@ export class PlaybackService {
     this.pushService.init(socketUrl);
   }
 
-  async unRegisterForPlayback(token) {
+  async unRegisterForPlayback(tokens: string[]) {
     // unsubscribe from push
-    await this.pushService.unsubscribe(token);
+    await this.pushService.unsubscribe(tokens);
 
     // unregister from playback registry
-    delete this.playbackRegistry[token];
+    tokens.forEach((token) => {
+      delete this.playbackRegistry[token];
+    });
   }
 
   async registerForPlayback(
+    owner: object,
+    scriptName: string,
+    query: Query,
+    stateFunctions: StateFunctions,
+    playbackList: PlaybackList,
+    streamRevisionFunction: (item: any) => number = (item) => 0,
+    rowId?: string,
+    conditionFunction?: (item: any) => boolean
+  ) {
+    const playbackSubscriptionId = Math.random().toString(36).substr(2, 9) + '-' + Date.now().toString();
+
+    const script = await this.scriptService.getScript(scriptName);
+    let playbackScript;
+    if (script) {
+      playbackScript = window[script.meta.objectName];
+    }
+
+    let rowData;
+    if (rowId) {
+      const aggregateId = rowId ? rowId : query.aggregateId;
+      rowData = await new Promise((resolve, reject) => {
+        playbackList.get(aggregateId, (error, item) => {
+          if (error) {
+            reject(error);
+          }
+          resolve(item);
+        });
+      });
+    }
+
+    const streamRevision = streamRevisionFunction(rowData);
+
+    // Check if condition is true
+    const isConditionTrue = conditionFunction ? conditionFunction(rowData) : undefined;
+
+    let pushSubscriptionId;
+    if (isConditionTrue === true || conditionFunction === undefined) {
+      pushSubscriptionId = await this.pushService.subscribe(
+        query,
+        streamRevision,
+        this,
+        async (err, eventObj, owner2) => {
+          // owner is playbackservice
+          const self = owner2 as PlaybackService;
+          console.log(self.playbackRegistry);
+          console.log(playbackSubscriptionId);
+          const registration = self.playbackRegistry[playbackSubscriptionId];
+
+          if (eventObj.aggregate === 'states') {
+            const thisScriptName = registration.scriptName;
+            const fromEvent = eventObj.payload._meta.fromEvent;
+            const eventName = fromEvent.payload.name;
+            const thisPlaybackScript = window[thisScriptName];
+            const playbackFunction = thisPlaybackScript.playbackInterface[eventName];
+
+            if (playbackFunction) {
+              if (registration.rowId) {
+                eventObj.aggregateId = registration.rowId;
+              }
+              const state = eventObj.payload;
+              const funcs = {
+                emit: (targetQuery, payload, done) => {
+                  done();
+                },
+                getPlaybackList: (
+                  playbackListName: string,
+                  callback: (err, playbackList: PlaybackList) => void
+                ) => {
+                  if (registration.playbackList) {
+                    callback(null, registration.playbackList);
+                  } else {
+                    callback(
+                      new Error(
+                        'PlaybackList does not exist in this registration'
+                      ),
+                      null
+                    );
+                  }
+                },
+              };
+
+              const doneCallback = () => {
+                registration.playbackList.get(eventObj.aggregateId, (error, item) => {
+                  self._updateConditionalSubscriptions(eventObj.aggregateId, item);
+                });
+              };
+
+              playbackFunction(state, fromEvent, funcs, doneCallback);
+            }
+          } else {
+
+            const thisScriptName = registration.scriptName;
+            const thisPlaybackScript = window[thisScriptName];
+            const playbackFunction = thisPlaybackScript.playbackInterface[eventObj.payload.name];
+
+            if (playbackFunction) {
+              // Override aggregateId to handle other subscriptions
+              if (registration.rowId) {
+                eventObj.aggregateId = registration.rowId;
+              }
+              const row = stateFunctions.getState(eventObj.aggregateId);
+              const state = row.data;
+              const funcs = {
+                emit: (targetQuery, payload, done) => {
+                  done();
+                },
+                getPlaybackList: (
+                  playbackListName: string,
+                  callback: (err, playbackList: PlaybackList) => void
+                ) => {
+                  if (registration.playbackList) {
+                    callback(null, registration.playbackList);
+                  } else {
+                    callback(
+                      new Error(
+                        'PlaybackList does not exist in this registration'
+                      ),
+                      null
+                    );
+                  }
+                },
+              };
+
+              const doneCallback = () => {
+                registration.playbackList.get(eventObj.aggregateId, (error, item) => {
+                  self._updateConditionalSubscriptions(eventObj.aggregateId, item);
+                });
+              };
+
+              playbackFunction(state, eventObj, funcs, doneCallback);
+            }
+          }
+        }
+      );
+    }
+
+    // If condition exists, register in conditional registry
+    if (conditionFunction) {
+      if (this.conditionalSubscriptionRegistry[rowId] && Array.isArray(this.conditionalSubscriptionRegistry[rowId])) {
+        this.conditionalSubscriptionRegistry[rowId].push({
+          playbackList: playbackList,
+          playbackScript: playbackScript,
+          scriptName: scriptName,
+          owner: owner,
+          stateFunctions: stateFunctions,
+          query: query,
+          streamRevisionFunction: streamRevisionFunction,
+          conditionFunction: conditionFunction,
+          subscriptionToken: pushSubscriptionId
+        });
+      } else {
+        this.conditionalSubscriptionRegistry[rowId] = [{
+          playbackList: playbackList,
+          playbackScript: playbackScript,
+          scriptName: scriptName,
+          owner: owner,
+          stateFunctions: stateFunctions,
+          query: query,
+          streamRevisionFunction: streamRevisionFunction,
+          conditionFunction: conditionFunction,
+          subscriptionToken: pushSubscriptionId
+        }];
+      }
+    }
+
+
+    this.playbackRegistry[playbackSubscriptionId] = {
+      playbackScript: playbackScript,
+      owner: owner,
+      registrationId: pushSubscriptionId,
+      playbackList: playbackList,
+      scriptName: scriptName,
+      rowId: rowId
+    };
+
+
+
+    console.log('subscribed to playback: ', playbackSubscriptionId, pushSubscriptionId, query);
+    return playbackSubscriptionId;
+  }
+
+  async registerConditionalSubscriptions(
+    conditionFunction: (item) => boolean,
     scriptName: string,
     owner: object,
     query: Query,
     stateFunctions: StateFunctions,
-    offset?: number,
-    playbackList?: PlaybackList
+    playbackList: PlaybackList,
+    rowId?: string,
+    streamRevisionFunction?: (item) =>  number,
+    subscriptionToken?: string
   ) {
     const script = await this.scriptService.getScript(scriptName);
-    const playbackScript = window[script.meta.objectName];
-    const subscriptionId = await this.pushService.subscribe(
-      query,
-      offset,
-      this,
-      (err, eventObj, owner2, token) => {
-        // owner is playbackservice
-        const self = owner2 as PlaybackService;
-        const registration = self.playbackRegistry[token];
-        // call the function
-        // const playbackList = self.createPlaybacklist(registration)
+    let playbackScript;
+    if (script) {
+      playbackScript = window[script.meta.objectName];
+    }
 
-        // if (typeof eventObj.stateType !== 'undefined' && eventObj.eventSource)
-        //   eventObj = eventObj.eventSource;
 
-        if (eventObj.context === 'states') {
-          const thisScriptName = registration.scriptName;
-          const fromEvent = eventObj.payload._meta.fromEvent;
-          const eventName = fromEvent.payload.name;
-          const thisPlaybackScript = window[thisScriptName];
-          const playbackFunction = thisPlaybackScript.playbackInterface[eventName];
-          // const stateInitFn = thisPlaybackScript.playbackInterface.$init;
-
-          if (playbackFunction) {
-            // const row = stateFunctions.getState(eventObj.aggregateId);
-            const state = eventObj.payload;
-            const funcs = {
-              emit: (targetQuery, payload, done) => {
-                done();
-              },
-              getPlaybackList: (
-                playbackListName: string,
-                callback: (err, playbackList: PlaybackList) => void
-              ) => {
-                if (registration.playbackList) {
-                  callback(null, registration.playbackList);
-                } else {
-                  callback(
-                    new Error(
-                      'PlaybackList does not exist in this registration'
-                    ),
-                    null
-                  );
-                }
-              },
-            };
-
-            const doneCallback = () => {
-              // stateFunctions.setState(row.rowId, row);
-            };
-
-            playbackFunction(state, fromEvent, funcs, doneCallback);
-          }
-        } else {
-
-          const thisScriptName = registration.scriptName;
-          const thisPlaybackScript = window[thisScriptName];
-          const playbackFunction = thisPlaybackScript.playbackInterface[eventObj.payload.name];
-
-          if (playbackFunction) {
-            const row = stateFunctions.getState(eventObj.aggregateId);
-            const state = row.data;
-            const funcs = {
-              emit: (targetQuery, payload, done) => {
-                done();
-              },
-              getPlaybackList: (
-                playbackListName: string,
-                callback: (err, playbackList: PlaybackList) => void
-              ) => {
-                if (registration.playbackList) {
-                  callback(null, registration.playbackList);
-                } else {
-                  callback(
-                    new Error(
-                      'PlaybackList does not exist in this registration'
-                    ),
-                    null
-                  );
-                }
-              },
-            };
-
-            const doneCallback = () => {
-              // stateFunctions.setState(row.rowId, row);
-            };
-
-            playbackFunction(state, eventObj, funcs, doneCallback);
-          }
-        }
-      }
-    );
-
-    // just use the subscriptionId to map the push subscription to the playback
-    this.playbackRegistry[subscriptionId] = {
-      playbackScript: playbackScript,
-      owner: owner,
-      registrationId: subscriptionId,
-      playbackList: playbackList,
-      scriptName: scriptName
-    };
-
-    console.log('subscribed to playback: ', subscriptionId, query);
-    return subscriptionId;
+    if (this.conditionalSubscriptionRegistry[rowId] && Array.isArray(this.conditionalSubscriptionRegistry[rowId])) {
+      this.conditionalSubscriptionRegistry[rowId].push({
+        playbackList: playbackList,
+        playbackScript: playbackScript,
+        scriptName: scriptName,
+        owner: owner,
+        stateFunctions: stateFunctions,
+        query: query,
+        streamRevisionFunction: streamRevisionFunction,
+        conditionFunction: conditionFunction,
+        subscriptionToken: subscriptionToken
+      });
+    } else {
+      this.conditionalSubscriptionRegistry[rowId] = [{
+        playbackList: playbackList,
+        playbackScript: playbackScript,
+        scriptName: scriptName,
+        owner: owner,
+        stateFunctions: stateFunctions,
+        query: query,
+        streamRevisionFunction: streamRevisionFunction,
+        conditionFunction: conditionFunction,
+        subscriptionToken: subscriptionToken
+      }];
+    }
   }
+
+  _updateConditionalSubscriptions(rowId, rowData) {
+    const conditionalSubscriptions = this.conditionalSubscriptionRegistry[rowId] || [];
+    conditionalSubscriptions.forEach(async (conditionalSubscription) => {
+      if (!conditionalSubscription.subscriptionToken && conditionalSubscription.conditionFunction(rowData)) {
+        const offset = conditionalSubscription.streamRevisionFunction(rowData);
+        const subscriptionId = this.pushService.subscribe(
+          conditionalSubscription.query,
+          offset,
+          this,
+          async (err, eventObj, owner2, token) => {
+            // owner is playbackservice
+            const self = owner2 as PlaybackService;
+            const registration = self.playbackRegistry[token];
+
+            if (eventObj.aggregate === 'states') {
+              const thisScriptName = registration.scriptName;
+              const fromEvent = eventObj.payload._meta.fromEvent;
+              const eventName = fromEvent.payload.name;
+              const thisPlaybackScript = window[thisScriptName];
+              const playbackFunction = thisPlaybackScript.playbackInterface[eventName];
+
+              if (playbackFunction) {
+                const state = eventObj.payload;
+                const funcs = {
+                  emit: (targetQuery, payload, done) => {
+                    done();
+                  },
+                  getPlaybackList: (
+                    playbackListName: string,
+                    callback: (err, playbackList: PlaybackList) => void
+                  ) => {
+                    if (registration.playbackList) {
+                      callback(null, registration.playbackList);
+                    } else {
+                      callback(
+                        new Error(
+                          'PlaybackList does not exist in this registration'
+                        ),
+                        null
+                      );
+                    }
+                  },
+                };
+
+                const doneCallback = () => {
+                };
+                playbackFunction(state, fromEvent, funcs, doneCallback);
+              }
+            } else {
+
+              const thisScriptName = registration.scriptName;
+              const thisPlaybackScript = window[thisScriptName];
+              const playbackFunction = thisPlaybackScript.playbackInterface[eventObj.payload.name];
+
+              if (playbackFunction) {
+                // Override aggregateId to handle other subscriptions
+                if (registration.rowId) {
+                  eventObj.aggregateId = registration.rowId;
+                }
+                const row = conditionalSubscription.stateFunctions.getState(eventObj.aggregateId);
+                const state = row.data;
+                const funcs = {
+                  emit: (targetQuery, payload, done) => {
+                    done();
+                  },
+                  getPlaybackList: (
+                    playbackListName: string,
+                    callback: (err, playbackList: PlaybackList) => void
+                  ) => {
+                    if (registration.playbackList) {
+                      callback(null, registration.playbackList);
+                    } else {
+                      callback(
+                        new Error(
+                          'PlaybackList does not exist in this registration'
+                        ),
+                        null
+                      );
+                    }
+                  },
+                };
+
+                const doneCallback = () => {
+                  // stateFunctions.setState(row.rowId, row);
+                };
+
+                playbackFunction(state, eventObj, funcs, doneCallback);
+              }
+            }
+          }
+        );
+
+        // just use the subscriptionId to map the push subscription to the playback
+        this.playbackRegistry[subscriptionId] = {
+          playbackScript: conditionalSubscription.playbackScript,
+          owner: conditionalSubscription.owner,
+          registrationId: subscriptionId,
+          playbackList: conditionalSubscription.playbackList,
+          scriptName: conditionalSubscription.scriptName,
+          rowId: rowId
+        };
+
+        conditionalSubscription.subscriptionToken = subscriptionId;
+
+        console.log('subscribed to playback: ', subscriptionId, conditionalSubscription.query);
+        return subscriptionId;
+      } else if (!conditionalSubscription.conditionFunction(rowData) && conditionalSubscription.subscriptionToken) {
+        this.pushService.unsubscribe([conditionalSubscription.subscriptionToken]).then(() => {
+          delete this.playbackRegistry[conditionalSubscription.subscriptionToken];
+          conditionalSubscription.subscriptionToken = undefined;
+        });
+      }
+    });
+  }
+
 }

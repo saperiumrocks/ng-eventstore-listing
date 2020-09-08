@@ -6,4 +6,7 @@ export interface PlaybackRegistration {
   registrationId: string;
   playbackList: PlaybackList;
   scriptName?: string;
+  rowId: string;
+  // conditionFunction?: Function;
+  // streamRevisionFunction?: Function;
 }

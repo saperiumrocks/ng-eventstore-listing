@@ -173,6 +173,37 @@ const routes = function (es) {
     res.json(event);
   });
 
+  router.patch('/vehicles/:vehicleId', async function(req, res, next) {
+    const vehicleId = req.params.vehicleId;
+
+    const event = {
+      name: 'vehicle_updated',
+      payload: {
+          vehicleId: vehicleId,
+          year: req.body.year,
+          make: req.body.make,
+          model: req.body.model,
+          trim: req.body.trim,
+          mileage: req.body.mileage
+      }
+    };
+
+    const query = {
+      aggregate: 'vehicle',
+      context: 'vehicle',
+      aggregateId: vehicleId
+    };
+
+    const stream = await getEventStreamAsync(es, query, 0, -1);
+
+    stream.addEvent(event);
+    await commitStream(stream);
+
+    res.json(event);
+  });
+
+
+
   router.post('/batch-vehicles', async function(req, res, next) {
     const vehicles = req.body.vehicles;
     const vehicleCreatedEvents = vehicles.map((vehicle) => {
@@ -511,7 +542,7 @@ const routes = function (es) {
         const query = {
           context: 'profile',
           aggregate: 'dealership',
-          aggregateId: dealership.dealershipName
+          aggregateId: dealership.dealershipId
         };
 
         const stream = await getEventStreamAsync(es, query, 0, 1);
@@ -523,6 +554,32 @@ const routes = function (es) {
 
     res.json(mockUsers);
   });
+
+  router.put('/sales-channel-instance-vehicles/:salesChannelInstanceVehicleId/subscription-flag', async (req, res, next) => {
+    const param = req.params;
+    const body = req.body;
+    const salesChannelInstanceVehicleId = param.salesChannelInstanceVehicleId;
+
+    const event = {
+      name: 'subscription_flag_updated',
+      payload: {
+         subscriptionFlag: body.subscriptionFlag
+      }
+    };
+
+    const query = {
+      context: 'auction',
+      aggregate: 'sales-channel-instance-vehicle',
+      aggregateId: salesChannelInstanceVehicleId
+    };
+
+    const stream = await getEventStreamAsync(es, query, 0, 1);
+    stream.addEvent(event);
+    await commitStream(stream);
+
+    res.json(event);
+  });
+
 
 
   return router;

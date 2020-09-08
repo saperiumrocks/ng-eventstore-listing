@@ -12,7 +12,7 @@ const vehicleProjection = {
         },
         vehicle_created: function(state, esEvent, funcs, done) {
             const eventPayload = esEvent.payload.payload;
-            
+
             state.vehicleId = eventPayload.vehicleId;
             state.year = eventPayload.year;
             state.make = eventPayload.make;

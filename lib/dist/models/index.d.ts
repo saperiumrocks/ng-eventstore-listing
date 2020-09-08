@@ -12,4 +12,6 @@ export * from './playback-list';
 export * from './query';
 export * from './playback-registration';
 export * from './playback-registry';
+export * from './conditional-subscription-registration';
+export * from './conditional-subscription-registry';
 export * from './sort';

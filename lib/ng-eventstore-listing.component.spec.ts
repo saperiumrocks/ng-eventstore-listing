@@ -166,14 +166,14 @@ describe('NgEventstoreListingComponent', () => {
         }
       );
 
-      component.itemSubscriptionConfiguration = {
+      component.itemSubscriptionConfigurations = [{
         query: {
           context: 'auction',
           aggregate: 'auction-titles-dashboard-vehicle',
-          aggregateId: `{{rowId}}`,
+          aggregateId: `{{rowId}}`
         },
-        playbackScriptName: 'auction-titles-dashboard-vehicle',
-      };
+        playbackScriptName: 'auction-titles-dashboard-vehicle'
+      }];
 
       component.listSubscriptionConfiguration = {
         query: {

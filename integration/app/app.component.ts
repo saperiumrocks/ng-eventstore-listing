@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, OnInit, ViewChild, ChangeDetectorRef } from '@angular/core';
+import { Component, ChangeDetectionStrategy, OnInit, ViewChild, ChangeDetectorRef, NgZone } from '@angular/core';
 import { TestRowComponent } from './test-row/test-row.component';
 import {
   SubscriptionConfiguration,
@@ -30,7 +30,7 @@ export class AppComponent implements OnInit {
   sortFormControl = new FormControl();
 
   // FOR DEMO
-  itemsPerPage = 3; // = 25;
+  itemsPerPage  = 25;
   pageIndex = 1;
   filters: Filter[];
   sort: Sort;
@@ -42,19 +42,37 @@ export class AppComponent implements OnInit {
   scriptStore = ScriptStore;
   playbackListName = 'auction_titles_list_view';
 
-  itemSubscriptionConfiguration: SubscriptionConfiguration = {
-    query: {
-      context: 'auction',
-      aggregate: 'auction-titles-dashboard-vehicle',
-      aggregateId: `{{rowId}}`,
+  itemSubscriptionConfigurations: SubscriptionConfiguration[] = [
+    {
+      query: {
+        context: 'auction',
+        aggregate: 'auction-titles-dashboard-vehicle',
+        aggregateId: `{{rowId}}`,
+      },
+      rowIdFieldName: 'salesChannelInstanceVehicleId',
+      playbackScriptName: 'titles-dashboard-list-projection',
     },
-    playbackScriptName: 'titles-dashboard-list-projection',
-  };
+    {
+      query: {
+        context: 'vehicle',
+        aggregate: 'vehicle',
+        aggregateId: `{{rowId}}`,
+      },
+      rowIdFieldName: 'vehicleId',
+      streamRevisionFunction: (item) => {
+        return 0;
+      },
+      condition: (item: any) => {
+        return item.data.subscriptionFlag === undefined || item.data.subscriptionFlag === 1;
+      },
+      playbackScriptName: 'auction-vehicle-list-projection',
+    }
+  ];
 
   listSubscriptionConfiguration: SubscriptionConfiguration = {
     query: {
-      context: 'states',
-      aggregate: 'titles-dashboard-list-projection',
+      context: 'auction',
+      aggregate: 'states',
       aggregateId: 'titles-dashboard-list-projection-result',
     },
     playbackScriptName: 'titles-dashboard-list-projection',
@@ -79,8 +97,16 @@ export class AppComponent implements OnInit {
 
   constructor(private cdr: ChangeDetectorRef) {}
 
+  switchPlaybackListName() {
+    if (this.playbackListName === 'auction_titles_list_view') {
+      this.playbackListName = 'auction_titles_list_view_2';
+    } else {
+      this.playbackListName = 'auction_titles_list_view';
+    }
+    console.log(this.playbackListName);
+  }
+
   ngOnInit() {
-    const self = this;
     this.dealershipFilterFormControl.valueChanges.subscribe((value) => {
       if (value) {
         const newFilter: Filter = {
@@ -102,7 +128,7 @@ export class AppComponent implements OnInit {
     });
 
     setTimeout(() => {
-      self.lookups['test'] = { groupName: 'test', groupItems: [
+      this.lookups['test'] = { groupName: 'test', groupItems: [
         { lookupId: 'id-1', lookupName: 'Test 1', lookupValue: '1' },
         { lookupId: 'id-2', lookupName: 'Test 2', lookupValue: '2' },
         { lookupId: 'id-3', lookupName: 'Test 3', lookupValue: '3' }

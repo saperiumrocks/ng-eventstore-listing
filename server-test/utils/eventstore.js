@@ -43,6 +43,7 @@ module.exports = () => {
     user: process.env.EVENTSTORE_MYSQL_USERNAME,
     password: process.env.EVENTSTORE_MYSQL_PASSWORD,
     database: process.env.EVENTSTORE_MYSQL_DATABASE,
+    enableProjection: true,
     redisConfig: {
       host: process.env.REDIS_HOST,
       port: process.env.REDIS_PORT,
@@ -54,7 +55,8 @@ module.exports = () => {
       user: process.env.EVENTSTORE_MYSQL_USERNAME,
       password: process.env.EVENTSTORE_MYSQL_PASSWORD,
       database: process.env.EVENTSTORE_MYSQL_DATABASE
-    }
+    },
+    stateContextName: 'auction'
   });
 
   es.on('connect', function() {

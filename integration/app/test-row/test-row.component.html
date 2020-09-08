@@ -71,6 +71,7 @@
       </div>
       <div class="col-6 text-md">
         <div class="text-right">{{ data.get('data').get('titleStatus') }}</div>
+        <input [formControl]="titleStatusFormControl" class="form-control">
       </div>
     </div>
     <div class="row mb-2">
@@ -230,7 +231,7 @@
             <button class="btn btn-default btn-block">Buyer Invoice</button>
           </div>
         </div>
-    
+
         <div class="row no-gutters">
           <div class="col-6 pr-1">
             <button class="btn btn-default btn-block">Adjust Price</button>
@@ -242,6 +243,6 @@
       </div>
     </div>
 
-   
+
   </div>
 </div>

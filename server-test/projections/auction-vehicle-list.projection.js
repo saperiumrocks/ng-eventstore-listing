@@ -17,7 +17,19 @@
                     done();
                 })
             });
-        }
+        },
+        vehicle_updated: function(state, event, funcs, done) {
+          funcs.getPlaybackList('auction_vehicle_list', function(err, playbackList) {
+            const eventPayload = event.payload.payload;
+            playbackList.get(event.aggregateId, (err, oldData) => {
+              const newData = eventPayload;
+
+              playbackList.update(event.aggregateId, event.streamRevision, oldData.data, newData, {}, function(err) {
+                  done();
+              });
+            });
+          });
+      }
     };
     exports.query = {
         context: 'vehicle',
@@ -50,4 +62,4 @@
             ]
         }
     };
-})(typeof(exports) === 'undefined' ? this['auction-sales-channel-instance-vehicle-list'] = {} : exports);
+})(typeof(exports) === 'undefined' ? this['auction-vehicle-list-projection'] = {} : exports);

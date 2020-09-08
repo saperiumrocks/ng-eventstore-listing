@@ -6,6 +6,10 @@ import {
   ChangeDetectorRef,
 } from '@angular/core';
 
+import {
+  FormGroup, Validators, FormControl
+} from '@angular/forms';
+
 export abstract class ItemTemplateComponent implements OnInit, OnChanges {
   // Event Emitters
   onUpdateEmitter: EventEmitter<any> = new EventEmitter();
@@ -16,6 +20,8 @@ export abstract class ItemTemplateComponent implements OnInit, OnChanges {
   idPropertyName: string;
   data: any; // Immutable item
   lookups: any;
+  private _formGroup: FormGroup = new FormGroup({});
+  private _formGroupKeys: string[] = [];
 
   _changeFn: (changes) => void;
 
@@ -27,6 +33,22 @@ export abstract class ItemTemplateComponent implements OnInit, OnChanges {
     if (this._changeFn) {
       this._changeFn(changes);
     }
+
+    const dataChanges = changes.data ? changes.data.currentValue : null;
+    if (dataChanges && !changes.data.isFirstChange()) {
+      const dataObj = (dataChanges as any).toJS();
+
+      this._formGroupKeys.forEach((key) => {
+        const newValue = dataObj.data[key];
+        const oldValue = this._formGroup.get(key).value;
+
+        if (newValue !== oldValue) {
+          this._formGroup.get(key).setValue(newValue, { emit: false, onlySelf: true });
+        }
+      });
+
+    }
+
 
     if (this.changeDetectorRef) {
       this.changeDetectorRef.detectChanges();
@@ -69,4 +91,17 @@ export abstract class ItemTemplateComponent implements OnInit, OnChanges {
     };
     this.onDeleteEmitter.emit(actionEventEmitterData);
   }
+
+  // registerFormControl(propertyName: string)
+  registerFormGroup = (formGroup: FormGroup): void => {
+    this._formGroup = formGroup;
+  }
+
+  createFormControl(propertyName: string, initialValue: any, validators: Validators): FormControl {
+    const formControl = new FormControl(initialValue, validators);
+    this._formGroup.addControl(propertyName, formControl);
+    this._formGroupKeys.push(propertyName);
+    return formControl;
+  }
+
 }

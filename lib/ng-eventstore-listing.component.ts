@@ -64,7 +64,7 @@ export class NgEventstoreListingComponent
   @Input() socketUrl: string;
   @Input() playbackListBaseUrl: string;
   @Input() scriptStore: Script[];
-  @Input() itemSubscriptionConfiguration: SubscriptionConfiguration;
+  @Input() itemSubscriptionConfigurations: SubscriptionConfiguration[] = [];
   @Input() listSubscriptionConfiguration: SubscriptionConfiguration;
   @Input() playbackListName: string;
   @Input() filters: Filter[] = null;
@@ -85,7 +85,7 @@ export class NgEventstoreListingComponent
   _getPlaybackListSubject: Subject<PlaybackListRequest> = new Subject();
   _exportPlaybackListSubscription: Subscription;
   _exportPlaybackListSubject: Subject<PlaybackListRequest> = new Subject();
-  _subscriptionTokens: string[] = [];
+  _playbackSubscriptionTokens: string[] = [];
   _playbackList: PlaybackList = {
     get: (rowId: string, callback: (err, item) => void) => {
       const rowIndex = this._dataList.findIndex((value: any) => {
@@ -226,7 +226,6 @@ export class NgEventstoreListingComponent
       this._loadScripts().then(() => {
         this._initializeRequests();
         this.playbackService.init(this.socketUrl);
-
         const changesKeys = Object.keys(changes);
         changesKeys.forEach((key) => {
           self[key] = changes[key].currentValue;
@@ -242,14 +241,14 @@ export class NgEventstoreListingComponent
 
       });
     } else {
-
       const changesKeys = Object.keys(changes);
       changesKeys.forEach((key) => {
         self[key] = changes[key].currentValue;
         switch (key) {
           case 'pageIndex':
           case 'filters':
-          case 'sort': {
+          case 'sort':
+          case 'playbackListName': {
             this.requestPlaybackList();
             break;
           }
@@ -273,7 +272,6 @@ export class NgEventstoreListingComponent
       .pipe(
         debounceTime(100),
         switchMap((params) => {
-          console.log('GET PLAYBACK LIST HERE');
           return this.playbackListService.getPlaybackList(
             this.playbackListBaseUrl,
             params.playbackListName,
@@ -361,47 +359,53 @@ export class NgEventstoreListingComponent
   private async _initSubscriptions() {
     const self = this;
     // Per row subscriptions
-    if (self.itemSubscriptionConfiguration) {
-      self._dataList.forEach(async (row: any) => {
-        const query: Query = _clone(self.itemSubscriptionConfiguration.query);
-        query.aggregateId = query.aggregateId.replace(
-          /{{rowId}}/g,
-          row.get('rowId')
-        );
-        this._subscriptionTokens.push(
-          await self.playbackService.registerForPlayback(
-            self.itemSubscriptionConfiguration.playbackScriptName,
+    (self.itemSubscriptionConfigurations || []).forEach((itemSubscriptionConfiguration: SubscriptionConfiguration) => {
+      if (itemSubscriptionConfiguration) {
+        self._dataList.forEach(async (row: any) => {
+          const streamRevisionFunction = itemSubscriptionConfiguration.streamRevisionFunction;
+
+          const aggregateId = itemSubscriptionConfiguration.rowIdFieldName ?
+              row.get('data').get(itemSubscriptionConfiguration.rowIdFieldName) : row.get('rowId');
+
+          const query: Query = _clone(itemSubscriptionConfiguration.query);
+          query.aggregateId = query.aggregateId.replace(
+            /{{rowId}}/g,
+            aggregateId
+          );
+
+          const playbackSubscriptionToken = await self.playbackService.registerForPlayback(
             self,
+            itemSubscriptionConfiguration.playbackScriptName,
             query,
             self._stateFunctions,
-            row.get('revision') + 1,
-            self._playbackList
-          )
-        );
-      });
-    }
+            self._playbackList,
+            streamRevisionFunction,
+            row.get('rowId'),
+            itemSubscriptionConfiguration.condition
+          );
+          this._playbackSubscriptionTokens.push(playbackSubscriptionToken);
+        });
+      }
+    });
 
     if (self.listSubscriptionConfiguration) {
       // List subscription
-      this._subscriptionTokens.push(
+      this._playbackSubscriptionTokens.push(
         await self.playbackService.registerForPlayback(
-          self.listSubscriptionConfiguration.playbackScriptName,
           self,
+          self.listSubscriptionConfiguration.playbackScriptName,
           self.listSubscriptionConfiguration.query,
           self._stateFunctions,
-          // TODO: Revision response from getPlaybackList
-          0,
-          self._playbackList
+          self._playbackList,
+          () => 0
         )
       );
     }
   }
 
   _resetSubscriptions() {
-    this._subscriptionTokens.forEach((subscriptionToken) => {
-      this.playbackService.unRegisterForPlayback(subscriptionToken);
-    });
-    this._subscriptionTokens = [];
+    this.playbackService.unRegisterForPlayback(this._playbackSubscriptionTokens);
+    this._playbackSubscriptionTokens = [];
   }
 
   _onUpdate(payload: any) {

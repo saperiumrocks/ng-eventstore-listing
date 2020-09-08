@@ -5,4 +5,5 @@ export interface PlaybackRegistration {
     registrationId: string;
     playbackList: PlaybackList;
     scriptName?: string;
+    rowId: string;
 }

@@ -23,7 +23,7 @@ export declare class NgEventstoreListingComponent implements OnInit, OnChanges, 
     socketUrl: string;
     playbackListBaseUrl: string;
     scriptStore: Script[];
-    itemSubscriptionConfiguration: SubscriptionConfiguration;
+    itemSubscriptionConfigurations: SubscriptionConfiguration[];
     listSubscriptionConfiguration: SubscriptionConfiguration;
     playbackListName: string;
     filters: Filter[];
@@ -42,7 +42,7 @@ export declare class NgEventstoreListingComponent implements OnInit, OnChanges, 
     _getPlaybackListSubject: Subject<PlaybackListRequest>;
     _exportPlaybackListSubscription: Subscription;
     _exportPlaybackListSubject: Subject<PlaybackListRequest>;
-    _subscriptionTokens: string[];
+    _playbackSubscriptionTokens: string[];
     _playbackList: PlaybackList;
     _stateFunctions: {
         getState: (id: string) => any;

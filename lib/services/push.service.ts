@@ -1,5 +1,6 @@
 import { Injectable, Inject, NgZone } from '@angular/core';
 import _forOwn from 'lodash-es/forOwn';
+import _clone from 'lodash-es/clone';
 import * as io from 'socket.io-client';
 
 // TODO: Make environment pluggable or derivable
@@ -13,46 +14,49 @@ export class PushService {
   init(socketUrl: string) {
     this.ioPush = io.connect(`${socketUrl}/events`);
     const self = this;
-    this.ioPush.on('message', (eventObj, token) => {
-      console.log('got message from push server: ', eventObj, token);
+    this.ioPush.on('message', (eventObj, queryKey) => {
+      console.log('got message from push server: ', eventObj, queryKey);
       const clientTokens = Object.keys(self.subscriptions);
       // redirect to mapped subscription/token callback
       clientTokens.forEach((clientToken) => {
         const sub = self.subscriptions[clientToken];
-        // if (sub.token === token) {
-          // update next offset (from stream revision) for this subscription, so for reconnecting
-          if (!isNaN(eventObj.streamRevision)) {
-            sub.offset = eventObj.streamRevision + 1;
-          }
-          if (typeof sub.cb === 'function') {
-            sub.cb(undefined, eventObj, sub.owner, clientToken);
-          }
-
-          // iterate on monitors meta tags
-          const tags = Object.keys(sub.monitorTags);
-          tags.forEach((tag) => {
-            // check for state/eventSource._meta or event._meta
-            if (eventObj._meta && eventObj._meta.tag === tag) {
-              let reason = 'N/A';
-              if (typeof eventObj.eventType === 'string') {
-                reason = eventObj.eventType;
-              } else if (typeof eventObj.stateType === 'string') {
-                reason = eventObj.stateType;
-                if (
-                  eventObj.eventSource &&
-                  typeof eventObj.eventSource.eventType === 'string'
-                ) {
-                  reason += ` <- ${eventObj.eventSource.eventType}`;
-                }
-              }
-              // iterate on the monitors
-              const monitors = sub.monitorTags[tag];
-              monitors.forEach((monitor) => {
-                monitor.callback(reason, eventObj._meta);
-              });
+        if (sub) {
+          const subQueryKey = `${sub.query.context}.${sub.query.aggregate}.${sub.query.aggregateId}`;
+          if (subQueryKey === queryKey) {
+            // update next offset (from stream revision) for this subscription, so for reconnecting
+            if (!isNaN(eventObj.streamRevision)) {
+              sub.offset = eventObj.streamRevision + 1;
             }
-          });
-        // }
+            if (typeof sub.cb === 'function') {
+              sub.cb(undefined, eventObj, sub.owner, clientToken);
+            }
+
+            // iterate on monitors meta tags
+            const tags = Object.keys(sub.monitorTags);
+            tags.forEach((tag) => {
+              // check for state/eventSource._meta or event._meta
+              if (eventObj._meta && eventObj._meta.tag === tag) {
+                let reason = 'N/A';
+                if (typeof eventObj.eventType === 'string') {
+                  reason = eventObj.eventType;
+                } else if (typeof eventObj.stateType === 'string') {
+                  reason = eventObj.stateType;
+                  if (
+                    eventObj.eventSource &&
+                    typeof eventObj.eventSource.eventType === 'string'
+                  ) {
+                    reason += ` <- ${eventObj.eventSource.eventType}`;
+                  }
+                }
+                // iterate on the monitors
+                const monitors = sub.monitorTags[tag];
+                monitors.forEach((monitor) => {
+                  monitor.callback(reason, eventObj._meta);
+                });
+              }
+            });
+          }
+        }
       });
     });
 
@@ -67,7 +71,7 @@ export class PushService {
 
           this.ioPush.emit('subscribe', subscriptionQuery, (token: string) => {
             if (token) {
-              console.log('Reconnected:', token, subscriptionQuery);
+              // console.log('Reconnected:', token, subscriptionQuery);
               sub.token = token;
             } else {
               console.error('Reconnect error for query', subscriptionQuery);
@@ -78,7 +82,7 @@ export class PushService {
     });
   }
 
-  async subscribe(query, offset, owner, cb) {
+  subscribe(query, offset, owner, cb) {
     // await this.waitForSocketConnection();
     const clientToken =
       Math.random().toString(36).substr(2, 9) + '-' + Date.now().toString();
@@ -100,7 +104,7 @@ export class PushService {
 
       this.ioPush.emit('subscribe', subscriptionQuery, (token: string) => {
         if (token) {
-          console.log('Server Subscribed:', token, subscriptionQuery);
+          // console.log('Server Subscribed:', token, subscriptionQuery);
           sub.token = token;
         } else {
           console.error('Subscribe error for query', subscriptionQuery);
@@ -112,28 +116,25 @@ export class PushService {
     return clientToken;
   }
 
-  unsubscribe(clientToken): Promise<void> {
-    return new Promise((resolve, reject) => {
-      try {
-        // just do a force server unsubscribe and removal of subscription entry
-        const sub = this.subscriptions[clientToken];
-        if (sub) {
-          if (sub.token && this.ioPush.connected) {
-            //  NOTE: need to handle unsubscribe/emit errors
-            this.ioPush.emit('unsubscribe', sub.token, () => {
-                resolve();
-            });
-          }
-          delete this.subscriptions[clientToken];
-          resolve();
-          // console.log('Unsubscribed:', clientToken, subscriptions);
+  unsubscribe(clientTokens): Promise<void> {
+    const socketTokens = [];
+
+    clientTokens.forEach((clientToken) => {
+      if (this.subscriptions[clientToken]) {
+        const clientSubscription = _clone(this.subscriptions[clientToken]);
+        delete this.subscriptions[clientToken];
+
+        const sub = clientSubscription;
+        if (sub && sub.token) {
+          socketTokens.push(sub.token);
         }
-        // no subscription
-        resolve();
-      } catch (error) {
-        reject(error);
-        console.error('error in unsubscribing: ', error);
       }
+    });
+
+    return new Promise((resolve, reject) => {
+      this.ioPush.emit('unsubscribe', socketTokens, () => {
+        resolve();
+      });
     });
   }
 }
