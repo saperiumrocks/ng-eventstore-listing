@@ -9,5 +9,6 @@ export interface ConditionalSubscriptionRegistration {
     stateFunctions: StateFunctions;
     streamRevisionFunction: (item: any) => number;
     conditionFunction: (item: any) => boolean;
-    subscriptionToken?: string;
+    pushSubscriptionId?: string;
+    playbackSubscriptionId?: string;
 }

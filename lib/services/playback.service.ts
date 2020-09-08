@@ -78,8 +78,6 @@ export class PlaybackService {
         async (err, eventObj, owner2) => {
           // owner is playbackservice
           const self = owner2 as PlaybackService;
-          console.log(self.playbackRegistry);
-          console.log(playbackSubscriptionId);
           const registration = self.playbackRegistry[playbackSubscriptionId];
 
           if (eventObj.aggregate === 'states') {
@@ -182,7 +180,8 @@ export class PlaybackService {
           query: query,
           streamRevisionFunction: streamRevisionFunction,
           conditionFunction: conditionFunction,
-          subscriptionToken: pushSubscriptionId
+          pushSubscriptionId: pushSubscriptionId,
+          playbackSubscriptionId: playbackSubscriptionId
         });
       } else {
         this.conditionalSubscriptionRegistry[rowId] = [{
@@ -194,7 +193,8 @@ export class PlaybackService {
           query: query,
           streamRevisionFunction: streamRevisionFunction,
           conditionFunction: conditionFunction,
-          subscriptionToken: pushSubscriptionId
+          pushSubscriptionId: pushSubscriptionId,
+          playbackSubscriptionId: playbackSubscriptionId
         }];
       }
     }
@@ -243,7 +243,7 @@ export class PlaybackService {
         query: query,
         streamRevisionFunction: streamRevisionFunction,
         conditionFunction: conditionFunction,
-        subscriptionToken: subscriptionToken
+        pushSubscriptionId: subscriptionToken
       });
     } else {
       this.conditionalSubscriptionRegistry[rowId] = [{
@@ -255,7 +255,7 @@ export class PlaybackService {
         query: query,
         streamRevisionFunction: streamRevisionFunction,
         conditionFunction: conditionFunction,
-        subscriptionToken: subscriptionToken
+        pushSubscriptionId: subscriptionToken
       }];
     }
   }
@@ -263,16 +263,16 @@ export class PlaybackService {
   _updateConditionalSubscriptions(rowId, rowData) {
     const conditionalSubscriptions = this.conditionalSubscriptionRegistry[rowId] || [];
     conditionalSubscriptions.forEach(async (conditionalSubscription) => {
-      if (!conditionalSubscription.subscriptionToken && conditionalSubscription.conditionFunction(rowData)) {
+      if (!conditionalSubscription.pushSubscriptionId && conditionalSubscription.conditionFunction(rowData)) {
         const offset = conditionalSubscription.streamRevisionFunction(rowData);
-        const subscriptionId = this.pushService.subscribe(
+        const pushSubscriptionId = this.pushService.subscribe(
           conditionalSubscription.query,
           offset,
           this,
-          async (err, eventObj, owner2, token) => {
+          async (err, eventObj, owner2) => {
             // owner is playbackservice
             const self = owner2 as PlaybackService;
-            const registration = self.playbackRegistry[token];
+            const registration = self.playbackRegistry[conditionalSubscription.playbackSubscriptionId];
 
             if (eventObj.aggregate === 'states') {
               const thisScriptName = registration.scriptName;
@@ -353,23 +353,23 @@ export class PlaybackService {
         );
 
         // just use the subscriptionId to map the push subscription to the playback
-        this.playbackRegistry[subscriptionId] = {
+        this.playbackRegistry[conditionalSubscription.playbackSubscriptionId] = {
           playbackScript: conditionalSubscription.playbackScript,
           owner: conditionalSubscription.owner,
-          registrationId: subscriptionId,
+          registrationId: pushSubscriptionId,
           playbackList: conditionalSubscription.playbackList,
           scriptName: conditionalSubscription.scriptName,
           rowId: rowId
         };
 
-        conditionalSubscription.subscriptionToken = subscriptionId;
+        conditionalSubscription.pushSubscriptionId = pushSubscriptionId;
 
-        console.log('subscribed to playback: ', subscriptionId, conditionalSubscription.query);
-        return subscriptionId;
-      } else if (!conditionalSubscription.conditionFunction(rowData) && conditionalSubscription.subscriptionToken) {
-        this.pushService.unsubscribe([conditionalSubscription.subscriptionToken]).then(() => {
-          delete this.playbackRegistry[conditionalSubscription.subscriptionToken];
-          conditionalSubscription.subscriptionToken = undefined;
+        console.log('subscribed to playback: ', pushSubscriptionId, conditionalSubscription.query);
+        return pushSubscriptionId;
+      } else if (!conditionalSubscription.conditionFunction(rowData) && conditionalSubscription.pushSubscriptionId) {
+        this.pushService.unsubscribe([conditionalSubscription.pushSubscriptionId]).then(() => {
+          delete this.playbackRegistry[conditionalSubscription.playbackSubscriptionId];
+          conditionalSubscription.pushSubscriptionId = undefined;
         });
       }
     });

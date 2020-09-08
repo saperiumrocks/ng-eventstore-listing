@@ -30,7 +30,6 @@ module.exports = function(server, es) {
   socketInstance.origins('*:*');
 
   const subscriberFunc = (err, event, done) => {
-    console.log('SUBSCRIBER FUNC');
     if (err) {
       console.error(err);
     } else {
@@ -40,6 +39,10 @@ module.exports = function(server, es) {
         aggregate: event.aggregate,
         aggregateId: event.aggregateId
       });
+
+      console.log('EMIT TO');
+      console.log(key);
+      console.log(event);
 
       socketInstance.of('events').to(key).emit('message', event, key);
       done();
@@ -82,9 +85,9 @@ module.exports = function(server, es) {
         });
 
         (events || []).forEach((event) => {
-          subscriberFunc(null, event, () => {
-            console.log('CALLBACKS ON EVENT SUB');
-          });
+          // subscriberFunc(null, event, () => {
+          //   console.log('CALLBACKS ON EVENT SUB');
+          // });
         });
 
         if (lastEvent) {
