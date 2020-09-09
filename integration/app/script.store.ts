@@ -8,17 +8,14 @@ const environment = {
 export const ScriptStore: Script[] = [
   {
     name: 'titles-dashboard-list-projection',
-    meta: { objectName: 'titles-dashboard-list-projection' },
     src: `${environment.scriptUrl}/auction-titles-dashboard-list.projection.js`,
   },
   {
     name: 'auction-titles-dashboard-vehicle',
-    meta: { objectName: 'auction-titles-dashboard-vehicle' },
     src: `${environment.scriptUrl}/auction-titles-dashboard-vehicle.projection.js`
   },
   {
     name: 'auction-vehicle-list-projection',
-    meta: { objectName: 'auction-vehicle-list-projection' },
     src: `${environment.scriptUrl}/auction-vehicle-list.projection.js`
   }
 ];

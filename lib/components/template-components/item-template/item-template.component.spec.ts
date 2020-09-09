@@ -19,7 +19,7 @@ describe('ItemTemplate', () => {
   describe('ngOnChanges', () => {
     it('should call registered changeFn with the changes', () => {
       const mockChanges: SimpleChanges = {
-        data: { currentValue: {}, previousValue: {}, isFirstChange: () => false, firstChange: false }
+        data: { currentValue: Immutable.fromJS({}), previousValue: {}, isFirstChange: () => false, firstChange: false }
       };
 
       component._changeFn = () => {};

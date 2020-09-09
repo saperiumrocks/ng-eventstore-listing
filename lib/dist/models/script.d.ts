@@ -1,5 +1,5 @@
 export interface Script {
     name: string;
-    meta: object;
+    meta?: object;
     src: string;
 }

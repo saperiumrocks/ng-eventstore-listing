@@ -13,7 +13,7 @@ import {
 export abstract class ItemTemplateComponent implements OnInit, OnChanges {
   // Event Emitters
   onUpdateEmitter: EventEmitter<any> = new EventEmitter();
-  onUpdateLookupsEmitter: EventEmitter<any> = new EventEmitter();
+  onGetLookupsEmitter: EventEmitter<any> = new EventEmitter();
   onShowModalEmitter: EventEmitter<any> = new EventEmitter();
   onDeleteEmitter: EventEmitter<any> = new EventEmitter();
 
@@ -68,11 +68,12 @@ export abstract class ItemTemplateComponent implements OnInit, OnChanges {
     this.onUpdateEmitter.emit(actionEventEmitterData);
   }
 
-  onUpdateLookups = (lookup) => {
+  onGetLookups = (lookupName: string, callback: (payload: any) => void) => {
     const actionEventEmitterData = {
-      lookup: lookup,
+      lookupName: lookupName,
+      callback: callback
     };
-    this.onUpdateLookupsEmitter.emit(actionEventEmitterData);
+    this.onGetLookupsEmitter.emit(actionEventEmitterData);
   }
 
   onShowModal = (modalName, data) => {

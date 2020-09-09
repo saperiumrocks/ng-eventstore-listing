@@ -1,3 +1,4 @@
+import { Helpers } from './../utils/helpers';
 import { Injectable } from '@angular/core';
 import { ScriptService } from './script.service';
 import { PushService } from './push.service';
@@ -11,8 +12,8 @@ import {
 
 @Injectable()
 export class PlaybackService {
-  private playbackRegistry: PlaybackRegistry = {};
-  private conditionalSubscriptionRegistry: ConditionalSubscriptionRegistry = {};
+  _playbackRegistry: PlaybackRegistry = {};
+  _conditionalSubscriptionRegistry: ConditionalSubscriptionRegistry = {};
 
   constructor(
     private scriptService: ScriptService,
@@ -23,13 +24,13 @@ export class PlaybackService {
     this.pushService.init(socketUrl);
   }
 
-  async unRegisterForPlayback(tokens: string[]) {
+  async unregisterForPlayback(tokens: string[]) {
     // unsubscribe from push
     await this.pushService.unsubscribe(tokens);
 
     // unregister from playback registry
     tokens.forEach((token) => {
-      delete this.playbackRegistry[token];
+      delete this._playbackRegistry[token];
     });
   }
 
@@ -43,12 +44,12 @@ export class PlaybackService {
     rowId?: string,
     conditionFunction?: (item: any) => boolean
   ) {
-    const playbackSubscriptionId = Math.random().toString(36).substr(2, 9) + '-' + Date.now().toString();
+    const playbackSubscriptionId = Helpers.generateToken();
 
     const script = await this.scriptService.getScript(scriptName);
     let playbackScript;
     if (script) {
-      playbackScript = window[script.meta.objectName];
+      playbackScript = window[script.name];
     }
 
     let rowData;
@@ -64,10 +65,13 @@ export class PlaybackService {
       });
     }
 
-    const streamRevision = streamRevisionFunction(rowData);
+    let streamRevision;
+    let isConditionTrue;
 
-    // Check if condition is true
-    const isConditionTrue = conditionFunction ? conditionFunction(rowData) : undefined;
+    if (rowData) {
+      streamRevision = streamRevisionFunction(rowData);
+      isConditionTrue = conditionFunction ? conditionFunction(rowData) : undefined;
+    }
 
     let pushSubscriptionId;
     if (isConditionTrue === true || conditionFunction === undefined) {
@@ -78,7 +82,7 @@ export class PlaybackService {
         async (err, eventObj, owner2) => {
           // owner is playbackservice
           const self = owner2 as PlaybackService;
-          const registration = self.playbackRegistry[playbackSubscriptionId];
+          const registration = self._playbackRegistry[playbackSubscriptionId];
 
           if (eventObj.aggregate === 'states') {
             const thisScriptName = registration.scriptName;
@@ -170,8 +174,8 @@ export class PlaybackService {
 
     // If condition exists, register in conditional registry
     if (conditionFunction) {
-      if (this.conditionalSubscriptionRegistry[rowId] && Array.isArray(this.conditionalSubscriptionRegistry[rowId])) {
-        this.conditionalSubscriptionRegistry[rowId].push({
+      if (this._conditionalSubscriptionRegistry[rowId] && Array.isArray(this._conditionalSubscriptionRegistry[rowId])) {
+        this._conditionalSubscriptionRegistry[rowId].push({
           playbackList: playbackList,
           playbackScript: playbackScript,
           scriptName: scriptName,
@@ -184,7 +188,7 @@ export class PlaybackService {
           playbackSubscriptionId: playbackSubscriptionId
         });
       } else {
-        this.conditionalSubscriptionRegistry[rowId] = [{
+        this._conditionalSubscriptionRegistry[rowId] = [{
           playbackList: playbackList,
           playbackScript: playbackScript,
           scriptName: scriptName,
@@ -199,8 +203,7 @@ export class PlaybackService {
       }
     }
 
-
-    this.playbackRegistry[playbackSubscriptionId] = {
+    this._playbackRegistry[playbackSubscriptionId] = {
       playbackScript: playbackScript,
       owner: owner,
       registrationId: pushSubscriptionId,
@@ -209,59 +212,11 @@ export class PlaybackService {
       rowId: rowId
     };
 
-
-
-    console.log('subscribed to playback: ', playbackSubscriptionId, pushSubscriptionId, query);
     return playbackSubscriptionId;
   }
 
-  async registerConditionalSubscriptions(
-    conditionFunction: (item) => boolean,
-    scriptName: string,
-    owner: object,
-    query: Query,
-    stateFunctions: StateFunctions,
-    playbackList: PlaybackList,
-    rowId?: string,
-    streamRevisionFunction?: (item) =>  number,
-    subscriptionToken?: string
-  ) {
-    const script = await this.scriptService.getScript(scriptName);
-    let playbackScript;
-    if (script) {
-      playbackScript = window[script.meta.objectName];
-    }
-
-
-    if (this.conditionalSubscriptionRegistry[rowId] && Array.isArray(this.conditionalSubscriptionRegistry[rowId])) {
-      this.conditionalSubscriptionRegistry[rowId].push({
-        playbackList: playbackList,
-        playbackScript: playbackScript,
-        scriptName: scriptName,
-        owner: owner,
-        stateFunctions: stateFunctions,
-        query: query,
-        streamRevisionFunction: streamRevisionFunction,
-        conditionFunction: conditionFunction,
-        pushSubscriptionId: subscriptionToken
-      });
-    } else {
-      this.conditionalSubscriptionRegistry[rowId] = [{
-        playbackList: playbackList,
-        playbackScript: playbackScript,
-        scriptName: scriptName,
-        owner: owner,
-        stateFunctions: stateFunctions,
-        query: query,
-        streamRevisionFunction: streamRevisionFunction,
-        conditionFunction: conditionFunction,
-        pushSubscriptionId: subscriptionToken
-      }];
-    }
-  }
-
   _updateConditionalSubscriptions(rowId, rowData) {
-    const conditionalSubscriptions = this.conditionalSubscriptionRegistry[rowId] || [];
+    const conditionalSubscriptions = this._conditionalSubscriptionRegistry[rowId] || [];
     conditionalSubscriptions.forEach(async (conditionalSubscription) => {
       if (!conditionalSubscription.pushSubscriptionId && conditionalSubscription.conditionFunction(rowData)) {
         const offset = conditionalSubscription.streamRevisionFunction(rowData);
@@ -272,7 +227,7 @@ export class PlaybackService {
           async (err, eventObj, owner2) => {
             // owner is playbackservice
             const self = owner2 as PlaybackService;
-            const registration = self.playbackRegistry[conditionalSubscription.playbackSubscriptionId];
+            const registration = self._playbackRegistry[conditionalSubscription.playbackSubscriptionId];
 
             if (eventObj.aggregate === 'states') {
               const thisScriptName = registration.scriptName;
@@ -353,7 +308,7 @@ export class PlaybackService {
         );
 
         // just use the subscriptionId to map the push subscription to the playback
-        this.playbackRegistry[conditionalSubscription.playbackSubscriptionId] = {
+        this._playbackRegistry[conditionalSubscription.playbackSubscriptionId] = {
           playbackScript: conditionalSubscription.playbackScript,
           owner: conditionalSubscription.owner,
           registrationId: pushSubscriptionId,
@@ -364,11 +319,11 @@ export class PlaybackService {
 
         conditionalSubscription.pushSubscriptionId = pushSubscriptionId;
 
-        console.log('subscribed to playback: ', pushSubscriptionId, conditionalSubscription.query);
+        // console.log('subscribed to playback: ', pushSubscriptionId, conditionalSubscription.query);
         return pushSubscriptionId;
       } else if (!conditionalSubscription.conditionFunction(rowData) && conditionalSubscription.pushSubscriptionId) {
         this.pushService.unsubscribe([conditionalSubscription.pushSubscriptionId]).then(() => {
-          delete this.playbackRegistry[conditionalSubscription.playbackSubscriptionId];
+          delete this._playbackRegistry[conditionalSubscription.playbackSubscriptionId];
           conditionalSubscription.pushSubscriptionId = undefined;
         });
       }

@@ -49,8 +49,7 @@ export class AppComponent implements OnInit {
         aggregate: 'auction-titles-dashboard-vehicle',
         aggregateId: `{{rowId}}`,
       },
-      rowIdFieldName: 'salesChannelInstanceVehicleId',
-      playbackScriptName: 'titles-dashboard-list-projection',
+      playbackScriptName: 'titles-dashboard-list-projection'
     },
     {
       query: {
@@ -152,5 +151,9 @@ export class AppComponent implements OnInit {
     this.show = !this.show;
     console.log(this.show);
     this.cdr.detectChanges();
+  }
+
+  onGetLookups({ lookupName, callback }) {
+    callback({ mock: 'payload' });
   }
 }

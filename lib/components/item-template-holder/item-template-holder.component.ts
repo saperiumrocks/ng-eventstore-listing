@@ -27,7 +27,7 @@ export class ItemTemplateHolderComponent
   @Input() data: any = {};
   @Input() lookups: any = {};
   @Output() updateEmitter: EventEmitter<any> = new EventEmitter();
-  @Output() updateLookupsEmitter: EventEmitter<any> = new EventEmitter();
+  @Output() getLookupsEmitter: EventEmitter<any> = new EventEmitter();
   @Output() showModalEmitter: EventEmitter<any> = new EventEmitter();
   @Output() deleteEmitter: EventEmitter<any> = new EventEmitter();
 
@@ -77,7 +77,7 @@ export class ItemTemplateHolderComponent
     (this.componentRef
       .instance as ItemTemplateComponent).onUpdateEmitter = this.updateEmitter;
     (this.componentRef
-      .instance as ItemTemplateComponent).onUpdateLookupsEmitter = this.updateLookupsEmitter;
+      .instance as ItemTemplateComponent).onGetLookupsEmitter = this.getLookupsEmitter;
     (this.componentRef
       .instance as ItemTemplateComponent).onShowModalEmitter = this.showModalEmitter;
     (this.componentRef

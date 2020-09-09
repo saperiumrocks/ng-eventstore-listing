@@ -1,9 +1,8 @@
-import { Injectable, Inject, NgZone } from '@angular/core';
+import { Injectable } from '@angular/core';
+import { Helpers } from '../utils/helpers.js';
 import _forOwn from 'lodash-es/forOwn';
 import _clone from 'lodash-es/clone';
 import * as io from 'socket.io-client';
-
-// TODO: Make environment pluggable or derivable
 
 @Injectable()
 export class PushService {
@@ -15,7 +14,7 @@ export class PushService {
     this.ioPush = io.connect(`${socketUrl}/events`);
     const self = this;
     this.ioPush.on('message', (eventObj, queryKey) => {
-      console.log('got message from push server: ', eventObj, queryKey);
+      // console.log('got message from push server: ', eventObj, queryKey);
       const clientTokens = Object.keys(self.subscriptions);
       // redirect to mapped subscription/token callback
       clientTokens.forEach((clientToken) => {
@@ -84,8 +83,7 @@ export class PushService {
 
   subscribe(query, offset, owner, cb) {
     // await this.waitForSocketConnection();
-    const clientToken =
-      Math.random().toString(36).substr(2, 9) + '-' + Date.now().toString();
+    const clientToken = Helpers.generateToken();
     // map new subscription, then try to subscribe to server asap
     this.subscriptions[clientToken] = {
       query: query,

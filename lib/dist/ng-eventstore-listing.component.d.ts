@@ -12,7 +12,7 @@ export declare class NgEventstoreListingComponent implements OnInit, OnChanges, 
     private playbackService;
     private playbackListService;
     updateEmitter: EventEmitter<any>;
-    updateLookupsEmitter: EventEmitter<any>;
+    getLookupsEmitter: EventEmitter<any>;
     showModalEmitter: EventEmitter<any>;
     deleteEmitter: EventEmitter<any>;
     playbackListLoadedEmitter: EventEmitter<any>;
@@ -60,7 +60,7 @@ export declare class NgEventstoreListingComponent implements OnInit, OnChanges, 
     private _initSubscriptions;
     _resetSubscriptions(): void;
     _onUpdate(payload: any): void;
-    _onUpdateLookups(payload: any): void;
+    _onGetLookups(payload: any): void;
     _onShowModal(payload: any): void;
     _onDelete(payload: any): void;
     exportCSV(overrideParams?: PlaybackListRequest): void;

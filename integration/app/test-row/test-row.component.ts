@@ -26,4 +26,10 @@ export class TestRowComponent extends ItemTemplateComponent implements OnInit {
     console.log(changes);
   }
 
+  testGetLookups() {
+    this.onGetLookups('test', (payload) => {
+      console.log(payload);
+    });
+  }
+
 }

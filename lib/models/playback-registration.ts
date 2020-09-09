@@ -7,6 +7,4 @@ export interface PlaybackRegistration {
   playbackList: PlaybackList;
   scriptName?: string;
   rowId: string;
-  // conditionFunction?: Function;
-  // streamRevisionFunction?: Function;
 }

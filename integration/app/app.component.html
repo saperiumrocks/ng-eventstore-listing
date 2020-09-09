@@ -29,6 +29,7 @@
   <div *ngIf="show">
     <lib-ng-eventstore-listing
       (playbackListLoadedEmitter)="playbackListLoaded($event)"
+      (getLookupsEmitter)="onGetLookups($event)"
       [itemComponentClass]="rowComponentClass"
       [lookups]="lookups"
       [itemSubscriptionConfigurations]="itemSubscriptionConfigurations"

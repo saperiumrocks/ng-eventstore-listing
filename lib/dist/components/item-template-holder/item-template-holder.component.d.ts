@@ -6,7 +6,7 @@ export declare class ItemTemplateHolderComponent implements OnInit, OnChanges, A
     data: any;
     lookups: any;
     updateEmitter: EventEmitter<any>;
-    updateLookupsEmitter: EventEmitter<any>;
+    getLookupsEmitter: EventEmitter<any>;
     showModalEmitter: EventEmitter<any>;
     deleteEmitter: EventEmitter<any>;
     componentRef: ComponentRef<any>;

@@ -52,7 +52,7 @@ import saveAs from 'file-saver';
 export class NgEventstoreListingComponent
   implements OnInit, OnChanges, OnDestroy {
   @Output() updateEmitter: EventEmitter<any> = new EventEmitter();
-  @Output() updateLookupsEmitter: EventEmitter<any> = new EventEmitter();
+  @Output() getLookupsEmitter: EventEmitter<any> = new EventEmitter();
   @Output() showModalEmitter: EventEmitter<any> = new EventEmitter();
   @Output() deleteEmitter: EventEmitter<any> = new EventEmitter();
   @Output() playbackListLoadedEmitter: EventEmitter<any> = new EventEmitter();
@@ -362,7 +362,8 @@ export class NgEventstoreListingComponent
     (self.itemSubscriptionConfigurations || []).forEach((itemSubscriptionConfiguration: SubscriptionConfiguration) => {
       if (itemSubscriptionConfiguration) {
         self._dataList.forEach(async (row: any) => {
-          const streamRevisionFunction = itemSubscriptionConfiguration.streamRevisionFunction;
+          const streamRevisionFunction = itemSubscriptionConfiguration.streamRevisionFunction ?
+            itemSubscriptionConfiguration.streamRevisionFunction : () => +row.get('revision') + 1;
 
           const aggregateId = itemSubscriptionConfiguration.rowIdFieldName ?
               row.get('data').get(itemSubscriptionConfiguration.rowIdFieldName) : row.get('rowId');
@@ -404,7 +405,7 @@ export class NgEventstoreListingComponent
   }
 
   _resetSubscriptions() {
-    this.playbackService.unRegisterForPlayback(this._playbackSubscriptionTokens);
+    this.playbackService.unregisterForPlayback(this._playbackSubscriptionTokens);
     this._playbackSubscriptionTokens = [];
   }
 
@@ -412,8 +413,8 @@ export class NgEventstoreListingComponent
     this.updateEmitter.emit(payload);
   }
 
-  _onUpdateLookups(payload: any) {
-    this.updateLookupsEmitter.emit(payload);
+  _onGetLookups(payload: any) {
+    this.getLookupsEmitter.emit(payload);
   }
 
   _onShowModal(payload: any) {
