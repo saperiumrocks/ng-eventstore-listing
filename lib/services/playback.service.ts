@@ -26,7 +26,6 @@ export class PlaybackService {
 
   async unregisterForPlayback(playbackTokens: string[]) {
     // unregister from playback registry
-
     const pushTokens = playbackTokens.map((playbackToken) => {
       return this._playbackRegistry[playbackToken].pushSubscriptionId;
     });
@@ -35,9 +34,6 @@ export class PlaybackService {
       // unsubscribe from push
       delete this._playbackRegistry[token];
     });
-
-    console.log('PUSH TOKENS TO UNSUB');
-    console.log(pushTokens);
 
     await this.pushService.unsubscribe(pushTokens);
   }
