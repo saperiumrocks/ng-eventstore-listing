@@ -43,15 +43,31 @@ describe('playbackService', () => {
       expect(playbackRegistration.scriptName).toEqual(mockScriptName);
       expect(playbackRegistration.playbackList).toEqual(mockPlaybackList);
       expect(playbackRegistration.owner).toEqual(service);
-      expect(playbackRegistration.registrationId).toEqual('test-sub-id');
+      expect(playbackRegistration.pushSubscriptionId).toEqual('test-sub-id');
     });
   });
 
   describe('unregisterForPlayback', () => {
     it('should call pushService.unsubscribe', async () => {
       const mockTokens = ['test-1', 'test-2'];
+      service._playbackRegistry = {
+        'test-1': {
+          rowId: '',
+          pushSubscriptionId: 'mock-reg-1',
+          scriptName: '',
+          playbackList: null,
+          owner: null
+        },
+        'test-2': {
+          rowId: '',
+          pushSubscriptionId: 'mock-reg-2',
+          scriptName: '',
+          playbackList: null,
+          owner: null
+        }
+      };
       await service.unregisterForPlayback(mockTokens);
-      expect(mockPushService.unsubscribe).toHaveBeenCalledWith(mockTokens);
+      expect(mockPushService.unsubscribe).toHaveBeenCalledWith(['mock-reg-1', 'mock-reg-2']);
     });
 
     it('should call delete all tokens for unsubscription in registry', async () => {
@@ -59,15 +75,15 @@ describe('playbackService', () => {
       service._playbackRegistry = {
         'test-1': {
           rowId: '',
-          registrationId: '',
-          playbackScript: '',
+          pushSubscriptionId: '',
+          scriptName: '',
           playbackList: null,
           owner: null
         },
         'test-2': {
           rowId: '',
-          registrationId: '',
-          playbackScript: '',
+          pushSubscriptionId: '',
+          scriptName: '',
           playbackList: null,
           owner: null
         }

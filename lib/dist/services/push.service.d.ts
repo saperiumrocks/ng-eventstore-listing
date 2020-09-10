@@ -3,6 +3,7 @@ export declare class PushService {
     private subscriptions;
     constructor();
     init(socketUrl: string): void;
+    _processEvent(eventObj: any): void;
     subscribe(query: any, offset: any, owner: any, cb: any): string;
-    unsubscribe(clientTokens: any): Promise<void>;
+    unsubscribe(pushTokens: string[]): Promise<void>;
 }

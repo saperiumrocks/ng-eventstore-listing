@@ -8,7 +8,7 @@ export declare class PlaybackService {
     _conditionalSubscriptionRegistry: ConditionalSubscriptionRegistry;
     constructor(scriptService: ScriptService, pushService: PushService);
     init(socketUrl: string): void;
-    unregisterForPlayback(tokens: string[]): Promise<void>;
+    unregisterForPlayback(playbackTokens: string[]): Promise<void>;
     registerForPlayback(owner: object, scriptName: string, query: Query, stateFunctions: StateFunctions, playbackList: PlaybackList, streamRevisionFunction?: (item: any) => number, rowId?: string, conditionFunction?: (item: any) => boolean): Promise<string>;
     _updateConditionalSubscriptions(rowId: any, rowData: any): void;
 }

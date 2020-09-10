@@ -24,14 +24,22 @@ export class PlaybackService {
     this.pushService.init(socketUrl);
   }
 
-  async unregisterForPlayback(tokens: string[]) {
-    // unsubscribe from push
-    await this.pushService.unsubscribe(tokens);
-
+  async unregisterForPlayback(playbackTokens: string[]) {
     // unregister from playback registry
-    tokens.forEach((token) => {
+
+    const pushTokens = playbackTokens.map((playbackToken) => {
+      return this._playbackRegistry[playbackToken].pushSubscriptionId;
+    });
+
+    playbackTokens.forEach(async (token) => {
+      // unsubscribe from push
       delete this._playbackRegistry[token];
     });
+
+    console.log('PUSH TOKENS TO UNSUB');
+    console.log(pushTokens);
+
+    await this.pushService.unsubscribe(pushTokens);
   }
 
   async registerForPlayback(
@@ -45,12 +53,6 @@ export class PlaybackService {
     conditionFunction?: (item: any) => boolean
   ) {
     const playbackSubscriptionId = Helpers.generateToken();
-
-    const script = await this.scriptService.getScript(scriptName);
-    let playbackScript;
-    if (script) {
-      playbackScript = window[script.name];
-    }
 
     let rowData;
     if (rowId) {
@@ -82,14 +84,18 @@ export class PlaybackService {
         async (err, eventObj, owner2) => {
           // owner is playbackservice
           const self = owner2 as PlaybackService;
+
+          console.log(self._playbackRegistry);
+
           const registration = self._playbackRegistry[playbackSubscriptionId];
 
-          if (eventObj.aggregate === 'states') {
-            const thisScriptName = registration.scriptName;
-            const fromEvent = eventObj.payload._meta.fromEvent;
-            const eventName = fromEvent.payload.name;
-            const thisPlaybackScript = window[thisScriptName];
-            const playbackFunction = thisPlaybackScript.playbackInterface[eventName];
+          if (registration) {
+            if (eventObj.aggregate === 'states') {
+              const thisScriptName = registration.scriptName;
+              const fromEvent = eventObj.payload._meta.fromEvent;
+              const eventName = fromEvent.payload.name;
+              const thisPlaybackScript = window[thisScriptName];
+              const playbackFunction = thisPlaybackScript.playbackInterface[eventName];
 
             if (playbackFunction) {
               if (registration.rowId) {
@@ -125,47 +131,47 @@ export class PlaybackService {
 
               playbackFunction(state, fromEvent, funcs, doneCallback);
             }
-          } else {
+            } else {
+              const thisScriptName = registration.scriptName;
+              const thisPlaybackScript = window[thisScriptName];
+              const playbackFunction = thisPlaybackScript.playbackInterface[eventObj.payload.name];
 
-            const thisScriptName = registration.scriptName;
-            const thisPlaybackScript = window[thisScriptName];
-            const playbackFunction = thisPlaybackScript.playbackInterface[eventObj.payload.name];
+              if (playbackFunction) {
+                // Override aggregateId to handle other subscriptions
+                if (registration.rowId) {
+                  eventObj.aggregateId = registration.rowId;
+                }
+                const row = stateFunctions.getState(eventObj.aggregateId);
+                const state = row.data;
+                const funcs = {
+                  emit: (targetQuery, payload, done) => {
+                    done();
+                  },
+                  getPlaybackList: (
+                    playbackListName: string,
+                    callback: (err, playbackList: PlaybackList) => void
+                  ) => {
+                    if (registration.playbackList) {
+                      callback(null, registration.playbackList);
+                    } else {
+                      callback(
+                        new Error(
+                          'PlaybackList does not exist in this registration'
+                        ),
+                        null
+                      );
+                    }
+                  },
+                };
 
-            if (playbackFunction) {
-              // Override aggregateId to handle other subscriptions
-              if (registration.rowId) {
-                eventObj.aggregateId = registration.rowId;
+                const doneCallback = () => {
+                  registration.playbackList.get(eventObj.aggregateId, (error, item) => {
+                    self._updateConditionalSubscriptions(eventObj.aggregateId, item);
+                  });
+                };
+
+                playbackFunction(state, eventObj, funcs, doneCallback);
               }
-              const row = stateFunctions.getState(eventObj.aggregateId);
-              const state = row.data;
-              const funcs = {
-                emit: (targetQuery, payload, done) => {
-                  done();
-                },
-                getPlaybackList: (
-                  playbackListName: string,
-                  callback: (err, playbackList: PlaybackList) => void
-                ) => {
-                  if (registration.playbackList) {
-                    callback(null, registration.playbackList);
-                  } else {
-                    callback(
-                      new Error(
-                        'PlaybackList does not exist in this registration'
-                      ),
-                      null
-                    );
-                  }
-                },
-              };
-
-              const doneCallback = () => {
-                registration.playbackList.get(eventObj.aggregateId, (error, item) => {
-                  self._updateConditionalSubscriptions(eventObj.aggregateId, item);
-                });
-              };
-
-              playbackFunction(state, eventObj, funcs, doneCallback);
             }
           }
         }
@@ -177,7 +183,6 @@ export class PlaybackService {
       if (this._conditionalSubscriptionRegistry[rowId] && Array.isArray(this._conditionalSubscriptionRegistry[rowId])) {
         this._conditionalSubscriptionRegistry[rowId].push({
           playbackList: playbackList,
-          playbackScript: playbackScript,
           scriptName: scriptName,
           owner: owner,
           stateFunctions: stateFunctions,
@@ -190,7 +195,6 @@ export class PlaybackService {
       } else {
         this._conditionalSubscriptionRegistry[rowId] = [{
           playbackList: playbackList,
-          playbackScript: playbackScript,
           scriptName: scriptName,
           owner: owner,
           stateFunctions: stateFunctions,
@@ -204,9 +208,8 @@ export class PlaybackService {
     }
 
     this._playbackRegistry[playbackSubscriptionId] = {
-      playbackScript: playbackScript,
       owner: owner,
-      registrationId: pushSubscriptionId,
+      pushSubscriptionId: pushSubscriptionId,
       playbackList: playbackList,
       scriptName: scriptName,
       rowId: rowId
@@ -309,9 +312,8 @@ export class PlaybackService {
 
         // just use the subscriptionId to map the push subscription to the playback
         this._playbackRegistry[conditionalSubscription.playbackSubscriptionId] = {
-          playbackScript: conditionalSubscription.playbackScript,
           owner: conditionalSubscription.owner,
-          registrationId: pushSubscriptionId,
+          pushSubscriptionId: pushSubscriptionId,
           playbackList: conditionalSubscription.playbackList,
           scriptName: conditionalSubscription.scriptName,
           rowId: rowId

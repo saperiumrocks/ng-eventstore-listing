@@ -1,8 +1,7 @@
 import { PlaybackList } from '.';
 export interface PlaybackRegistration {
-    playbackScript: any;
     owner: object;
-    registrationId: string;
+    pushSubscriptionId: string;
     playbackList: PlaybackList;
     scriptName?: string;
     rowId: string;

@@ -30,6 +30,7 @@ module.exports = function(server, es) {
   socketInstance.origins('*:*');
 
   const subscriberFunc = (err, event, done) => {
+    console.log('SUBSCRIBE FUNC');
     if (err) {
       console.error(err);
     } else {
@@ -39,12 +40,7 @@ module.exports = function(server, es) {
         aggregate: event.aggregate,
         aggregateId: event.aggregateId
       });
-
-      console.log('EMIT TO');
-      console.log(key);
-      console.log(event);
-
-      socketInstance.of('events').to(key).emit('message', event, key);
+      socketInstance.of('events').to(key).emit('message', event);
       done();
     }
   };
@@ -80,14 +76,9 @@ module.exports = function(server, es) {
             if (err) {
               reject(err);
             }
+
             resolve(events);
           });
-        });
-
-        (events || []).forEach((event) => {
-          // subscriberFunc(null, event, () => {
-          //   console.log('CALLBACKS ON EVENT SUB');
-          // });
         });
 
         if (lastEvent) {
@@ -99,12 +90,10 @@ module.exports = function(server, es) {
         let esSubscriptionToken = queryTokenMap[queryKey];
 
         if (!esSubscriptionToken) {
-          console.log('CHECK SUB');
-          console.log(query);
-          console.log(data.offset);
           esSubscriptionToken = es.subscribe(query, data.offset + 1, subscriberFunc);
           queryTokenMap[queryKey] = esSubscriptionToken;
         }
+
         socket.join(queryKey);
 
         const socketSubscriptionToken = shortid.generate();
@@ -119,7 +108,7 @@ module.exports = function(server, es) {
           tokenSocketIdMap[esSubscriptionToken] = [socket.id];
         }
 
-        fn(socketSubscriptionToken);
+        fn({ subscriptionToken: socketSubscriptionToken, catchUpEvents: events || [] });
     });
 
     socket.on('unsubscribe', function(subscriptionTokens, fn) {
