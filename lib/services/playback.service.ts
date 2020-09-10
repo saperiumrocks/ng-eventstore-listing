@@ -31,6 +31,18 @@ export class PlaybackService {
     });
 
     playbackTokens.forEach(async (token) => {
+      const rowId = this._playbackRegistry[token].rowId;
+
+      // console.log('BEFORE');
+      // console.log(this._conditionalSubscriptionRegistry);
+
+      if (rowId) {
+        delete this._conditionalSubscriptionRegistry[rowId];
+      }
+
+      // console.log('AFTER');
+      // console.log(this._conditionalSubscriptionRegistry);
+
       // unsubscribe from push
       delete this._playbackRegistry[token];
     });
@@ -81,7 +93,7 @@ export class PlaybackService {
           // owner is playbackservice
           const self = owner2 as PlaybackService;
 
-          console.log(self._playbackRegistry);
+          // console.log(self._playbackRegistry);
 
           const registration = self._playbackRegistry[playbackSubscriptionId];
 
