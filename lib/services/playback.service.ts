@@ -80,7 +80,7 @@ export class PlaybackService {
 
     if (rowData) {
       streamRevision = streamRevisionFunction(rowData);
-      isConditionTrue = conditionFunction ? conditionFunction(rowData) : undefined;
+      isConditionTrue = conditionFunction ? (conditionFunction(rowData) ? true : false) : undefined;
     }
 
     let pushSubscriptionId;
