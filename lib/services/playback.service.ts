@@ -242,7 +242,7 @@ export class PlaybackService {
         }
 
         const pushSubscriptionId = this.pushService.subscribe(
-          conditionalSubscription.query,
+          subQuery,
           offset,
           this,
           async (err, eventObj, owner2) => {
