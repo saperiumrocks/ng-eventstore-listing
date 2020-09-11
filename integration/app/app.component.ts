@@ -57,7 +57,9 @@ export class AppComponent implements OnInit {
         aggregate: 'vehicle',
         aggregateId: `{{rowId}}`,
       },
-      rowIdFieldName: 'vehicleId',
+      rowIdFunction: (item: any) => {
+        return item.data.vehicleId;
+      },
       streamRevisionFunction: (item) => {
         return 0;
       },

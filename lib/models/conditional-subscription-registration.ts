@@ -10,4 +10,5 @@ export interface ConditionalSubscriptionRegistration {
   conditionFunction: (item) => boolean;
   pushSubscriptionId?: string;
   playbackSubscriptionId?: string;
+  rowIdFunction?: (item: any) => string;
 }

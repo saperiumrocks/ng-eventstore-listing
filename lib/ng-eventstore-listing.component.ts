@@ -365,8 +365,9 @@ export class NgEventstoreListingComponent
           const streamRevisionFunction = itemSubscriptionConfiguration.streamRevisionFunction ?
             itemSubscriptionConfiguration.streamRevisionFunction : () => +row.get('revision') + 1;
 
-          const aggregateId = itemSubscriptionConfiguration.rowIdFieldName ?
-              row.get('data').get(itemSubscriptionConfiguration.rowIdFieldName) : row.get('rowId');
+
+          const aggregateId = itemSubscriptionConfiguration.rowIdFunction ?
+              itemSubscriptionConfiguration.rowIdFunction(row.toJS()) : row.get('rowId');
 
           const query: Query = _clone(itemSubscriptionConfiguration.query);
           query.aggregateId = query.aggregateId.replace(
@@ -382,7 +383,8 @@ export class NgEventstoreListingComponent
             self._playbackList,
             streamRevisionFunction,
             row.get('rowId'),
-            itemSubscriptionConfiguration.condition
+            itemSubscriptionConfiguration.condition,
+            itemSubscriptionConfiguration.rowIdFunction
           );
           this._playbackSubscriptionTokens.push(playbackSubscriptionToken);
         });

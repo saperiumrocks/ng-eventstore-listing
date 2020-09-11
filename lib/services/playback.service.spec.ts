@@ -1,26 +1,20 @@
 import { StateFunctions } from './../models/state-functions';
 import { Query } from './../models/query';
 import _isEmpty from 'lodash-es/isEmpty';
-// import { SortDirection } from '../enums/sort-direction';
-// import { Sort } from '../models/sort';
 
 import { PlaybackService } from './playback.service';
 
 describe('playbackService', () => {
   let service: PlaybackService;
-  let mockScriptService: any;
   let mockPushService: any;
 
   beforeEach(() => {
-    // mockHttp = jasmine.createSpyObj('http', ['get', 'post']);
-    mockScriptService = jasmine.createSpyObj('scriptService', ['getScript']);
     mockPushService = jasmine.createSpyObj('pushService', ['subscribe', 'unsubscribe']);
 
-    mockScriptService.getScript.and.returnValue({ });
     mockPushService.subscribe.and.returnValue('test-sub-id');
     mockPushService.unsubscribe.and.returnValue(Promise.resolve());
 
-    service = new PlaybackService(mockScriptService, mockPushService);
+    service = new PlaybackService(mockPushService);
   });
 
   describe('registerForPlayback', () => {

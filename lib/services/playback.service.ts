@@ -1,3 +1,4 @@
+import _clone from 'lodash-es/clone';
 import { Helpers } from './../utils/helpers';
 import { Injectable } from '@angular/core';
 import { ScriptService } from './script.service';
@@ -16,7 +17,6 @@ export class PlaybackService {
   _conditionalSubscriptionRegistry: ConditionalSubscriptionRegistry = {};
 
   constructor(
-    private scriptService: ScriptService,
     private pushService: PushService
   ) {}
 
@@ -58,7 +58,8 @@ export class PlaybackService {
     playbackList: PlaybackList,
     streamRevisionFunction: (item: any) => number = (item) => 0,
     rowId?: string,
-    conditionFunction?: (item: any) => boolean
+    conditionFunction?: (item: any) => boolean,
+    rowIdFunction?: (item: any) => string
   ) {
     const playbackSubscriptionId = Helpers.generateToken();
 
@@ -198,7 +199,8 @@ export class PlaybackService {
           streamRevisionFunction: streamRevisionFunction,
           conditionFunction: conditionFunction,
           pushSubscriptionId: pushSubscriptionId,
-          playbackSubscriptionId: playbackSubscriptionId
+          playbackSubscriptionId: playbackSubscriptionId,
+          rowIdFunction: rowIdFunction
         });
       } else {
         this._conditionalSubscriptionRegistry[rowId] = [{
@@ -210,7 +212,8 @@ export class PlaybackService {
           streamRevisionFunction: streamRevisionFunction,
           conditionFunction: conditionFunction,
           pushSubscriptionId: pushSubscriptionId,
-          playbackSubscriptionId: playbackSubscriptionId
+          playbackSubscriptionId: playbackSubscriptionId,
+          rowIdFunction: rowIdFunction
         }];
       }
     }
@@ -231,6 +234,13 @@ export class PlaybackService {
     conditionalSubscriptions.forEach(async (conditionalSubscription) => {
       if (!conditionalSubscription.pushSubscriptionId && conditionalSubscription.conditionFunction(rowData)) {
         const offset = conditionalSubscription.streamRevisionFunction(rowData);
+
+        const subQuery = _clone(conditionalSubscription.query);
+
+        if (conditionalSubscription.rowIdFunction) {
+          subQuery.aggregateId = conditionalSubscription.rowIdFunction(rowData);
+        }
+
         const pushSubscriptionId = this.pushService.subscribe(
           conditionalSubscription.query,
           offset,

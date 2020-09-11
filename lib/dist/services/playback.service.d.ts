@@ -9,6 +9,6 @@ export declare class PlaybackService {
     constructor(scriptService: ScriptService, pushService: PushService);
     init(socketUrl: string): void;
     unregisterForPlayback(playbackTokens: string[]): Promise<void>;
-    registerForPlayback(owner: object, scriptName: string, query: Query, stateFunctions: StateFunctions, playbackList: PlaybackList, streamRevisionFunction?: (item: any) => number, rowId?: string, conditionFunction?: (item: any) => boolean): Promise<string>;
+    registerForPlayback(owner: object, scriptName: string, query: Query, stateFunctions: StateFunctions, playbackList: PlaybackList, streamRevisionFunction?: (item: any) => number, rowId?: string, conditionFunction?: (item: any) => boolean, rowIdFunction?: (item: any) => string): Promise<string>;
     _updateConditionalSubscriptions(rowId: any, rowData: any): void;
 }
