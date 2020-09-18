@@ -29,6 +29,7 @@ describe('NgEventstoreListingComponent', () => {
     mockPlaybackService = jasmine.createSpyObj('mockPlaybackService', [
       'registerForPlayback',
       'unregisterForPlayback',
+      'resetCustomPlaybacks'
     ]);
     mockPlaybackListService = jasmine.createSpyObj('mockPlaybackListService', [
       '_getPlaybackList',

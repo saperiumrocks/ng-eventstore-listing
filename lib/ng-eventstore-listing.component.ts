@@ -24,6 +24,7 @@ import {
   Query,
   Sort,
   PlaybackListRequest,
+  CustomPlaybackConfiguration
 } from './models';
 
 
@@ -74,6 +75,7 @@ export class NgEventstoreListingComponent
   @Input() responseBasePath = 'data';
   @Input() emptyListDisplayText = 'No Results';
   @Input() csvFileName = '';
+  @Input() customPlaybackConfigurations: CustomPlaybackConfiguration[];
 
   @Input() debugging = false;
 
@@ -260,6 +262,7 @@ export class NgEventstoreListingComponent
 
   ngOnDestroy() {
     this._resetSubscriptions();
+    this.playbackService.resetCustomPlaybacks();
     this._initialized = false;
   }
 
@@ -289,6 +292,7 @@ export class NgEventstoreListingComponent
 
         this._resetSubscriptions();
         this._initSubscriptions();
+        this._initCustomPlaybackConfigurations();
 
         this.changeDetectorRef.detectChanges();
 
@@ -403,6 +407,12 @@ export class NgEventstoreListingComponent
           () => 0
         )
       );
+    }
+  }
+
+  private _initCustomPlaybackConfigurations() {
+    if (!_isEmpty(this.customPlaybackConfigurations)) {
+      this.playbackService.registerCustomPlaybacks(this.customPlaybackConfigurations);
     }
   }
 

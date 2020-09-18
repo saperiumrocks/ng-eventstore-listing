@@ -72,7 +72,7 @@ module.exports = function(server, es) {
       }
 
       const events = await new Promise((resolve, reject) => {
-        es.getEventsByRevision(query, data.offset + 1, -1, (err, events) => {
+        es.getEventsByRevision(query, (data.offset || 0) + 1, -1, (err, events) => {
             if (err) {
               reject(err);
             }
@@ -90,7 +90,7 @@ module.exports = function(server, es) {
         let esSubscriptionToken = queryTokenMap[queryKey];
 
         if (!esSubscriptionToken) {
-          esSubscriptionToken = es.subscribe(query, data.offset + 1, subscriberFunc);
+          esSubscriptionToken = es.subscribe(query, (data.offset || 0) + 1, subscriberFunc);
           queryTokenMap[queryKey] = esSubscriptionToken;
         }
 

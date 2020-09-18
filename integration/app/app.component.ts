@@ -1,3 +1,4 @@
+import { CustomPlaybackConfiguration } from './../../lib/models/custom-playback-configuration';
 import { Component, ChangeDetectionStrategy, OnInit, ViewChild, ChangeDetectorRef, NgZone } from '@angular/core';
 import { TestRowComponent } from './test-row/test-row.component';
 import {
@@ -95,6 +96,15 @@ export class AppComponent implements OnInit {
   lookups = {};
 
   show = false;
+
+  customPlaybackConfigurations: CustomPlaybackConfiguration[] = [
+    {
+      eventName: 'titles_vehicle_title_status_updated',
+      playbackFunction: (event) => {
+        console.log(event);
+      }
+    }
+  ];
 
   constructor(private cdr: ChangeDetectorRef) {}
 

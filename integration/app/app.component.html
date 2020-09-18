@@ -30,6 +30,7 @@
     <lib-ng-eventstore-listing
       (playbackListLoadedEmitter)="playbackListLoaded($event)"
       (getLookupsEmitter)="onGetLookups($event)"
+      [customPlaybackConfigurations]="customPlaybackConfigurations"
       [itemComponentClass]="rowComponentClass"
       [lookups]="lookups"
       [itemSubscriptionConfigurations]="itemSubscriptionConfigurations"

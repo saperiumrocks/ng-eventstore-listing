@@ -15,3 +15,5 @@ export * from './playback-registry';
 export * from './conditional-subscription-registration';
 export * from './conditional-subscription-registry';
 export * from './sort';
+export * from './event';
+export * from './custom-playback-configuration';

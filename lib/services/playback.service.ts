@@ -1,7 +1,6 @@
 import _clone from 'lodash-es/clone';
 import { Helpers } from './../utils/helpers';
 import { Injectable } from '@angular/core';
-import { ScriptService } from './script.service';
 import { PushService } from './push.service';
 import {
   StateFunctions,
@@ -9,12 +8,15 @@ import {
   PlaybackRegistry,
   Query,
   ConditionalSubscriptionRegistry,
+  CustomPlaybackConfiguration
 } from '../models';
+import { CustomPlaybackRegistry } from '../models/custom-playback-registry';
 
 @Injectable()
 export class PlaybackService {
   _playbackRegistry: PlaybackRegistry = {};
   _conditionalSubscriptionRegistry: ConditionalSubscriptionRegistry = {};
+  _customPlaybackRegistry: CustomPlaybackRegistry = {};
 
   constructor(
     private pushService: PushService
@@ -106,40 +108,47 @@ export class PlaybackService {
               const thisPlaybackScript = window[thisScriptName];
               const playbackFunction = thisPlaybackScript.playbackInterface[eventName];
 
-            if (playbackFunction) {
-              if (registration.rowId) {
-                eventObj.aggregateId = registration.rowId;
+              if (playbackFunction) {
+                if (registration.rowId) {
+                  eventObj.aggregateId = registration.rowId;
+                }
+                const state = eventObj.payload;
+                const funcs = {
+                  emit: (targetQuery, payload, done) => {
+                    done();
+                  },
+                  getPlaybackList: (
+                    playbackListName: string,
+                    callback: (err, playbackList: PlaybackList) => void
+                  ) => {
+                    if (registration.playbackList) {
+                      callback(null, registration.playbackList);
+                    } else {
+                      callback(
+                        new Error(
+                          'PlaybackList does not exist in this registration'
+                        ),
+                        null
+                      );
+                    }
+                  },
+                };
+
+                const doneCallback = () => {
+                  registration.playbackList.get(eventObj.aggregateId, (error, item) => {
+                    self._updateConditionalSubscriptions(eventObj.aggregateId, item);
+                  });
+                };
+
+                playbackFunction(state, fromEvent, funcs, doneCallback);
+
+                // Run custom playbackEvents if they exist
+                if (this._customPlaybackRegistry[eventName]) {
+                  this._customPlaybackRegistry[eventName].forEach((customPlaybackConfiguration: CustomPlaybackConfiguration) => {
+                    customPlaybackConfiguration.playbackFunction(fromEvent);
+                  });
+                }
               }
-              const state = eventObj.payload;
-              const funcs = {
-                emit: (targetQuery, payload, done) => {
-                  done();
-                },
-                getPlaybackList: (
-                  playbackListName: string,
-                  callback: (err, playbackList: PlaybackList) => void
-                ) => {
-                  if (registration.playbackList) {
-                    callback(null, registration.playbackList);
-                  } else {
-                    callback(
-                      new Error(
-                        'PlaybackList does not exist in this registration'
-                      ),
-                      null
-                    );
-                  }
-                },
-              };
-
-              const doneCallback = () => {
-                registration.playbackList.get(eventObj.aggregateId, (error, item) => {
-                  self._updateConditionalSubscriptions(eventObj.aggregateId, item);
-                });
-              };
-
-              playbackFunction(state, fromEvent, funcs, doneCallback);
-            }
             } else {
               const thisScriptName = registration.scriptName;
               const thisPlaybackScript = window[thisScriptName];
@@ -180,6 +189,13 @@ export class PlaybackService {
                 };
 
                 playbackFunction(state, eventObj, funcs, doneCallback);
+                // Run custom playbackEvents if they exist
+                if (this._customPlaybackRegistry[eventObj.payload.name]) {
+                  this._customPlaybackRegistry[eventObj.payload.name].forEach(
+                    (customPlaybackConfiguration: CustomPlaybackConfiguration) => {
+                      customPlaybackConfiguration.playbackFunction(eventObj);
+                    });
+                }
               }
             }
           }
@@ -227,6 +243,19 @@ export class PlaybackService {
     };
 
     return playbackSubscriptionId;
+  }
+
+  registerCustomPlaybacks(customPlaybackConfigurations: CustomPlaybackConfiguration[]) {
+    customPlaybackConfigurations.forEach((customPlaybackConfiguration: CustomPlaybackConfiguration) => {
+      if (!this._customPlaybackRegistry[customPlaybackConfiguration.eventName]) {
+        this._customPlaybackRegistry[customPlaybackConfiguration.eventName] = [];
+      }
+      this._customPlaybackRegistry[customPlaybackConfiguration.eventName].push(customPlaybackConfiguration);
+    });
+  }
+
+  resetCustomPlaybacks() {
+    this._customPlaybackRegistry = {};
   }
 
   _updateConditionalSubscriptions(rowId, rowData) {

@@ -1,7 +1,7 @@
 import { OnInit, EventEmitter, OnChanges, SimpleChanges, ChangeDetectorRef, OnDestroy } from '@angular/core';
 import { Subscription } from 'rxjs/Subscription';
 import { Subject } from 'rxjs/Subject';
-import { SubscriptionConfiguration, Script, PlaybackList, RowItem, Filter, Sort, PlaybackListRequest } from './models';
+import { SubscriptionConfiguration, Script, PlaybackList, RowItem, Filter, Sort, PlaybackListRequest, CustomPlaybackConfiguration } from './models';
 import { ScriptService } from './services/script.service';
 import { PlaybackService } from './services/playback.service';
 import { PlaybackListService } from './services/playback-list.service';
@@ -33,6 +33,7 @@ export declare class NgEventstoreListingComponent implements OnInit, OnChanges, 
     responseBasePath: string;
     emptyListDisplayText: string;
     csvFileName: string;
+    customPlaybackConfigurations: CustomPlaybackConfiguration[];
     debugging: boolean;
     _dataList: Immutable.List<RowItem>;
     _dataCount: number;
@@ -58,6 +59,7 @@ export declare class NgEventstoreListingComponent implements OnInit, OnChanges, 
     requestPlaybackList(): void;
     private _loadScripts;
     private _initSubscriptions;
+    private _initCustomPlaybackConfigurations;
     _resetSubscriptions(): void;
     _onUpdate(payload: any): void;
     _onGetLookups(payload: any): void;
