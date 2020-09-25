@@ -6,4 +6,6 @@ export enum FilterOperator {
   endsWith = 'endsWith',
   startsWith = 'startsWith',
   arrayContains = 'arrayContains',
+  exists = 'exists',
+  notExists = 'notExists'
 }
