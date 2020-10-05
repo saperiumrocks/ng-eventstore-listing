@@ -10,7 +10,7 @@
     "lint": "cd lib && ng lint && cd ..",
     "lint:fix": "cd lib && ng lint --fix && cd ..",
     "e2e": "ng e2e",
-    "test:lib": "node ./node_modules/@angular/cli/bin/ng test --watch=false -sm=false --app=lib",
+    "test:lib": "ng test --watch=false -sm=false --app=lib",
     "test:lib:forever": "node ./node_modules/@angular/cli/bin/ng test --app=lib",
     "build": "npm run build:lib && npm run build:showcase",
     "build:lib": "ng-packagr -p lib/package.json",

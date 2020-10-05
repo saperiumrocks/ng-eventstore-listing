@@ -19,6 +19,8 @@ describe('NgEventstoreListingComponent', () => {
   let mockScriptService;
   let mockPlaybackService;
   let mockPlaybackListService;
+  let mockJquery;
+  let $;
 
   beforeEach(() => {
     mockChangeDetectorRef = jasmine.createSpyObj('mockChangeDetectorRef', [
@@ -34,7 +36,12 @@ describe('NgEventstoreListingComponent', () => {
     mockPlaybackListService = jasmine.createSpyObj('mockPlaybackListService', [
       '_getPlaybackList',
     ]);
+    mockJquery = jasmine.createSpyObj('mockJquery', ['modal', 'on', 'is', 'css', 'contents']);
+    $ = (name) => {
+      return mockJquery;
+    }
     component = new NgEventstoreListingComponent(
+      $,
       mockChangeDetectorRef,
       mockScriptService,
       mockPlaybackService,
