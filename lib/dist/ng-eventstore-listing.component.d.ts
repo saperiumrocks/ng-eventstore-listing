@@ -36,6 +36,7 @@ export declare class NgEventstoreListingComponent implements OnInit, OnChanges, 
     emptyListDisplayText: string;
     csvFileName: string;
     customPlaybackConfigurations: CustomPlaybackConfiguration[];
+    enableLoadingOverlay: boolean;
     loadingTopBoundSelector: string;
     debugging: boolean;
     _dataList: Immutable.List<RowItem>;

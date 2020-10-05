@@ -81,6 +81,7 @@ export class NgEventstoreListingComponent
   @Input() emptyListDisplayText = 'No Results';
   @Input() csvFileName = '';
   @Input() customPlaybackConfigurations: CustomPlaybackConfiguration[];
+  @Input() enableLoadingOverlay: boolean = true;
   @Input() loadingTopBoundSelector: string;
 
   @Input() debugging = false;
@@ -310,10 +311,14 @@ export class NgEventstoreListingComponent
           dataCount: self._dataCount,
         });
 
-        self.hideLoadingOverlay();
+        if (this.enableLoadingOverlay) {
+          self.hideLoadingOverlay();
+        }
       }, (error: any) => {
         self.onGetPlaybackLIstErrorEmitter.emit(error);
-        self.hideLoadingOverlay();
+        if (this.enableLoadingOverlay) {
+          self.hideLoadingOverlay();
+        }
       });
 
     self._exportPlaybackListSubscription = self._exportPlaybackListSubject
@@ -354,7 +359,9 @@ export class NgEventstoreListingComponent
       filters: filters,
       sort: sort,
     };
-    this.showLoadingOverlay();
+    if (this.enableLoadingOverlay) {
+      this.showLoadingOverlay();
+    }
     this._getPlaybackListSubject.next(playbackListRequestParams);
   }
 
