@@ -311,12 +311,12 @@ export class NgEventstoreListingComponent
           dataCount: self._dataCount,
         });
 
-        if (this.enableLoadingOverlay) {
+        if (self.enableLoadingOverlay) {
           self.hideLoadingOverlay();
         }
       }, (error: any) => {
         self.getPlaybackLIstErrorEmitter.emit(error);
-        if (this.enableLoadingOverlay) {
+        if (self.enableLoadingOverlay) {
           self.hideLoadingOverlay();
         }
       });
