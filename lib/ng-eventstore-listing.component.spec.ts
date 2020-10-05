@@ -39,7 +39,7 @@ describe('NgEventstoreListingComponent', () => {
     mockJquery = jasmine.createSpyObj('mockJquery', ['modal', 'on', 'is', 'css', 'contents']);
     $ = (name) => {
       return mockJquery;
-    }
+    };
     component = new NgEventstoreListingComponent(
       $,
       mockChangeDetectorRef,
