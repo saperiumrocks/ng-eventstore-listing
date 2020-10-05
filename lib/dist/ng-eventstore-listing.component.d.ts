@@ -19,7 +19,7 @@ export declare class NgEventstoreListingComponent implements OnInit, OnChanges, 
     playbackListLoadedEmitter: EventEmitter<any>;
     newItemNotifyEmitter: EventEmitter<any>;
     removedItemNotifyEmitter: EventEmitter<any>;
-    onGetPlaybackLIstErrorEmitter: EventEmitter<any>;
+    getPlaybackLIstErrorEmitter: EventEmitter<any>;
     itemComponentClass: any;
     lookups: {};
     socketUrl: string;
