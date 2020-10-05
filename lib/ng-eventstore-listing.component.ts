@@ -63,7 +63,7 @@ export class NgEventstoreListingComponent
   @Output() playbackListLoadedEmitter: EventEmitter<any> = new EventEmitter();
   @Output() newItemNotifyEmitter: EventEmitter<any> = new EventEmitter();
   @Output() removedItemNotifyEmitter: EventEmitter<any> = new EventEmitter();
-  @Output() onGetPlaybackLIstErrorEmitter: EventEmitter<any> = new EventEmitter();
+  @Output() getPlaybackLIstErrorEmitter: EventEmitter<any> = new EventEmitter();
 
   @Input() itemComponentClass: any;
   @Input() lookups = {};
@@ -81,7 +81,7 @@ export class NgEventstoreListingComponent
   @Input() emptyListDisplayText = 'No Results';
   @Input() csvFileName = '';
   @Input() customPlaybackConfigurations: CustomPlaybackConfiguration[];
-  @Input() enableLoadingOverlay: boolean = true;
+  @Input() enableLoadingOverlay = true;
   @Input() loadingTopBoundSelector: string;
 
   @Input() debugging = false;
@@ -315,7 +315,7 @@ export class NgEventstoreListingComponent
           self.hideLoadingOverlay();
         }
       }, (error: any) => {
-        self.onGetPlaybackLIstErrorEmitter.emit(error);
+        self.getPlaybackLIstErrorEmitter.emit(error);
         if (this.enableLoadingOverlay) {
           self.hideLoadingOverlay();
         }
