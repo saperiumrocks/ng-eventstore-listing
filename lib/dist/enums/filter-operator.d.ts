@@ -5,5 +5,7 @@ export declare enum FilterOperator {
     contains = "contains",
     endsWith = "endsWith",
     startsWith = "startsWith",
-    arrayContains = "arrayContains"
+    arrayContains = "arrayContains",
+    exists = "exists",
+    notExists = "notExists"
 }

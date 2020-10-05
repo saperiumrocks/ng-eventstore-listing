@@ -12,6 +12,7 @@ import { PlaybackService } from './services/playback.service';
 import { PlaybackListService } from './services/playback-list.service';
 import { PushService } from './services/push.service';
 import { SocketIoService } from './services/socket.io.service';
+import { jQueryFactory, JQ_TOKEN } from './services/jquery.service';
 
 @NgModule({
   declarations: [
@@ -29,7 +30,8 @@ import { SocketIoService } from './services/socket.io.service';
     PlaybackService,
     PlaybackListService,
     PushService,
-    SocketIoService
+    SocketIoService,
+    { provide: JQ_TOKEN, useFactory: jQueryFactory }
     // ,
     // { provide: IO_TOKEN, useValue: io }
   ]

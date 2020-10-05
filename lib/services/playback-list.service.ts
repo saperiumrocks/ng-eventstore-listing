@@ -24,7 +24,7 @@ export class PlaybackListService {
     if (sort) {
       url += `&sort=${JSON.stringify(sort)}`;
     }
-
+    console.log(url);
     return this.http.get<PlaybackListResponse>(url);
   }
 
@@ -50,7 +50,6 @@ export class PlaybackListService {
     if (type) {
       url += `&type=${type}`;
     }
-
     return this.http.get<PlaybackListResponse>(url);
   }
 }

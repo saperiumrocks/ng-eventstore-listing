@@ -9,11 +9,13 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   OnDestroy,
+  Inject
 } from '@angular/core';
 
 import { switchMap, debounceTime } from 'rxjs/operators';
 import { Subscription } from 'rxjs/Subscription';
 import { Subject } from 'rxjs/Subject';
+import { JQ_TOKEN } from './services/jquery.service';
 
 import {
   SubscriptionConfiguration,
@@ -47,8 +49,10 @@ import saveAs from 'file-saver';
 @Component({
   selector: 'lib-ng-eventstore-listing',
   templateUrl: './ng-eventstore-listing.component.html',
-  styles: [],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+  styleUrls: [
+    './ng-eventstore-listing.component.css'
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class NgEventstoreListingComponent
   implements OnInit, OnChanges, OnDestroy {
@@ -59,6 +63,7 @@ export class NgEventstoreListingComponent
   @Output() playbackListLoadedEmitter: EventEmitter<any> = new EventEmitter();
   @Output() newItemNotifyEmitter: EventEmitter<any> = new EventEmitter();
   @Output() removedItemNotifyEmitter: EventEmitter<any> = new EventEmitter();
+  @Output() onGetPlaybackLIstErrorEmitter: EventEmitter<any> = new EventEmitter();
 
   @Input() itemComponentClass: any;
   @Input() lookups = {};
@@ -76,6 +81,7 @@ export class NgEventstoreListingComponent
   @Input() emptyListDisplayText = 'No Results';
   @Input() csvFileName = '';
   @Input() customPlaybackConfigurations: CustomPlaybackConfiguration[];
+  @Input() loadingTopBoundSelector: string;
 
   @Input() debugging = false;
 
@@ -190,6 +196,7 @@ export class NgEventstoreListingComponent
     },
   };
 
+
   _stateFunctions = {
     getState: (id: string) => {
       const index = this._dataList.findIndex((row: any) => {
@@ -211,6 +218,7 @@ export class NgEventstoreListingComponent
   };
 
   constructor(
+    @Inject(JQ_TOKEN) public $: any,
     private changeDetectorRef: ChangeDetectorRef,
     private scriptService: ScriptService,
     private playbackService: PlaybackService,
@@ -271,12 +279,13 @@ export class NgEventstoreListingComponent
   }
 
   private _initializeRequests(): void {
-    this._getPlaybackListSubscription = this._getPlaybackListSubject
+    const self = this;
+    self._getPlaybackListSubscription = self._getPlaybackListSubject
       .pipe(
         debounceTime(100),
         switchMap((params) => {
-          return this.playbackListService.getPlaybackList(
-            this.playbackListBaseUrl,
+          return self.playbackListService.getPlaybackList(
+            self.playbackListBaseUrl,
             params.playbackListName,
             params.startIndex,
             params.limit,
@@ -286,28 +295,33 @@ export class NgEventstoreListingComponent
         })
       )
       .subscribe((res: any) => {
-        this._dataList = Immutable.fromJS(res.rows);
-        this._dataCount = res.rows.length;
-        this._dataTotalCount = res.count;
+        self._dataList = Immutable.fromJS(res.rows);
+        self._dataCount = res.rows.length;
+        self._dataTotalCount = res.count;
 
-        this._resetSubscriptions();
-        this._initSubscriptions();
-        this._initCustomPlaybackConfigurations();
+        self._resetSubscriptions();
+        self._initSubscriptions();
+        self._initCustomPlaybackConfigurations();
 
-        this.changeDetectorRef.detectChanges();
+        self.changeDetectorRef.detectChanges();
 
-        this.playbackListLoadedEmitter.emit({
-          totalItems: this._dataTotalCount,
-          dataCount: this._dataCount,
+        self.playbackListLoadedEmitter.emit({
+          totalItems: self._dataTotalCount,
+          dataCount: self._dataCount,
         });
+
+        self.hideLoadingOverlay();
+      }, (error: any) => {
+        self.onGetPlaybackLIstErrorEmitter.emit(error);
+        self.hideLoadingOverlay();
       });
 
-    this._exportPlaybackListSubscription = this._exportPlaybackListSubject
+    self._exportPlaybackListSubscription = self._exportPlaybackListSubject
     .pipe(
       debounceTime(100),
       switchMap((params) => {
-        return this.playbackListService.getPlaybackListCsv(
-          this.playbackListBaseUrl,
+        return self.playbackListService.getPlaybackListCsv(
+          self.playbackListBaseUrl,
           params.playbackListName,
           params.startIndex,
           params.limit,
@@ -340,6 +354,7 @@ export class NgEventstoreListingComponent
       filters: filters,
       sort: sort,
     };
+    this.showLoadingOverlay();
     this._getPlaybackListSubject.next(playbackListRequestParams);
   }
 
@@ -451,6 +466,42 @@ export class NgEventstoreListingComponent
       };
 
       this._exportPlaybackListSubject.next(exportPlaybackListRequestParams);
+    }
+  }
+
+  // Loading Overlay Functions
+  hideLoadingOverlay() {
+    const $ = this.$;
+    $('body').css('overflow', '');
+    $('body').removeClass('loading-body');
+    $('#overlay').hide();
+  }
+
+  showLoadingOverlay() {
+    const $ = this.$;
+    $('#overlay').show();
+    if (this.loadingTopBoundSelector ? true : false) {
+      this._fixLoadingOverlayPosition();
+    }
+  }
+
+  _fixLoadingOverlayPosition() {
+    const $ = this.$;
+    const windowY = window.pageYOffset;
+    const pageHeaderSectionHeight = 53;
+    const pageHeaderSectionBottomY = $(this.loadingTopBoundSelector).offset().top + pageHeaderSectionHeight;
+    $('body').css('overflow', 'hidden');
+    $('body').addClass('loading-body');
+    if (windowY < pageHeaderSectionBottomY) {
+      $('#overlay').css('position', 'absolute');
+      $('#overlay').css('height', `${window.innerHeight}px`);
+      $('#overlay').css('width', '100%');
+      const pageHeaderHeight = pageHeaderSectionHeight;
+      $('#overlay').css('margin-top', `${pageHeaderHeight}px`);
+    } else {
+      $('#overlay').css('position', 'fixed');
+      $('#overlay').css('height', '100%');
+      $('#overlay').css('margin-top', '0px');
     }
   }
 }

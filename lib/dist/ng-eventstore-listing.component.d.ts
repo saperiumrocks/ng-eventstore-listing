@@ -7,6 +7,7 @@ import { PlaybackService } from './services/playback.service';
 import { PlaybackListService } from './services/playback-list.service';
 import * as Immutable from 'immutable';
 export declare class NgEventstoreListingComponent implements OnInit, OnChanges, OnDestroy {
+    $: any;
     private changeDetectorRef;
     private scriptService;
     private playbackService;
@@ -18,6 +19,7 @@ export declare class NgEventstoreListingComponent implements OnInit, OnChanges, 
     playbackListLoadedEmitter: EventEmitter<any>;
     newItemNotifyEmitter: EventEmitter<any>;
     removedItemNotifyEmitter: EventEmitter<any>;
+    onGetPlaybackLIstErrorEmitter: EventEmitter<any>;
     itemComponentClass: any;
     lookups: {};
     socketUrl: string;
@@ -34,6 +36,7 @@ export declare class NgEventstoreListingComponent implements OnInit, OnChanges, 
     emptyListDisplayText: string;
     csvFileName: string;
     customPlaybackConfigurations: CustomPlaybackConfiguration[];
+    loadingTopBoundSelector: string;
     debugging: boolean;
     _dataList: Immutable.List<RowItem>;
     _dataCount: number;
@@ -49,7 +52,7 @@ export declare class NgEventstoreListingComponent implements OnInit, OnChanges, 
         getState: (id: string) => any;
         setState: (id: string, data: any) => void;
     };
-    constructor(changeDetectorRef: ChangeDetectorRef, scriptService: ScriptService, playbackService: PlaybackService, playbackListService: PlaybackListService);
+    constructor($: any, changeDetectorRef: ChangeDetectorRef, scriptService: ScriptService, playbackService: PlaybackService, playbackListService: PlaybackListService);
     ngOnInit(): Promise<void>;
     ngOnChanges(changes: SimpleChanges): void;
     ngOnDestroy(): void;
@@ -66,4 +69,7 @@ export declare class NgEventstoreListingComponent implements OnInit, OnChanges, 
     _onShowModal(payload: any): void;
     _onDelete(payload: any): void;
     exportCSV(overrideParams?: PlaybackListRequest): void;
+    hideLoadingOverlay(): void;
+    showLoadingOverlay(): void;
+    _fixLoadingOverlayPosition(): void;
 }
