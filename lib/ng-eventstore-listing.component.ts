@@ -481,12 +481,12 @@ export class NgEventstoreListingComponent
     const $ = this.$;
     $('body').css('overflow', '');
     $('body').removeClass('loading-body');
-    $('#overlay').hide();
+    $('#ng-eventstore-listing-overlay').hide();
   }
 
   showLoadingOverlay() {
     const $ = this.$;
-    $('#overlay').show();
+    $('#ng-eventstore-listing-overlay').show();
     if (this.loadingTopBoundSelector ? true : false) {
       this._fixLoadingOverlayPosition();
     }
@@ -500,15 +500,15 @@ export class NgEventstoreListingComponent
     $('body').css('overflow', 'hidden');
     $('body').addClass('loading-body');
     if (windowY < pageHeaderSectionBottomY) {
-      $('#overlay').css('position', 'absolute');
-      $('#overlay').css('height', `${window.innerHeight}px`);
-      $('#overlay').css('width', '100%');
+      $('#ng-eventstore-listing-overlay').css('position', 'absolute');
+      $('#ng-eventstore-listing-overlay').css('height', `${window.innerHeight}px`);
+      $('#ng-eventstore-listing-overlay').css('width', '100%');
       const pageHeaderHeight = pageHeaderSectionHeight;
-      $('#overlay').css('margin-top', `${pageHeaderHeight}px`);
+      $('#ng-eventstore-listing-overlay').css('margin-top', `${pageHeaderHeight}px`);
     } else {
-      $('#overlay').css('position', 'fixed');
-      $('#overlay').css('height', '100%');
-      $('#overlay').css('margin-top', '0px');
+      $('#ng-eventstore-listing-overlay').css('position', 'fixed');
+      $('#ng-eventstore-listing-overlay').css('height', '100%');
+      $('#ng-eventstore-listing-overlay').css('margin-top', '0px');
     }
   }
 }
