@@ -38,6 +38,7 @@ export declare class NgEventstoreListingComponent implements OnInit, OnChanges, 
     customPlaybackConfigurations: CustomPlaybackConfiguration[];
     enableLoadingOverlay: boolean;
     loadingTopBoundSelector: string;
+    minHeightCss: string;
     debugging: boolean;
     _dataList: Immutable.List<RowItem>;
     _dataCount: number;
@@ -49,6 +50,7 @@ export declare class NgEventstoreListingComponent implements OnInit, OnChanges, 
     _exportPlaybackListSubject: Subject<PlaybackListRequest>;
     _playbackSubscriptionTokens: string[];
     _playbackList: PlaybackList;
+    _id: string;
     _stateFunctions: {
         getState: (id: string) => any;
         setState: (id: string, data: any) => void;

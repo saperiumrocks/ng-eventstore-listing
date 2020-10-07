@@ -1,4 +1,4 @@
-#ng-eventstore-listing-overlay {
+.ng-eventstore-listing-overlay {
   position: absolute;
   width: 100%;
   height: 100%;
@@ -11,7 +11,7 @@
   z-index: 10;
 }
 
-#ng-eventstore-listing-overlay-subject {
+.ng-eventstore-listing-overlay-subject {
   position: absolute;
   top: 30%;
   left: 50%;

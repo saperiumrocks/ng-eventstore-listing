@@ -40,8 +40,8 @@
   </div>
 </div>
 
-<div id="ng-eventstore-listing-overlay" class="ng-eventstore-listing-overlay">
-  <div id="ng-eventstore-listing-overlay-subject">
+<div [id]="'ng-eventstore-listing-overlay-' + _id" class="ng-eventstore-listing-overlay">
+  <div [id]="'ng-eventstore-listing-overlay-subject-' + _id" class="ng-eventstore-listing-overlay-subject">
       <div class="cssload-container">
         <div class="cssload-speeding-wheel"></div>
       </div>

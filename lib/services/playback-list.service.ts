@@ -24,7 +24,6 @@ export class PlaybackListService {
     if (sort) {
       url += `&sort=${JSON.stringify(sort)}`;
     }
-    console.log(url);
     return this.http.get<PlaybackListResponse>(url);
   }
 

@@ -1,3 +1,4 @@
+import { Helpers } from './utils/helpers';
 import {
   Component,
   OnInit,
@@ -83,6 +84,7 @@ export class NgEventstoreListingComponent
   @Input() customPlaybackConfigurations: CustomPlaybackConfiguration[];
   @Input() enableLoadingOverlay = true;
   @Input() loadingTopBoundSelector: string;
+  @Input() minHeightCss: string = '500px';
 
   @Input() debugging = false;
 
@@ -197,6 +199,7 @@ export class NgEventstoreListingComponent
     },
   };
 
+  _id: string = Helpers.generateToken();
 
   _stateFunctions = {
     getState: (id: string) => {
@@ -481,12 +484,12 @@ export class NgEventstoreListingComponent
     const $ = this.$;
     $('body').css('overflow', '');
     $('body').removeClass('loading-body');
-    $('#ng-eventstore-listing-overlay').hide();
+    $(`#ng-eventstore-listing-overlay-${this._id}`).hide();
   }
 
   showLoadingOverlay() {
     const $ = this.$;
-    $('#ng-eventstore-listing-overlay').show();
+    $(`#ng-eventstore-listing-overlay-${this._id}`).show();
     if (this.loadingTopBoundSelector ? true : false) {
       this._fixLoadingOverlayPosition();
     }
@@ -500,15 +503,15 @@ export class NgEventstoreListingComponent
     $('body').css('overflow', 'hidden');
     $('body').addClass('loading-body');
     if (windowY < pageHeaderSectionBottomY) {
-      $('#ng-eventstore-listing-overlay').css('position', 'absolute');
-      $('#ng-eventstore-listing-overlay').css('height', `${window.innerHeight}px`);
-      $('#ng-eventstore-listing-overlay').css('width', '100%');
+      $(`#ng-eventstore-listing-overlay-${this._id}`).css('position', 'absolute');
+      $(`#ng-eventstore-listing-overlay-${this._id}`).css('height', `${window.innerHeight}px`);
+      $(`#ng-eventstore-listing-overlay-${this._id}`).css('width', '100%');
       const pageHeaderHeight = pageHeaderSectionHeight;
-      $('#ng-eventstore-listing-overlay').css('margin-top', `${pageHeaderHeight}px`);
+      $(`#ng-eventstore-listing-overlay-${this._id}`).css('margin-top', `${pageHeaderHeight}px`);
     } else {
-      $('#ng-eventstore-listing-overlay').css('position', 'fixed');
-      $('#ng-eventstore-listing-overlay').css('height', '100%');
-      $('#ng-eventstore-listing-overlay').css('margin-top', '0px');
+      $(`#ng-eventstore-listing-overlay-${this._id}`).css('position', 'fixed');
+      $(`#ng-eventstore-listing-overlay-${this._id}`).css('height', '100%');
+      $(`#ng-eventstore-listing-overlay-${this._id}`).css('margin-top', '0px');
     }
   }
 }
