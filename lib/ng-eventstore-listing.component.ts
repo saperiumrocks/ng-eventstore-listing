@@ -84,7 +84,7 @@ export class NgEventstoreListingComponent
   @Input() customPlaybackConfigurations: CustomPlaybackConfiguration[];
   @Input() enableLoadingOverlay = true;
   @Input() loadingTopBoundSelector: string;
-  @Input() minHeightCss: string = '500px';
+  @Input() minHeightCss = '500px';
 
   @Input() debugging = false;
 
