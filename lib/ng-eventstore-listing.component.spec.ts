@@ -235,11 +235,15 @@ describe('NgEventstoreListingComponent', () => {
       component.exportCSV();
 
       const expectedParams = {
-        playbackListName: 'test_playback_list_name',
-        startIndex: component.itemsPerPage * (component.pageIndex - 1),
-        limit: 1000000,
-        filters: component.filters,
-        sort: component.sort
+        playbackListRequest: {
+
+          playbackListName: 'test_playback_list_name',
+          startIndex: component.itemsPerPage * (component.pageIndex - 1),
+          limit: 1000000,
+          filters: component.filters,
+          sort: component.sort
+        },
+        fileNameOverride: undefined
       };
       expect(component._exportPlaybackListSubject.next).toHaveBeenCalledWith(expectedParams);
     });

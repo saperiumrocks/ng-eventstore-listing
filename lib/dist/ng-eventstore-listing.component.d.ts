@@ -47,7 +47,7 @@ export declare class NgEventstoreListingComponent implements OnInit, OnChanges, 
     _getPlaybackListSubscription: Subscription;
     _getPlaybackListSubject: Subject<PlaybackListRequest>;
     _exportPlaybackListSubscription: Subscription;
-    _exportPlaybackListSubject: Subject<PlaybackListRequest>;
+    _exportPlaybackListSubject: Subject<any>;
     _playbackSubscriptionTokens: string[];
     _playbackList: PlaybackList;
     _id: string;
@@ -71,7 +71,7 @@ export declare class NgEventstoreListingComponent implements OnInit, OnChanges, 
     _onGetLookups(payload: any): void;
     _onShowModal(payload: any): void;
     _onDelete(payload: any): void;
-    exportCSV(overrideParams?: PlaybackListRequest): void;
+    exportCSV(overrideParams?: PlaybackListRequest, fileNameOverride?: string): void;
     hideLoadingOverlay(): void;
     showLoadingOverlay(): void;
     _fixLoadingOverlayPosition(): void;

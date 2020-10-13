@@ -414,7 +414,7 @@ const routes = function (es) {
   // router.put('dealerships/:dealershipId', async function(req, res, next) {
   //   const body = req.body;
 
-  // });
+
 
   router.get('/playback-list/:playbackListName', async function(req, res) {
     const query = req.query;
@@ -425,6 +425,9 @@ const routes = function (es) {
     const limit = query.limit;
 
     const filters = query.filters ? JSON.parse(query.filters) : null;
+
+    console.log(filters);
+
     const sort = query.sort ? JSON.parse(query.sort) : null;
 
     const playbackList = await getPlaybackListViewAsync(es, playbackListName);
@@ -497,8 +500,8 @@ const routes = function (es) {
       // Create Dealerships
       const mockDealerships = [
         {
-          dealershipId: 'dealership-1',
-          dealershipName: 'Glendale Toyota',
+          dealershipId: 'dealership-1-\'s',
+          dealershipName: 'Glendale\'s Toyota',
           address: '235 N Fairlane Glendale California 94545',
           sellerRepUserId: 'user-3',
           buyerRepUserId: 'user-4',

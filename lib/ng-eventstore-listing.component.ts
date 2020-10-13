@@ -16,6 +16,7 @@ import {
 import { switchMap, debounceTime } from 'rxjs/operators';
 import { Subscription } from 'rxjs/Subscription';
 import { Subject } from 'rxjs/Subject';
+import { map as rxMap } from 'rxjs/operators/map';
 import { JQ_TOKEN } from './services/jquery.service';
 
 import {
@@ -27,7 +28,8 @@ import {
   Query,
   Sort,
   PlaybackListRequest,
-  CustomPlaybackConfiguration
+  CustomPlaybackConfiguration,
+  PlaybackListResponse
 } from './models';
 
 
@@ -95,7 +97,7 @@ export class NgEventstoreListingComponent
   _getPlaybackListSubscription: Subscription;
   _getPlaybackListSubject: Subject<PlaybackListRequest> = new Subject();
   _exportPlaybackListSubscription: Subscription;
-  _exportPlaybackListSubject: Subject<PlaybackListRequest> = new Subject();
+  _exportPlaybackListSubject: Subject<any> = new Subject();
   _playbackSubscriptionTokens: string[] = [];
   _playbackList: PlaybackList = {
     get: (rowId: string, callback: (err, item) => void) => {
@@ -328,22 +330,27 @@ export class NgEventstoreListingComponent
     .pipe(
       debounceTime(100),
       switchMap((params) => {
+        const playbackListRequest = params.playbackListRequest;
         return self.playbackListService.getPlaybackListCsv(
           self.playbackListBaseUrl,
-          params.playbackListName,
-          params.startIndex,
-          params.limit,
-          params.filters,
-          params.sort,
-          params.type
+          playbackListRequest.playbackListName,
+          playbackListRequest.startIndex,
+          playbackListRequest.limit,
+          playbackListRequest.filters,
+          playbackListRequest.sort,
+          playbackListRequest.type
+        ).pipe(
+          rxMap((response: PlaybackListResponse) => {
+            return [response, params.fileNameOverride];
+          })
         );
       })
     )
-    .subscribe((result: any) => {
+    .subscribe(([result, fileNameOverride]) => {
       const csv = new Blob([result], { type: 'text/csv' });
       const moment = moment_;
       const now = moment();
-      const fileName = `${now.format('YYYY_MM_DD_HH_mm_ss')}_${this.csvFileName || this.playbackListName}.csv`;
+      const fileName = `${fileNameOverride || this.csvFileName || this.playbackListName}-${now.format('YYYY-MM-DD_HHmmss')}.csv`;
       saveAs(csv, fileName);
     });
   }
@@ -462,7 +469,7 @@ export class NgEventstoreListingComponent
     this.deleteEmitter.emit(payload);
   }
 
-  exportCSV(overrideParams?: PlaybackListRequest) {
+  exportCSV(overrideParams?: PlaybackListRequest, fileNameOverride?: string) {
     if (overrideParams) {
       this._exportPlaybackListSubject.next(overrideParams);
     } else {
@@ -475,7 +482,7 @@ export class NgEventstoreListingComponent
         sort: this.sort
       };
 
-      this._exportPlaybackListSubject.next(exportPlaybackListRequestParams);
+      this._exportPlaybackListSubject.next({ playbackListRequest: exportPlaybackListRequestParams, fileNameOverride: fileNameOverride });
     }
   }
 
