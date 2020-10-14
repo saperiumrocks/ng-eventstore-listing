@@ -471,7 +471,7 @@ export class NgEventstoreListingComponent
 
   exportCSV(overrideParams?: PlaybackListRequest, fileNameOverride?: string) {
     if (overrideParams) {
-      this._exportPlaybackListSubject.next(overrideParams);
+      this._exportPlaybackListSubject.next({ playbackListRequest: overrideParams, fileNameOverride: fileNameOverride });
     } else {
       const startIndex = this.itemsPerPage * (this.pageIndex - 1);
       const exportPlaybackListRequestParams: PlaybackListRequest = {
