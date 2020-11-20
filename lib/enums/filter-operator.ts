@@ -1,5 +1,6 @@
 export enum FilterOperator {
   range = 'range',
+  dateRange = 'dateRange',
   is = 'is',
   any = 'any',
   contains = 'contains',
