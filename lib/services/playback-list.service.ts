@@ -18,12 +18,13 @@ export class PlaybackListService {
     let url = `${playbackListBaseUrl}/playback-list/${playbackListName}?startIndex=${startIndex}&limit=${limit}`;
 
     if (filters) {
-      url += `&filters=${JSON.stringify(filters)}`;
+      url += `&filters=${encodeURIComponent(JSON.stringify(filters))}`;
     }
 
     if (sort) {
       url += `&sort=${JSON.stringify(sort)}`;
     }
+
     return this.http.get<PlaybackListResponse>(url);
   }
 

@@ -48,15 +48,33 @@ module.exports = () => {
       host: process.env.REDIS_HOST,
       port: process.env.REDIS_PORT,
     },
+    pollingTimeout: 10000,
+    eventCallbackTimeout: 20000,
+    pollingMaxRevisions: 100,
     projectionGroup: 'auction',
-    listStore: {
+    context: 'auction',
+    playbackListStore: {
       host: process.env.EVENTSTORE_MYSQL_HOST,
       port: process.env.EVENTSTORE_MYSQL_PORT,
       user: process.env.EVENTSTORE_MYSQL_USERNAME,
       password: process.env.EVENTSTORE_MYSQL_PASSWORD,
-      database: process.env.EVENTSTORE_MYSQL_DATABASE
+      database: process.env.EVENTSTORE_MYSQL_DATABASE,
+      charset: 'UTF8_GENERAL_CI',
+      connectionLimit: 1
     },
-    stateContextName: 'auction'
+    projectionStore: {
+      host: process.env.EVENTSTORE_MYSQL_HOST,
+      port: process.env.EVENTSTORE_MYSQL_PORT,
+      user: process.env.EVENTSTORE_MYSQL_USERNAME,
+      password: process.env.EVENTSTORE_MYSQL_PASSWORD,
+      database: process.env.EVENTSTORE_MYSQL_DATABASE,
+      connectionLimit: 1,
+      name: 'projections'
+  }, // required
+    stateContextName: 'auction',
+    enableProjection: true,
+    eventTypeNameInPayload: 'name',
+    concurrentProjectionGroup: 20
   });
 
   es.on('connect', function() {

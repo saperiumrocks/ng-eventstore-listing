@@ -426,8 +426,6 @@ const routes = function (es) {
 
     const filters = query.filters ? JSON.parse(query.filters) : null;
 
-    console.log(filters);
-
     const sort = query.sort ? JSON.parse(query.sort) : null;
 
     const playbackList = await getPlaybackListViewAsync(es, playbackListName);
