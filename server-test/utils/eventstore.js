@@ -53,7 +53,7 @@ module.exports = () => {
     pollingMaxRevisions: 100,
     projectionGroup: 'auction',
     context: 'auction',
-    playbackListStore: {
+    listStore: {
       host: process.env.EVENTSTORE_MYSQL_HOST,
       port: process.env.EVENTSTORE_MYSQL_PORT,
       user: process.env.EVENTSTORE_MYSQL_USERNAME,

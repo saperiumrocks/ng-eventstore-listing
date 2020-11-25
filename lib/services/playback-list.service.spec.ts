@@ -23,8 +23,8 @@ describe('playbackListService', () => {
 
       service.getPlaybackList(mockPlaybackListBaseUrl, mockPlaybackListName, mockStartIndex, mockLimit, mockFilters, mockSort);
 
-      const expectedUrl = 'test.com/playback-list/test_playback_list_name?startIndex=1&limit=1000&' +
-      'filters=[]&sort=[{"sortDirection":"ASC","field":"testField"}]';
+      const expectedUrl = `test.com/playback-list/test_playback_list_name?startIndex=1&limit=1000&` +
+      `filters=${encodeURIComponent('[]')}&sort=[{"sortDirection":"ASC","field":"testField"}]`;
 
       expect(mockHttp.get).toHaveBeenCalledWith(expectedUrl);
     });
