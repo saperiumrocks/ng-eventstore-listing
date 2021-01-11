@@ -87,6 +87,7 @@ export class NgEventstoreListingComponent
   @Input() enableLoadingOverlay = true;
   @Input() loadingTopBoundSelector: string;
   @Input() minHeightCss = '500px';
+  @Input() loadingOffset = '200px';
 
   @Input() debugging = false;
 
@@ -302,7 +303,6 @@ export class NgEventstoreListingComponent
         })
       )
       .subscribe((res: any) => {
-        self._isLoading = false;
         self._dataList = Immutable.fromJS(res.rows);
         self._dataCount = res.rows.length;
         self._dataTotalCount = res.count;
@@ -321,12 +321,13 @@ export class NgEventstoreListingComponent
         if (self.enableLoadingOverlay) {
           self.hideLoadingOverlay();
         }
-      }, (error: any) => {
         self._isLoading = false;
+      }, (error: any) => {
         self.getPlaybackLIstErrorEmitter.emit(error);
         if (self.enableLoadingOverlay) {
           self.hideLoadingOverlay();
         }
+        self._isLoading = false;
       });
 
     self._exportPlaybackListSubscription = self._exportPlaybackListSubject
@@ -372,9 +373,9 @@ export class NgEventstoreListingComponent
       filters: filters,
       sort: sort,
     };
+    this._isLoading = true;
     if (this.enableLoadingOverlay) {
       this.showLoadingOverlay();
-      this._isLoading = true;
     }
     this._getPlaybackListSubject.next(playbackListRequestParams);
   }

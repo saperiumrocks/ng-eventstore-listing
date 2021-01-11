@@ -27,8 +27,7 @@
     </lib-item-template-holder>
   </div>
 </div>
-
-<div class="row" *ngIf="!_dataCount || _dataCount === 0 && !_isLoading">
+<div class="row" *ngIf="(!_dataCount || _dataCount === 0) && !_isLoading">
   <div class="col-12">
     <div class="row">
       <div class="col-12 no-results-container">
@@ -41,7 +40,7 @@
 </div>
 
 <div [id]="'ng-eventstore-listing-overlay-' + _id" class="ng-eventstore-listing-overlay">
-  <div [id]="'ng-eventstore-listing-overlay-subject-' + _id" class="ng-eventstore-listing-overlay-subject">
+  <div [id]="'ng-eventstore-listing-overlay-subject-' + _id" class="ng-eventstore-listing-overlay-subject" [ngStyle]="{ top:  loadingOffset }">
       <div class="ng-eventstore-listing-cssload-container">
         <div class="ng-eventstore-listing-cssload-speeding-wheel"></div>
       </div>

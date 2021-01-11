@@ -39,6 +39,7 @@ export declare class NgEventstoreListingComponent implements OnInit, OnChanges, 
     enableLoadingOverlay: boolean;
     loadingTopBoundSelector: string;
     minHeightCss: string;
+    loadingOffset: string;
     debugging: boolean;
     _dataList: Immutable.List<RowItem>;
     _dataCount: number;
