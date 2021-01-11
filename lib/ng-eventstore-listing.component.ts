@@ -94,6 +94,7 @@ export class NgEventstoreListingComponent
   _dataCount: number;
   _dataTotalCount: number;
   _initialized = false;
+  _isLoading = false;
   _getPlaybackListSubscription: Subscription;
   _getPlaybackListSubject: Subject<PlaybackListRequest> = new Subject();
   _exportPlaybackListSubscription: Subscription;
@@ -301,6 +302,7 @@ export class NgEventstoreListingComponent
         })
       )
       .subscribe((res: any) => {
+        self._isLoading = false;
         self._dataList = Immutable.fromJS(res.rows);
         self._dataCount = res.rows.length;
         self._dataTotalCount = res.count;
@@ -320,6 +322,7 @@ export class NgEventstoreListingComponent
           self.hideLoadingOverlay();
         }
       }, (error: any) => {
+        self._isLoading = false;
         self.getPlaybackLIstErrorEmitter.emit(error);
         if (self.enableLoadingOverlay) {
           self.hideLoadingOverlay();
@@ -371,6 +374,7 @@ export class NgEventstoreListingComponent
     };
     if (this.enableLoadingOverlay) {
       this.showLoadingOverlay();
+      this._isLoading = true;
     }
     this._getPlaybackListSubject.next(playbackListRequestParams);
   }

@@ -44,6 +44,7 @@ export declare class NgEventstoreListingComponent implements OnInit, OnChanges, 
     _dataCount: number;
     _dataTotalCount: number;
     _initialized: boolean;
+    _isLoading: boolean;
     _getPlaybackListSubscription: Subscription;
     _getPlaybackListSubject: Subject<PlaybackListRequest>;
     _exportPlaybackListSubscription: Subscription;
