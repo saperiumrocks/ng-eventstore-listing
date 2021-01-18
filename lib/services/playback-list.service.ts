@@ -50,6 +50,6 @@ export class PlaybackListService {
     if (type) {
       url += `&type=${type}`;
     }
-    return this.http.get<PlaybackListResponse>(url);
+    return this.http.get<PlaybackListResponse>(url, <any>{ responseType: 'text/csv'});
   }
 }

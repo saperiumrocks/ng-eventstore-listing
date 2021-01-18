@@ -44,7 +44,7 @@ describe('playbackListService', () => {
       const expectedUrl = 'test.com/playback-list/test_playback_list_name/export?startIndex=1&limit=' +
       '1000&filters=[]&sort=[{"sortDirection":"ASC","field":"testField"}]';
 
-      expect(mockHttp.get).toHaveBeenCalledWith(expectedUrl);
+      expect(mockHttp.get).toHaveBeenCalledWith(expectedUrl, { responseType: 'text/csv' });
     });
   });
 });
