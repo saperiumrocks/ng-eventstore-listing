@@ -406,7 +406,9 @@ export class NgEventstoreListingComponent
         startIndex,
         this.itemsPerPage,
         this.filters,
-        this.sort
+        this.sort,
+        null,
+        null
       );
     } else if (this._previousPageIndex) {
       if (this._dataTotalCount - (this.pageIndex * this.itemsPerPage) <= 0) {
@@ -432,7 +434,7 @@ export class NgEventstoreListingComponent
             this.filters,
             this.sort,
             this._previousKey,
-            this._nextKey
+            null
           );
         } else {
           startIndex = this.itemsPerPage * (pageDelta - 1);
@@ -442,7 +444,7 @@ export class NgEventstoreListingComponent
             this.itemsPerPage,
             this.filters,
             this.sort,
-            this._previousKey,
+            null,
             this._nextKey
           );
         }
@@ -454,7 +456,9 @@ export class NgEventstoreListingComponent
         startIndex,
         this.itemsPerPage,
         this.filters,
-        this.sort
+        this.sort,
+        null,
+        null
       );
     }
   }
