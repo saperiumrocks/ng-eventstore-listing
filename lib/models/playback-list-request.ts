@@ -8,4 +8,6 @@ export interface PlaybackListRequest {
   filters?: Filter[];
   sort?: Sort[];
   type?: string;
+  previousKey?: string;
+  nextKey?: string;
 }

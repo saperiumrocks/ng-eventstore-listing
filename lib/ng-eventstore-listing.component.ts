@@ -94,6 +94,9 @@ export class NgEventstoreListingComponent
   _dataList: Immutable.List<RowItem>;
   _dataCount: number;
   _dataTotalCount: number;
+  _previousKey: string;
+  _nextKey: string;
+  _previousPageIndex: number;
   _initialized = false;
   _isLoading = false;
   _getPlaybackListSubscription: Subscription;
@@ -261,6 +264,9 @@ export class NgEventstoreListingComponent
     } else {
       const changesKeys = Object.keys(changes);
       changesKeys.forEach((key) => {
+        if (key === 'pageIndex') {
+          self._previousPageIndex = changes[key].previousValue;
+        }
         self[key] = changes[key].currentValue;
         switch (key) {
           case 'pageIndex':
@@ -298,7 +304,9 @@ export class NgEventstoreListingComponent
             params.startIndex,
             params.limit,
             params.filters,
-            params.sort
+            params.sort,
+            params.previousKey,
+            params.nextKey
           );
         })
       )
@@ -306,6 +314,8 @@ export class NgEventstoreListingComponent
         self._dataList = Immutable.fromJS(res.rows);
         self._dataCount = res.rows.length;
         self._dataTotalCount = res.count;
+        self._previousKey = res.previousKey;
+        self._nextKey = res.nextKey;
 
         self._resetSubscriptions();
         self._initSubscriptions();
@@ -364,7 +374,9 @@ export class NgEventstoreListingComponent
     startIndex: number,
     limit: number,
     filters?: Filter[],
-    sort?: Sort[]
+    sort?: Sort[],
+    previousKey?: string,
+    nextKey?: string
   ) {
     const playbackListRequestParams: PlaybackListRequest = {
       playbackListName: playbackListName,
@@ -372,6 +384,8 @@ export class NgEventstoreListingComponent
       limit: limit,
       filters: filters,
       sort: sort,
+      previousKey: previousKey,
+      nextKey: nextKey
     };
     this._isLoading = true;
     if (this.enableLoadingOverlay) {
@@ -381,14 +395,68 @@ export class NgEventstoreListingComponent
   }
 
   requestPlaybackList() {
-    const startIndex = this.itemsPerPage * (this.pageIndex - 1);
-    this._getPlaybackList(
-      this.playbackListName,
-      startIndex,
-      this.itemsPerPage,
-      this.filters,
-      this.sort
-    );
+    let startIndex;
+    if (this.pageIndex === 1) {
+      this._previousPageIndex = null;
+      this._previousKey = null;
+      this._nextKey = null;
+      startIndex = 0;
+      this._getPlaybackList(
+        this.playbackListName,
+        startIndex,
+        this.itemsPerPage,
+        this.filters,
+        this.sort
+      );
+    } else if (this._previousPageIndex) {
+      if (this._dataTotalCount - (this.pageIndex * this.itemsPerPage) <= 0) {
+        startIndex = 0;
+        this._getPlaybackList(
+          this.playbackListName,
+          startIndex,
+          this.itemsPerPage,
+          this.filters,
+          this.sort,
+          null,
+          '__LAST'
+        );
+      } else {
+        let pageDelta = this.pageIndex - this._previousPageIndex;
+        if (pageDelta < 0) {
+          pageDelta *= -1;
+          startIndex = this.itemsPerPage * (pageDelta - 1);
+          this._getPlaybackList(
+            this.playbackListName,
+            startIndex,
+            this.itemsPerPage,
+            this.filters,
+            this.sort,
+            this._previousKey,
+            this._nextKey
+          );
+        } else {
+          startIndex = this.itemsPerPage * (pageDelta - 1);
+          this._getPlaybackList(
+            this.playbackListName,
+            startIndex,
+            this.itemsPerPage,
+            this.filters,
+            this.sort,
+            this._previousKey,
+            this._nextKey
+          );
+        }
+      }
+    } else {
+      startIndex = this.itemsPerPage * (this.pageIndex - 1);
+      this._getPlaybackList(
+        this.playbackListName,
+        startIndex,
+        this.itemsPerPage,
+        this.filters,
+        this.sort
+      );
+    }
   }
 
   private async _loadScripts() {

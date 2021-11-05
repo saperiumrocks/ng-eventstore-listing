@@ -13,7 +13,9 @@ export class PlaybackListService {
     startIndex: number,
     limit: number,
     filters?: Filter[],
-    sort?: Sort[]
+    sort?: Sort[],
+    previousKey?: string,
+    nextKey?: string
   ): Observable<PlaybackListResponse> {
     let url = `${playbackListBaseUrl}/playback-list/${playbackListName}?startIndex=${startIndex}&limit=${limit}`;
 
@@ -23,6 +25,14 @@ export class PlaybackListService {
 
     if (sort) {
       url += `&sort=${JSON.stringify(sort)}`;
+    }
+
+    if (previousKey) {
+      url += '&previousKey=' + previousKey;
+    }
+
+    if (nextKey) {
+        url += '&nextKey=' + nextKey;
     }
 
     return this.http.get<PlaybackListResponse>(url);

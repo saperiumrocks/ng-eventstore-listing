@@ -44,6 +44,9 @@ export declare class NgEventstoreListingComponent implements OnInit, OnChanges, 
     _dataList: Immutable.List<RowItem>;
     _dataCount: number;
     _dataTotalCount: number;
+    _previousKey: string;
+    _nextKey: string;
+    _previousPageIndex: number;
     _initialized: boolean;
     _isLoading: boolean;
     _getPlaybackListSubscription: Subscription;
@@ -63,7 +66,7 @@ export declare class NgEventstoreListingComponent implements OnInit, OnChanges, 
     ngOnDestroy(): void;
     trackByFn(index: number, item: any): any;
     private _initializeRequests;
-    _getPlaybackList(playbackListName: string, startIndex: number, limit: number, filters?: Filter[], sort?: Sort[]): void;
+    _getPlaybackList(playbackListName: string, startIndex: number, limit: number, filters?: Filter[], sort?: Sort[], previousKey?: string, nextKey?: string): void;
     requestPlaybackList(): void;
     private _loadScripts;
     private _initSubscriptions;
