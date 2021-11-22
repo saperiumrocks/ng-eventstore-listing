@@ -410,7 +410,7 @@ export class NgEventstoreListingComponent
         null,
         null
       );
-    } else if (this._previousPageIndex) {
+    } else if (this._previousKey && this._nextKey) {
       if (this._dataTotalCount - (this.pageIndex * this.itemsPerPage) <= 0) {
         startIndex = 0;
         this._getPlaybackList(
