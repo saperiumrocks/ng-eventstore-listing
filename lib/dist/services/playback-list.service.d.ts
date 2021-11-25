@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs/Observable';
+import { Observable } from 'rxjs';
 import { Filter, Sort, PlaybackListResponse } from '../models';
 export declare class PlaybackListService {
     private http;

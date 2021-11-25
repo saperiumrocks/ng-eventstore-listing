@@ -143,7 +143,7 @@ export class AppComponent implements OnInit {
         { lookupId: 'id-1', lookupName: 'Test 1', lookupValue: '1' },
         { lookupId: 'id-2', lookupName: 'Test 2', lookupValue: '2' },
         { lookupId: 'id-3', lookupName: 'Test 3', lookupValue: '3' }
-      ] }
+      ] };
     }, 1000);
   }
 

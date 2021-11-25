@@ -1,6 +1,5 @@
 import { OnInit, EventEmitter, OnChanges, SimpleChanges, ChangeDetectorRef, OnDestroy } from '@angular/core';
-import { Subscription } from 'rxjs/Subscription';
-import { Subject } from 'rxjs/Subject';
+import { Subscription, Subject } from 'rxjs';
 import { SubscriptionConfiguration, Script, PlaybackList, RowItem, Filter, Sort, PlaybackListRequest, CustomPlaybackConfiguration } from './models';
 import { ScriptService } from './services/script.service';
 import { PlaybackService } from './services/playback.service';

@@ -13,10 +13,8 @@ import {
   Inject
 } from '@angular/core';
 
-import { switchMap, debounceTime } from 'rxjs/operators';
-import { Subscription } from 'rxjs/Subscription';
-import { Subject } from 'rxjs/Subject';
-import { map as rxMap } from 'rxjs/operators/map';
+import { switchMap, debounceTime ,  map as rxMap } from 'rxjs/operators';
+import { Subscription ,  Subject } from 'rxjs';
 import { JQ_TOKEN } from './services/jquery.service';
 
 import {

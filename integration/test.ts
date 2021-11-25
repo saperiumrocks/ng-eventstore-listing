@@ -11,11 +11,11 @@ import {
   platformBrowserDynamicTesting
 } from '@angular/platform-browser-dynamic/testing';
 
-declare const __karma__: any
+declare const __karma__: any;
 declare const require: any;
 
 
-__karma__.loaded = function () {}
+__karma__.loaded = function () {};
 
 // First, initialize the Angular testing environment.
 getTestBed().initTestEnvironment(

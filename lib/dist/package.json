@@ -8,10 +8,9 @@
     }
   ],
   "peerDependencies": {
-    "@angular/common": "5.2.0",
-    "@angular/core": "5.2.0",
-    "rxjs": "^5.5.8",
-    "rxjs-compat": "5.5.8",
+    "@angular/common": "6.1.10",
+    "@angular/core": "6.1.10",
+    "rxjs": "^6.6.7",
     "shortid": "2.2.15",
     "socket.io-client": "2.3.0"
   },
@@ -21,7 +20,7 @@
     "jquery": "^3.5.1",
     "lodash-es": "4.17.15",
     "moment-mini-ts": "^2.20.1",
-    "tslib": "^1.7.1"
+    "tslib": "^1.9.0"
   },
   "main": "bundles/ng-eventstore-listing.umd.js",
   "module": "esm5/ng-eventstore-listing.js",
