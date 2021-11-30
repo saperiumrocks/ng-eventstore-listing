@@ -1,6 +1,6 @@
 {
   "name": "ng-eventstore-listing",
-  "version": "0.1.16-alpha.50.angular.6",
+  "version": "0.1.16-alpha.50.angular.7",
   "contributors": [
     {
       "name": "Carlo Luis De Guzman",
@@ -8,8 +8,8 @@
     }
   ],
   "peerDependencies": {
-    "@angular/common": "6.1.10",
-    "@angular/core": "6.1.10",
+    "@angular/common": "7.2.16",
+    "@angular/core": "7.2.16",
     "rxjs": "^6.6.7",
     "shortid": "2.2.15",
     "socket.io-client": "2.3.0"
