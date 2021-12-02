@@ -23,7 +23,7 @@ export class NgHeaderFooterTemplateHolderComponent implements OnInit, OnChanges,
   @Output() filterEmitter: EventEmitter<any> = new EventEmitter();
 
   componentRef: ComponentRef<any>;
-  @ViewChild(TemplateDirective) itemHost: TemplateDirective;
+  @ViewChild(TemplateDirective, { static: false }) itemHost: TemplateDirective;
 
   constructor(private componentFactoryResolver: ComponentFactoryResolver) { }
 

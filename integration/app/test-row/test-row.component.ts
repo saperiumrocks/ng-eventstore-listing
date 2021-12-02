@@ -3,7 +3,7 @@ import { Component, OnInit, ChangeDetectorRef, SimpleChanges } from '@angular/co
 import { ItemTemplateComponent } from 'ng-eventstore-listing';
 
 @Component({
-  selector: 'app-test',
+  selector: 'lib-app-test',
   templateUrl: './test-row.component.html',
   styleUrls: ['./test-row.component.css']
 })

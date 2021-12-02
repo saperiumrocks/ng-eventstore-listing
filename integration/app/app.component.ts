@@ -18,13 +18,13 @@ import { FormControl } from '@angular/forms';
 // import { NgEventstoreListingComponent };
 
 @Component({
-  selector: 'app-root',
+  selector: 'lib-app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppComponent implements OnInit {
-  @ViewChild(NgEventstoreListingComponent) ngEventstoreListingComponent: NgEventstoreListingComponent;
+  @ViewChild(NgEventstoreListingComponent, { static: false }) ngEventstoreListingComponent: NgEventstoreListingComponent;
   rowComponentClass = TestRowComponent;
 
   dealershipFilterFormControl = new FormControl();

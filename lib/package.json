@@ -8,8 +8,8 @@
     }
   ],
   "peerDependencies": {
-    "@angular/common": "7.2.16",
-    "@angular/core": "7.2.16",
+    "@angular/common": "8.2.14",
+    "@angular/core": "8.2.14",
     "rxjs": "^6.6.7",
     "shortid": "2.2.15",
     "socket.io-client": "2.3.0"
