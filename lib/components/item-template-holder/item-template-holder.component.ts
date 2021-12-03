@@ -33,7 +33,7 @@ export class ItemTemplateHolderComponent
 
   componentRef: ComponentRef<any>;
   initialChanges: SimpleChanges;
-  @ViewChild(TemplateDirective, { static: false }) itemHost: TemplateDirective;
+  @ViewChild(TemplateDirective) itemHost: TemplateDirective;
 
   constructor(private componentFactoryResolver: ComponentFactoryResolver) {}
 

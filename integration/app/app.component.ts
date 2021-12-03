@@ -24,7 +24,7 @@ import { FormControl } from '@angular/forms';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppComponent implements OnInit {
-  @ViewChild(NgEventstoreListingComponent, { static: false }) ngEventstoreListingComponent: NgEventstoreListingComponent;
+  @ViewChild(NgEventstoreListingComponent) ngEventstoreListingComponent: NgEventstoreListingComponent;
   rowComponentClass = TestRowComponent;
 
   dealershipFilterFormControl = new FormControl();
