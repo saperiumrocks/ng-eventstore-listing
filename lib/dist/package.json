@@ -1,6 +1,6 @@
 {
   "name": "ng-eventstore-listing",
-  "version": "0.1.16-alpha.51.angular.8",
+  "version": "0.1.16-alpha.51.angular.9",
   "contributors": [
     {
       "name": "Carlo Luis De Guzman",
@@ -8,8 +8,8 @@
     }
   ],
   "peerDependencies": {
-    "@angular/common": "8.2.14",
-    "@angular/core": "8.2.14",
+    "@angular/common": "9.1.13",
+    "@angular/core": "9.1.13",
     "rxjs": "^6.6.7",
     "shortid": "2.2.15",
     "socket.io-client": "2.3.0"
@@ -20,26 +20,16 @@
     "jquery": "^3.5.1",
     "lodash-es": "4.17.15",
     "moment-mini-ts": "^2.20.1",
-    "tslib": "^1.9.0"
+    "tslib": "^1.10.0"
   },
   "main": "bundles/ng-eventstore-listing.umd.js",
-  "module_ivy_ngcc": "__ivy_ngcc__/fesm5/ng-eventstore-listing.js",
   "module": "fesm5/ng-eventstore-listing.js",
   "es2015": "fesm2015/ng-eventstore-listing.js",
   "esm5": "esm5/ng-eventstore-listing.js",
   "esm2015": "esm2015/ng-eventstore-listing.js",
-  "fesm5_ivy_ngcc": "__ivy_ngcc__/fesm5/ng-eventstore-listing.js",
   "fesm5": "fesm5/ng-eventstore-listing.js",
   "fesm2015": "fesm2015/ng-eventstore-listing.js",
   "typings": "ng-eventstore-listing.d.ts",
   "metadata": "ng-eventstore-listing.metadata.json",
-  "sideEffects": false,
-  "__processed_by_ivy_ngcc__": {
-    "fesm5": "9.1.13",
-    "module": "9.1.13",
-    "typings": "9.1.13"
-  },
-  "scripts": {
-    "prepublishOnly": "node --eval \"console.error('ERROR: Trying to publish a package that has been compiled by NGCC. This is not allowed.\\nPlease delete and rebuild the package, without compiling with NGCC, before attempting to publish.\\nNote that NGCC may have been run by importing this package into another project that is being built with Ivy enabled.\\n')\" && exit 1"
-  }
+  "sideEffects": false
 }
