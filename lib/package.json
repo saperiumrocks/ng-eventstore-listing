@@ -17,7 +17,7 @@
   },
   "dependencies": {
     "immutable": "4.0.0-rc.12",
-    "lodash-es": "4.17.15"
+    "lodash-es": "4.17.21"
   },
   "ngPackage": {
     "$schema": "./node_modules/ng-packagr/ng-package.schema.json",
